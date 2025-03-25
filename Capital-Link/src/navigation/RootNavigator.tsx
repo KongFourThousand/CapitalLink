@@ -3,12 +3,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
+import OtpVerificationScreen from '../screens/auth/OtpVerificationScreen';
+
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   Register: undefined; 
+  OtpVerification: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -25,6 +28,9 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
+
+      
     </Stack.Navigator>
   );
 };

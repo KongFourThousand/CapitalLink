@@ -94,7 +94,7 @@ const LoginScreen: React.FC = () => {
         {/* Register Button */}
         <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate("Register")}>
           <LinearGradient
-            colors={["#c19346", "#d4af71", "#e6c170"]}
+          colors={["#e6c170", "#d4af71", "#c19346"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.button}
@@ -135,14 +135,16 @@ const styles = StyleSheet.create({
   },
   companyName: {
     fontSize: 16,
-    fontFamily: "TimesNewRoman",
     color: "#CFA459",
+    fontWeight: "500",
+    fontFamily: "TimesNewRoman",
+    marginBottom: 2,
   },
   companySubtitle: {
-    fontSize: 10,
+    fontSize: 11,
+    color: "#AAAAAA",
+    letterSpacing: 0.5,
     fontFamily: "TimesNewRoman",
-    color: "#555555",
-    marginTop: 2,
   },
   inputLabel: {
     fontSize: 14,

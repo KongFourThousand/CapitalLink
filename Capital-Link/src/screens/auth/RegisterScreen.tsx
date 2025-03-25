@@ -213,7 +213,10 @@ const RegisterScreen: React.FC = () => {
             ? renderPersonalForm()
             : renderCorporateForm()}
 
-          <TouchableOpacity activeOpacity={0.9}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("OtpVerification")}
+          >
             <LinearGradient
               colors={["#e6c170", "#d4af71", "#c19346"]}
               start={{ x: 0.5, y: 0 }}
@@ -256,13 +259,14 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   companyName: {
-    fontSize: 20,
+    fontSize: 16,
     color: "#CFA459",
     fontWeight: "500",
     fontFamily: "TimesNewRoman",
+    marginBottom: 2,
   },
   companySubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#AAAAAA",
     letterSpacing: 0.5,
     fontFamily: "TimesNewRoman",
