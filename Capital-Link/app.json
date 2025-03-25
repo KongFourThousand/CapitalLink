@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Capital-Link",
+    "slug": "Capital-Link",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.botandlife.CapitalLink"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8ef80141-69a8-478e-aa07-fcfbc8c7a30a"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
