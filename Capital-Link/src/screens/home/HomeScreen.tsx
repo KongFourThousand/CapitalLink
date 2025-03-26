@@ -14,8 +14,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+import { LinearGradient } from "expo-linear-gradient";
 
 type HomeScreenNavProp = NativeStackNavigationProp<RootStackParamList, "HomeScreen">;
 
@@ -35,7 +36,7 @@ const HomeScreen: React.FC = () => {
   const externalLinks = [
     {
       id: "1",
-      title: "กลุ่มธุรกิจทางการเงิน Capital Link Financial Group",
+      title: "กลุ่มธุรกิจทางการเงิน แคปปิตอล ลิงค์ Capital Link Financial Group",
       image: require("../../../assets/banner1.png"),
       url: "https://www.capitallink.co.th/",
     },
@@ -65,49 +66,31 @@ const HomeScreen: React.FC = () => {
     Linking.openURL(linkUrl);
   };
 
-  // ฟังก์ชันไปยังหน้าแจ้งเตือน
-  const handleNotifications = () => {
-    // @ts-ignore - เนื่องจากเป็น Tab Navigator
-    navigation.navigate("Notifications");
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      {/* Header พร้อมแจ้งเตือน */}
-      <View style={styles.header}>
-        <Image 
-          source={require("../../../assets/CLlogo+NoBG.png")} 
-          style={styles.headerLogo}
-          resizeMode="contain"
-        />
-        <TouchableOpacity onPress={handleNotifications} style={styles.notificationButton}>
-          <Ionicons name="notifications-outline" size={24} color="#CFA459" />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>2</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          {/* ส่วนบน: โปรไฟล์ผู้ใช้ */}
-          <View style={styles.profileSection}>
-            {/* Avatar (icon) */}
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>👤</Text>
-            </View>
-            {/* ชื่อผู้ใช้งาน */}
-            <View style={styles.userInfo}>
-              <Text style={styles.welcomeText}>สวัสดีตอนเย็น</Text>
-              <Text style={styles.userName}>คุณมินอิน</Text>
-            </View>
+        {/* ส่วนบน: โปรไฟล์ผู้ใช้ ไล่สีแบบ LinearGradient ตามรูป */}
+        <LinearGradient
+          colors={['#E9D9B5', '#D4B976']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.profileSection}
+        >
+          <View style={styles.avatarContainer}>
+            <FontAwesome5 name="user-circle" size={36} color="#000" />
           </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.welcomeText}>สวัสดีตอนเย็น</Text>
+            <Text style={styles.userName}>MININ</Text>
+          </View>
+        </LinearGradient>
 
+        <View style={styles.container}>
           {/* ปุ่มสี่เหลี่ยม: เงินฝาก, สินเชื่อ */}
           <View style={styles.menuRow}>
             <TouchableOpacity
@@ -127,16 +110,8 @@ const HomeScreen: React.FC = () => {
                 // navigation.navigate("LoanDashboard");
               }}
             >
-              <Ionicons name="cash-outline" size={28} color="#CFA459" style={styles.menuIcon} />
+              <Ionicons name="card-outline" size={28} color="#4F7FE3" style={styles.menuIcon} />
               <Text style={styles.menuBoxTitle}>สินเชื่อ</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* หัวข้อบริการของเรา */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>บริการของเรา</Text>
-            <TouchableOpacity>
-              <Text style={styles.sectionLink}>ดูทั้งหมด</Text>
             </TouchableOpacity>
           </View>
 
@@ -146,7 +121,7 @@ const HomeScreen: React.FC = () => {
               <TouchableOpacity
                 key={item.id}
                 style={styles.bannerCard}
-                activeOpacity={0.8}
+                activeOpacity={0.9}
                 onPress={() => handleOpenLink(item.url)}
               >
                 <Image
@@ -165,6 +140,29 @@ const HomeScreen: React.FC = () => {
           <View style={styles.bottomSpacer} />
         </View>
       </ScrollView>
+      
+      {/* Bottom Tab Bar ตามรูป */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <Ionicons name="home" size={22} color="#000" />
+          <Text style={[styles.tabLabel, styles.activeTab]}>หน้าหลัก</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <Ionicons name="card-outline" size={22} color="#888" />
+          <Text style={styles.tabLabel}>บัญชี</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <Ionicons name="notifications-outline" size={22} color="#888" />
+          <Text style={styles.tabLabel}>การแจ้งเตือน</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <Ionicons name="person-outline" size={22} color="#888" />
+          <Text style={styles.tabLabel}>โปรไฟล์</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -176,153 +174,83 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  headerLogo: {
-    width: 120,
-    height: 40,
-  },
-  notificationButton: {
-    position: "relative",
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notificationBadge: {
-    position: "absolute",
-    top: 4,
-    right: 6,
-    backgroundColor: "#FF6B6B",
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notificationBadgeText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
   scrollView: {
     flex: 1,
   },
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 25,
-    backgroundColor: "#F9F9F9",
     padding: 15,
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    paddingVertical: 20,
+    marginBottom: 15,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#F0F0F0",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#CFA459",
-  },
-  avatarText: {
-    fontSize: 30,
+    marginRight: 10,
   },
   userInfo: {
-    marginLeft: 15,
     flex: 1,
   },
   welcomeText: {
     fontSize: 14,
-    color: "#888",
-    fontFamily: "TimesNewRoman",
+    color: "#000",
+    opacity: 0.7,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
-    marginTop: 2,
-    fontFamily: "TimesNewRoman",
+    color: "#000",
   },
   menuRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 30,
+    marginBottom: 20,
   },
   menuBox: {
     flex: 1,
-    backgroundColor: "#fff9ee",
+    backgroundColor: "#fff",
     borderRadius: 15,
-    marginHorizontal: 6,
-    paddingVertical: 20,
+    marginHorizontal: 5,
+    padding: 16,
+    paddingVertical: 15,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#CFA459",
-    shadowOffset: { width: 0, height: 3 },
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: "#FFF0D1",
+    borderColor: "#f0f0f0",
   },
   menuIcon: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   menuBoxTitle: {
     fontSize: 16,
-    color: "#CFA459",
-    fontWeight: "600",
-    fontFamily: "TimesNewRoman",
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    fontFamily: "TimesNewRoman",
-  },
-  sectionLink: {
-    fontSize: 14,
-    color: "#CFA459",
-    fontFamily: "TimesNewRoman",
+    color: "#000",
+    fontWeight: "500",
   },
   bannerContainer: {
     marginBottom: 20,
   },
   bannerCard: {
     width: "100%",
-    height: 130,
-    borderRadius: 15,
+    height: 120,
+    borderRadius: 12,
     overflow: "hidden",
     marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   bannerImage: {
     width: "100%",
@@ -334,16 +262,41 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: "rgba(0,0,0,0.4)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   bannerTitle: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    fontFamily: "TimesNewRoman",
   },
   bottomSpacer: {
-    height: 80, // ให้มีพื้นที่ว่างด้านล่างเพื่อไม่ให้เนื้อหาถูกซ่อนโดย bottom tab
+    height: 70, // ให้มีพื้นที่ว่างด้านล่างเพื่อไม่ให้เนื้อหาถูกซ่อนโดย bottom tab
+  },
+  tabBar: {
+    flexDirection: 'row',
+    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 5,
+  },
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: 10,
+    marginTop: 4,
+    color: '#888',
+  },
+  activeTab: {
+    color: '#000',
+    fontWeight: '600',
   },
 });
