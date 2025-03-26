@@ -71,7 +71,7 @@ const PinConfirmScreen: React.FC = () => {
       // เก็บ PIN
       await SecureStore.setItemAsync('userPin', confirmPin);
       // ไปหน้า PinEntry หรือ MainApp
-      navigation.replace('PinEntry');
+      navigation.replace('HomeScreen');
     } else {
       Alert.alert('แจ้งเตือน', 'PIN ไม่ตรงกัน กรุณาลองใหม่');
       setConfirmPin('');

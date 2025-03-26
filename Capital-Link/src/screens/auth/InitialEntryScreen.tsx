@@ -50,8 +50,8 @@ const InitialEntryScreen: React.FC = () => {
               colors={['#FFFFFF', '#F5F5F5']}
               style={styles.button}
             >
-              <Feather name="user-plus" size={28} color="#CFA459" style={styles.icon} />
-              <Text style={[styles.buttonText, styles.registerText]}>ลงทะเบียน</Text>
+              <Feather name="user" size={28} color="#CFA459" style={styles.icon} />
+              <Text style={[styles.buttonText, styles.registerText]}>เข้าใช้งานครั้งแรก</Text>
             </LinearGradient>
           </TouchableOpacity>
 
