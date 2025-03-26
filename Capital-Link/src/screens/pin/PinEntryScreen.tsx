@@ -50,8 +50,9 @@ const PinEntryKeyboardScreen: React.FC = () => {
 
   // ตัวอย่างปุ่มลืมรหัส PIN
   const handleForgotPin = () => {
-    // navigation.navigate('ForgotPin') or show alert
-    alert("ลืมรหัส PIN? ติดต่อ Call Center");
+    navigation.replace("Login"); 
+    // หรือ
+    // navigation.navigate("Login");
   };
 
   return (

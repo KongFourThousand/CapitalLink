@@ -83,7 +83,7 @@ const LoginScreen: React.FC = () => {
             end={{ x: 0.5, y: 1 }}
             style={styles.button}
           >
-            <Text style={styles.buttonText}>เข้าสู่ระบบ</Text>
+            <Text style={styles.buttonText}>ขอรหัส OTP</Text>
           </LinearGradient>
         </TouchableOpacity>
 
