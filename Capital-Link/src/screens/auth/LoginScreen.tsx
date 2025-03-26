@@ -80,9 +80,9 @@ const LoginScreen: React.FC = () => {
         </TouchableOpacity>
 
         {/* Forgot Password */}
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Text style={styles.forgotText}>ลืมรหัสผ่าน?</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Divider */}
         <View style={styles.dividerContainer}>

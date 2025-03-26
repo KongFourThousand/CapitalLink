@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
+  ActivityIndicator 
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +24,8 @@ const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(59);
+  const [timer, setTimer] = useState(5);
+  const [loading, setLoading] = useState(false); // สำหรับแสดง loading ตอนขอ OTP
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<OtpRouteProp>();
@@ -33,19 +35,38 @@ const OtpVerificationScreen: React.FC = () => {
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
-  useEffect(() => {
+ // นับถอยหลัง 60 วิ
+ useEffect(() => {
+  if (timer > 0) {
     const countdown = setInterval(() => {
       setTimer((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(countdown);
-  }, []);
+  }
+}, [timer]);
 
-  const handleOtpChange = (text: string, index: number) => {
-    const newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
-    // Focus next
-  };
+ // เมื่อผู้ใช้กรอก OTP ทีละหลัก
+ const handleOtpChange = (text: string, index: number) => {
+  const newOtp = [...otp];
+  newOtp[index] = text;
+  setOtp(newOtp);
+  // TODO: focus ถัดไป หรือ check if OTP เต็ม 6 ตัว
+};
+// ตัวอย่างฟังก์ชันเรียก API ขอ OTP ใหม่ (mock)
+const requestNewOtp = async () => {
+  try {
+    setLoading(true);
+    // เรียก API จริงตาม backend ของคุณ
+    // ตัวอย่าง mock: รอสัก 1 วิ
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // เมื่อสำเร็จ → รีเซ็ต timer กลับไป 60
+    setTimer(60);
+  } catch (error) {
+    console.log("error requesting new OTP:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!fontsLoaded) return null;
 
@@ -80,7 +101,30 @@ const OtpVerificationScreen: React.FC = () => {
         ))}
       </View>
 
-      <Text style={styles.timerText}>ขอรหัส OTP ใหม่อีก {timer} วินาที</Text>
+      {/* <Text style={styles.timerText}>ขอรหัส OTP ใหม่อีก {timer} วินาที</Text> */}
+      
+      {/* ถ้ายังมีเวลานับถอยหลัง => แสดงข้อความ ถ้าเหลือ 0 => แสดงลิงก์กดได้ */}
+      {timer > 0 ? (
+        // กรณีเหลือเวลา
+        <Text style={styles.timerText}>
+          ขอรหัส OTP ใหม่อีก {timer} วินาที
+        </Text>
+      ) : (
+        // กรณีหมดเวลาแล้ว → กดขอใหม่ได้
+        <TouchableOpacity
+          style={styles.resendContainer}
+          onPress={requestNewOtp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#CFA459" />
+          ) : (
+            <Text style={styles.resendText}>ขอรหัส OTP อีกครั้ง</Text>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {/* ปุ่มยืนยัน */}
 
       <TouchableOpacity activeOpacity={0.9}>
         <LinearGradient
@@ -111,7 +155,7 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     alignSelf: "flex-start",
-    marginTop: 10,
+    marginTop: 30,
     // backgroundColor: "pink"
   },
   title: {
@@ -190,4 +234,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
+  resendContainer: {
+    marginBottom: 20,
+  },
+  resendText: {
+    fontSize: 13,
+    color: "#CFA459", // สีทอง
+    textDecorationLine: "underline", // ทำเป็นลิงก์
+    textAlign: "center", // (ถ้าอยากให้อยู่กลาง)
+  },
+  
 });
