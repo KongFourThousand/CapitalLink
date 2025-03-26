@@ -68,7 +68,7 @@ const LoginScreen: React.FC = () => {
         </View>
 
         {/* Login Button */}
-        <TouchableOpacity activeOpacity={0.9}>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate("OtpVerification", { from: "Login" })}>
           <LinearGradient
             colors={["#e6c170", "#d4af71", "#c19346"]}
             start={{ x: 0.5, y: 0 }}

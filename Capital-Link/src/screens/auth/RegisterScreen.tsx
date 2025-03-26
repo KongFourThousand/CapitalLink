@@ -215,7 +215,7 @@ const RegisterScreen: React.FC = () => {
 
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => navigation.navigate("OtpVerification")}
+            onPress={() => navigation.navigate("OtpVerification", { from: "Register" })}
           >
             <LinearGradient
               colors={["#e6c170", "#d4af71", "#c19346"]}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,24 +8,29 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useFonts } from 'expo-font';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/RootNavigator';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFonts } from "expo-font";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/RootNavigator";
+import { useRoute, RouteProp } from "@react-navigation/native";
 
+type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(59);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<OtpRouteProp>();
+  const from = route.params.from; // ได้แล้วว่าเรามาจากหน้าไหน
 
   const [fontsLoaded] = useFonts({
-    TimesNewRoman: require('../../../assets/fonts/times new roman.ttf'),
+    TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
   useEffect(() => {
@@ -46,14 +51,14 @@ const OtpVerificationScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backIcon}>
+      <TouchableOpacity style={styles.backIcon} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={26} color="#000" />
       </TouchableOpacity>
 
       <Text style={styles.title}>ยืนยัน OTP</Text>
 
       <Image
-        source={require('../../../assets/CLLogin.png')}
+        source={require("../../../assets/CLLogin.png")}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -79,7 +84,7 @@ const OtpVerificationScreen: React.FC = () => {
 
       <TouchableOpacity activeOpacity={0.9}>
         <LinearGradient
-          colors={['#c19346', '#d4af71', '#e6c170']}
+          colors={["#c19346", "#d4af71", "#e6c170"]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.confirmButton}
@@ -89,7 +94,7 @@ const OtpVerificationScreen: React.FC = () => {
       </TouchableOpacity>
 
       <Text style={styles.supportText}>
-        หากต้องการความช่วยเหลือกรุณาติดต่อ{'\n'}ศูนย์บริการลูกค้า
+        หากต้องการความช่วยเหลือกรุณาติดต่อ{"\n"}ศูนย์บริการลูกค้า
       </Text>
     </SafeAreaView>
   );
@@ -100,18 +105,18 @@ export default OtpVerificationScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   backIcon: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginTop: 10,
-    backgroundColor: "pink"
+    // backgroundColor: "pink"
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 20,
     marginBottom: 20,
   },
@@ -129,60 +134,60 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 13,
-    color: '#000',
-    textAlign: 'center',
+    color: "#000",
+    textAlign: "center",
   },
   phoneNumber: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: "600",
+    color: "#000",
     marginTop: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subText: {
     fontSize: 11,
-    color: '#888',
+    color: "#888",
     marginTop: 2,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   otpRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
-    width: '100%',
+    width: "100%",
   },
   otpBox: {
     width: 42,
     height: 48,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 20,
   },
   timerText: {
     fontSize: 12,
-    color: '#333',
+    color: "#333",
     marginBottom: 20,
   },
   confirmButton: {
-    width: '100%',
-    height: 45,
+    width: 55,
+    height: 40,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 20,
   },
   confirmButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   supportText: {
     fontSize: 11,
-    color: '#888',
-    textAlign: 'center',
+    color: "#888",
+    textAlign: "center",
     lineHeight: 18,
   },
 });
