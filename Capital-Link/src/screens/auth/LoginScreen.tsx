@@ -123,17 +123,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    // ถ้าอยากให้ content อยู่กลางจอ: justifyContent: 'center'
   },
-  // logoContainer: {
-  //   alignItems: "center",
-  //   marginTop: 40,
-  //   marginBottom: 30,
-  // },
-  // logo: {
-  //   width: width * 0.7,  // โลโก้ใหญ่ขึ้น
-  //   height: width * 0.4,
-  // },
   logoContainer: {
     alignItems: "center",
 
@@ -142,7 +132,7 @@ const styles = StyleSheet.create({
   logo: {
     width: width * 0.9,
     height: width * 0.5,
-    resizeMode: "cover",
+    resizeMode: "contain",
     marginBottom: 30,
     marginTop: 20,
   },

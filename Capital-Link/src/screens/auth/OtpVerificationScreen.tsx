@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -19,71 +19,72 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useRoute, RouteProp } from "@react-navigation/native";
 
 type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
-
 const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(5);
-  const [loading, setLoading] = useState(false); // สำหรับแสดง loading ตอนขอ OTP
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [timer, setTimer] = useState(5); // หรือ 60
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<OtpRouteProp>();
-  const from = route.params.from; // ได้แล้วว่าเรามาจากหน้าไหน
+  const from = route.params.from;
+
+  // เพิ่ม useRef สำหรับ TextInput แต่ละตัว
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
- // นับถอยหลัง 60 วิ
- useEffect(() => {
-  if (timer > 0) {
-    const countdown = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(countdown);
-  }
-}, [timer]);
+  useEffect(() => {
+    if (timer > 0) {
+      const countdown = setInterval(() => {
+        setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(countdown);
+    }
+  }, [timer]);
 
- // เมื่อผู้ใช้กรอก OTP ทีละหลัก
- const handleOtpChange = (text: string, index: number) => {
-  const newOtp = [...otp];
-  newOtp[index] = text;
-  setOtp(newOtp);
-  // TODO: focus ถัดไป หรือ check if OTP เต็ม 6 ตัว
-};
-// ตัวอย่างฟังก์ชันเรียก API ขอ OTP ใหม่ (mock)
-const requestNewOtp = async () => {
-  try {
-    setLoading(true);
-    // เรียก API จริงตาม backend ของคุณ
-    // ตัวอย่าง mock: รอสัก 1 วิ
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // เมื่อสำเร็จ → รีเซ็ต timer กลับไป 60
-    setTimer(60);
-  } catch (error) {
-    console.log("error requesting new OTP:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  // ผู้ใช้กรอก OTP (ปรับ focus ช่องถัดไปถ้าใส่ 1 ตัว)
+  const handleOtpChange = (text: string, index: number) => {
+    const newOtp = [...otp];
+    newOtp[index] = text;
+    setOtp(newOtp);
+
+    if (text.length === 1 && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  // mock ขอ OTP ใหม่
+  const requestNewOtp = async () => {
+    try {
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setTimer(60);
+    } catch (error) {
+      console.log("error requesting new OTP:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!fontsLoaded) return null;
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.backIcon} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={26} color="#000" />
+      {/* Back Button*/}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={26} color="#CFA459" />
       </TouchableOpacity>
 
       <Text style={styles.title}>ยืนยัน OTP</Text>
 
       <Image
-        source={require("../../../assets/CLLogin.png")}
+        source={require("../../../assets/CapitalLink.png")}
         style={styles.logo}
-        resizeMode="contain"
       />
-      <Text style={styles.companyName}>CAPITAL LINK</Text>
+
       <Text style={styles.text}>กรุณากรอกรหัส OTP ที่ส่งไปยังเบอร์</Text>
       <Text style={styles.phoneNumber}>0XX-XXX-XXXX</Text>
       <Text style={styles.subText}>รหัสนี้จะถูกยกเลิกภายใน 3 นาที</Text>
@@ -92,6 +93,7 @@ const requestNewOtp = async () => {
         {otp.map((value, index) => (
           <TextInput
             key={index}
+            ref={(ref) => (inputRefs.current[index] = ref)} // ผูก ref
             style={styles.otpBox}
             keyboardType="number-pad"
             maxLength={1}
@@ -101,21 +103,10 @@ const requestNewOtp = async () => {
         ))}
       </View>
 
-      {/* <Text style={styles.timerText}>ขอรหัส OTP ใหม่อีก {timer} วินาที</Text> */}
-      
-      {/* ถ้ายังมีเวลานับถอยหลัง => แสดงข้อความ ถ้าเหลือ 0 => แสดงลิงก์กดได้ */}
       {timer > 0 ? (
-        // กรณีเหลือเวลา
-        <Text style={styles.timerText}>
-          ขอรหัส OTP ใหม่อีก {timer} วินาที
-        </Text>
+        <Text style={styles.timerText}>ขอรหัส OTP ใหม่อีก {timer} วินาที</Text>
       ) : (
-        // กรณีหมดเวลาแล้ว → กดขอใหม่ได้
-        <TouchableOpacity
-          style={styles.resendContainer}
-          onPress={requestNewOtp}
-          disabled={loading}
-        >
+        <TouchableOpacity style={styles.resendContainer} onPress={requestNewOtp} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#CFA459" />
           ) : (
@@ -124,11 +115,9 @@ const requestNewOtp = async () => {
         </TouchableOpacity>
       )}
 
-      {/* ปุ่มยืนยัน */}
-
       <TouchableOpacity activeOpacity={0.9}>
         <LinearGradient
-          colors={["#c19346", "#d4af71", "#e6c170"]}
+          colors={["#e6c170", "#d4af71", "#c19346"]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={styles.confirmButton}
@@ -152,44 +141,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 20,
     alignItems: "center",
-  },
-  backIcon: {
-    alignSelf: "flex-start",
-    marginTop: 30,
-    // backgroundColor: "pink"
+    // ถ้าอยาก content อยู่กลางแนวตั้ง => justifyContent: 'center'
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 20,
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 10,
     marginBottom: 20,
+    color: "#333",
   },
   logo: {
-    width: width * 0.4,
-    height: width * 0.25,
+    width: width * 0.7,
+    height: width * 0.35,
     marginVertical: 10,
   },
-  companyName: {
-    fontSize: 16,
-    color: "#CFA459",
-    fontWeight: "500",
-    fontFamily: "TimesNewRoman",
-    marginBottom: 30,
-  },
   text: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#000",
     textAlign: "center",
+    marginTop: 30,
   },
   phoneNumber: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
     color: "#000",
     marginTop: 5,
     textAlign: "center",
   },
   subText: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#888",
     marginTop: 2,
     marginBottom: 20,
@@ -211,37 +191,48 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   timerText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#333",
     marginBottom: 20,
   },
+  resendContainer: {
+    marginBottom: 20,
+  },
+  resendText: {
+    fontSize: 14,
+    color: "#CFA459",
+    textDecorationLine: "underline",
+    textAlign: "center",
+  },
   confirmButton: {
-    width: 55,
-    height: 40,
     borderRadius: 8,
+    width: 80,
+    height: 45,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
   confirmButtonText: {
     color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "500",
+    fontSize: 16,
+    fontWeight: "600",
   },
   supportText: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#888",
     textAlign: "center",
     lineHeight: 18,
   },
-  resendContainer: {
-    marginBottom: 20,
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 40,
   },
-  resendText: {
-    fontSize: 13,
-    color: "#CFA459", // สีทอง
-    textDecorationLine: "underline", // ทำเป็นลิงก์
-    textAlign: "center", // (ถ้าอยากให้อยู่กลาง)
+  backButtonText: {
+    color: "#CFA459",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 5,
   },
   
 });
