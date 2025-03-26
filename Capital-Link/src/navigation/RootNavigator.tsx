@@ -1,18 +1,24 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../screens/auth/LoginScreen';
-import RegisterScreen from '../screens/auth/RegisterScreen';
-import OtpVerificationScreen from '../screens/auth/OtpVerificationScreen';
-import InitialEntry from '../screens/auth/InitialEntryScreen';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from "../screens/auth/LoginScreen";
+import RegisterScreen from "../screens/auth/RegisterScreen";
+import OtpVerificationScreen from "../screens/auth/OtpVerificationScreen";
+import InitialEntry from "../screens/auth/InitialEntryScreen";
+import PinSetupScreen from "../screens/pin/PinSetupScreen";
+import PinConfirmScreen from "../screens/pin/PinConfirmScreen";
+import PinEntryScreen from "../screens/pin/PinEntryScreen";
 
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
   InitialEntry: undefined;
   Login: undefined;
-  Register: undefined; 
-  OtpVerification: { from: 'Login' | 'Register' };
-  
+  Register: undefined;
+  OtpVerification: { from: "Login" | "Register" };
+  PinSetup: undefined;
+  PinConfirm: { firstPin: string }; 
+  PinEntry: undefined;
+  MainApp: undefined; // หรือ MainTab
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -23,7 +29,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      // initialRouteName="Register"
+      // initialRouteName="PinEntry"
       initialRouteName="InitialEntry"
       screenOptions={{ headerShown: false }}
     >
@@ -32,8 +38,9 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
-
-      
+      <Stack.Screen name="PinSetup" component={PinSetupScreen} />
+      <Stack.Screen name="PinConfirm" component={PinConfirmScreen} />
+      <Stack.Screen name="PinEntry" component={PinEntryScreen} />
     </Stack.Navigator>
   );
 };

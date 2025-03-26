@@ -8,7 +8,9 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
-  ActivityIndicator 
+  ActivityIndicator,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,9 +25,10 @@ const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(5); // หรือ 60
+  const [timer, setTimer] = useState(10); // หรือ 60
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<OtpRouteProp>();
   const from = route.params.from;
 
@@ -45,7 +48,7 @@ const OtpVerificationScreen: React.FC = () => {
     }
   }, [timer]);
 
-  // ผู้ใช้กรอก OTP (ปรับ focus ช่องถัดไปถ้าใส่ 1 ตัว)
+  // ผู้ใช้กรอก OTP (ปรับ focus ช่องถัดไปถ้าใส่ 1 ตัวแล้ว)
   const handleOtpChange = (text: string, index: number) => {
     const newOtp = [...otp];
     newOtp[index] = text;
@@ -53,6 +56,24 @@ const OtpVerificationScreen: React.FC = () => {
 
     if (text.length === 1 && index < 5) {
       inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    index: number
+  ) => {
+    if (e.nativeEvent.key === "Backspace") {
+      // ถ้าช่องปัจจุบันยังไม่มีตัวอักษร => ข้ามไปช่องก่อนหน้า
+      if (!otp[index] && index > 0) {
+        // โฟกัสช่องก่อนหน้า
+        inputRefs.current[index - 1]?.focus();
+
+        // ลบค่าช่องก่อนหน้า (เผื่อผู้ใช้ต้องการลบต่อเนื่อง)
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+      }
     }
   };
 
@@ -69,12 +90,21 @@ const OtpVerificationScreen: React.FC = () => {
     }
   };
 
+  // ฟังก์ชันเมื่อกดปุ่มยืนยัน
+  const handleConfirmOTP = () => {
+    // สมมติว่าเช็ก OTP แล้วผ่าน → ไปหน้า PinSetupScreen
+    navigation.replace("PinSetup");
+  };
+
   if (!fontsLoaded) return null;
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button*/}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
         <Ionicons name="chevron-back" size={26} color="#CFA459" />
       </TouchableOpacity>
 
@@ -99,6 +129,7 @@ const OtpVerificationScreen: React.FC = () => {
             maxLength={1}
             value={value}
             onChangeText={(text) => handleOtpChange(text, index)}
+            onKeyPress={(e) => handleKeyPress(e, index)}
           />
         ))}
       </View>
@@ -106,7 +137,11 @@ const OtpVerificationScreen: React.FC = () => {
       {timer > 0 ? (
         <Text style={styles.timerText}>ขอรหัส OTP ใหม่อีก {timer} วินาที</Text>
       ) : (
-        <TouchableOpacity style={styles.resendContainer} onPress={requestNewOtp} disabled={loading}>
+        <TouchableOpacity
+          style={styles.resendContainer}
+          onPress={requestNewOtp}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#CFA459" />
           ) : (
@@ -115,7 +150,7 @@ const OtpVerificationScreen: React.FC = () => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity activeOpacity={0.9}>
+      <TouchableOpacity activeOpacity={0.9} onPress={handleConfirmOTP}>
         <LinearGradient
           colors={["#e6c170", "#d4af71", "#c19346"]}
           start={{ x: 0.5, y: 0 }}
@@ -146,7 +181,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "700",
-    marginTop: 10,
+    marginTop: 60,
     marginBottom: 20,
     color: "#333",
   },
@@ -224,9 +259,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 40,
+    position: 'absolute',
+    top: 40,     
+    left: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 999, 
   },
   backButtonText: {
     color: "#CFA459",
@@ -234,5 +272,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 5,
   },
-  
 });
