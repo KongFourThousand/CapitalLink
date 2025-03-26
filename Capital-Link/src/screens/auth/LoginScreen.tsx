@@ -37,24 +37,27 @@ const LoginScreen: React.FC = () => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Logo + Company Name */}
+        {/* Back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.replace("InitialEntry")} // หรือ navigation.goBack()
+        >
+          <Ionicons name="chevron-back" size={24} color="#CFA459" />
+        </TouchableOpacity>
+
+        {/* Logo (No text, since it's in the image) */}
         <View style={styles.logoContainer}>
           <Image
-            source={require("../../../assets/CLLogin.png")}
+            source={require("../../../assets/CLlogo+NoBG.png")}
             style={styles.logo}
-            resizeMode="contain"
           />
-          <Text style={styles.companyName}>CAPITAL LINK</Text>
-          <Text style={styles.companySubtitle}>
-            FINANCIAL GROUP PUBLIC COMPANY LIMITED
-          </Text>
         </View>
 
         {/* Phone Input */}
         <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
         <View style={styles.inputContainer}>
           <View style={styles.iconContainer}>
-            <FontAwesome name="phone" size={18} color="#999999" />
+            <FontAwesome name="phone" size={20} color="#999999" />
           </View>
           <TextInput
             style={styles.input}
@@ -68,7 +71,12 @@ const LoginScreen: React.FC = () => {
         </View>
 
         {/* Login Button */}
-        <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate("OtpVerification", { from: "Login" })}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() =>
+            navigation.navigate("OtpVerification", { from: "Login" })
+          }
+        >
           <LinearGradient
             colors={["#e6c170", "#d4af71", "#c19346"]}
             start={{ x: 0.5, y: 0 }}
@@ -79,11 +87,6 @@ const LoginScreen: React.FC = () => {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Forgot Password */}
-        {/* <TouchableOpacity>
-          <Text style={styles.forgotText}>ลืมรหัสผ่าน?</Text>
-        </TouchableOpacity> */}
-
         {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.divider} />
@@ -92,18 +95,17 @@ const LoginScreen: React.FC = () => {
         </View>
 
         {/* Register Button */}
-        <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate("Register")}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("Register")}
+        >
           <LinearGradient
-          colors={["#e6c170", "#d4af71", "#c19346"]}
+            colors={["#e6c170", "#d4af71", "#c19346"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.button}
           >
-            <Text
-              style={styles.buttonText}
-            >
-              ลงทะเบียนใหม่
-            </Text>
+            <Text style={styles.buttonText}>ลงทะเบียนใหม่</Text>
           </LinearGradient>
         </TouchableOpacity>
       </KeyboardAvoidingView>
@@ -121,35 +123,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+    // ถ้าอยากให้ content อยู่กลางจอ: justifyContent: 'center'
   },
+  // logoContainer: {
+  //   alignItems: "center",
+  //   marginTop: 40,
+  //   marginBottom: 30,
+  // },
+  // logo: {
+  //   width: width * 0.7,  // โลโก้ใหญ่ขึ้น
+  //   height: width * 0.4,
+  // },
   logoContainer: {
     alignItems: "center",
-    marginTop: 40,
-    marginBottom: 30,
-  },
-  logo: {
-    width: width * 0.55,
-    height: width * 0.28,
-    marginTop: 40,
+
     marginBottom: 10,
   },
-  companyName: {
-    fontSize: 16,
-    color: "#CFA459",
-    fontWeight: "500",
-    fontFamily: "TimesNewRoman",
-    marginBottom: 2,
-  },
-  companySubtitle: {
-    fontSize: 11,
-    color: "#AAAAAA",
-    letterSpacing: 0.5,
-    fontFamily: "TimesNewRoman",
+  logo: {
+    width: width * 0.9,
+    height: width * 0.5,
+    resizeMode: "cover",
+    marginBottom: 30,
+    marginTop: 20,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: 16, // bigger for older users
     color: "#333333",
     marginBottom: 6,
+    fontWeight: "600",
   },
   inputContainer: {
     flexDirection: "row",
@@ -158,22 +159,22 @@ const styles = StyleSheet.create({
     borderColor: "#E5E5E5",
     borderRadius: 8,
     marginBottom: 18,
-    height: 45,
+    height: 48, // สูงขึ้น
   },
   iconContainer: {
-    width: 40,
+    width: 45,
     alignItems: "center",
     justifyContent: "center",
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16, // bigger
     paddingRight: 15,
     color: "#333333",
   },
   button: {
     borderRadius: 8,
-    height: 45,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 5,
@@ -181,14 +182,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 15,
-  },
-  forgotText: {
-    color: "#CFA459",
-    fontSize: 13,
-    textAlign: "center",
-    marginVertical: 10,
+    fontWeight: "700",
+    fontSize: 18, // bigger
   },
   dividerContainer: {
     flexDirection: "row",
@@ -203,6 +198,20 @@ const styles = StyleSheet.create({
   dividerText: {
     marginHorizontal: 10,
     color: "#555555",
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "600",
   },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 40,
+    // แล้วแต่ดีไซน์
+  },
+  backButtonText: {
+    color: "#CFA459",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 5,
+  },
+  
 });
