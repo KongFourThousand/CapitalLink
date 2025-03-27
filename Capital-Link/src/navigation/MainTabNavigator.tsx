@@ -1,179 +1,82 @@
-// import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import HomeScreen from '../screens/home/HomeScreen';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-// สมมติว่าเรามีหน้าต่างๆ เหล่านี้ (คุณต้องสร้างไฟล์พวกนี้ด้วย)
-import NotificationScreen from '../screens/notifications/NotificationScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
-import SettingsScreen from '../screens/settings/SettingsScreen';
+// นำเข้าหน้าต่างๆ ที่จะอยู่ในแท็บ
+import HomeScreen from "../screens/home/HomeScreen";
+import AccountScreen from "../screens/accounts/AccountScreen";
 
-const Tab = createBottomTabNavigator();
+// สร้าง stub components สำหรับหน้าที่ยังไม่มี (ชั่วคราว)
+const NotificationScreen = () => <></>;
+const ProfileScreen = () => <></>;
 
-// สร้าง Custom Bottom Tab
-// ฟังก์ชันนี้จะสร้าง tab item แต่ละอัน
-const CustomTabBarButton = ({
-  label,
-  isFocused,
-  onPress,
-  iconName,
-  iconFamily = 'Ionicons',
-}) => {
-  const renderIcon = () => {
-    if (iconFamily === 'FontAwesome5') {
-      return (
-        <FontAwesome5
-          name={iconName}
-          size={22}
-          color={isFocused ? '#CFA459' : '#888'}
-        />
-      );
-    }
-    return (
-      <Ionicons
-        name={iconName}
-        size={22}
-        color={isFocused ? '#CFA459' : '#888'}
-      />
-    );
-  };
+// ถ้าต้องการสร้างจริงๆ ให้ uncomment และสร้างไฟล์เหล่านี้
+// import NotificationScreen from "../screens/notifications/NotificationScreen";
+// import ProfileScreen from "../screens/profile/ProfileScreen";
 
-  return (
-    <TouchableOpacity
-      style={styles.tabButton}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      {renderIcon()}
-      <Text
-        style={[
-          styles.tabLabel,
-          { color: isFocused ? '#CFA459' : '#888' },
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+// กำหนด types สำหรับ Tab Navigator
+export type MainTabParamList = {
+  HomeTab: undefined;
+  AccountsTab: undefined;
+  NotifyTab: undefined;
+  ProfileTab: undefined;
 };
 
-// Custom Tab Bar ทั้งแถบ
-const CustomTabBar = ({ state, descriptors, navigation }) => {
-  return (
-    <View style={styles.tabBarContainer}>
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label = options.tabBarLabel || options.title || route.name;
-        const isFocused = state.index === index;
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
-
-        // กำหนด Icon ตามชื่อ Route
-        let iconName;
-        let iconFamily = 'Ionicons';
-
-        if (route.name === 'Home') {
-          iconName = isFocused ? 'home' : 'home-outline';
-        } else if (route.name === 'Notifications') {
-          iconName = isFocused ? 'notifications' : 'notifications-outline';
-        } else if (route.name === 'Profile') {
-          iconName = isFocused ? 'person' : 'person-outline';
-        } else if (route.name === 'Settings') {
-          iconName = 'cog';
-          iconFamily = 'FontAwesome5';
-        }
-
-        return (
-          <CustomTabBarButton
-            key={index}
-            label={label}
-            isFocused={isFocused}
-            onPress={onPress}
-            iconName={iconName}
-            iconFamily={iconFamily}
-          />
-        );
-      })}
-    </View>
-  );
-};
-
-const MainTabNavigator = () => {
+const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
+      id={undefined} // เพิ่ม id={undefined} เพื่อแก้ไข TypeScript error
+      screenOptions={({ route }) => ({
+        headerShown: false,             // ปิดหัว default
+        tabBarActiveTintColor: "#CFA459",
+        tabBarInactiveTintColor: "#888",
+        tabBarLabelStyle: { fontSize: 12 },
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopWidth: 1,
+          borderTopColor: "#eee",
+          elevation: 8, // Android shadow
+        },
+        tabBarIcon: ({ color, size, focused }) => {
+          let iconName: string = "home-outline";
+          if (route.name === "HomeTab") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "AccountsTab") {
+            iconName = focused ? "card" : "card-outline";
+          } else if (route.name === "NotifyTab") {
+            iconName = focused ? "notifications" : "notifications-outline";
+          } else if (route.name === "ProfileTab") {
+            iconName = focused ? "person" : "person-outline";
+          }
+          // ติด TypeScript error? => as assertion
+          return <Ionicons name={iconName as keyof typeof Ionicons.glyphMap} size={size} color={color} />;
+        },
+      })}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeTab"
         component={HomeScreen}
-        options={{
-          tabBarLabel: 'หน้าหลัก',
-        }}
+        options={{ title: "หน้าหลัก" }}
       />
       <Tab.Screen
-        name="Notifications"
+        name="AccountsTab"
+        component={AccountScreen}
+        options={{ title: "บัญชี" }}
+      />
+      <Tab.Screen
+        name="NotifyTab"
         component={NotificationScreen}
-        options={{
-          tabBarLabel: 'แจ้งเตือน',
-        }}
+        options={{ title: "แจ้งเตือน" }}
       />
       <Tab.Screen
-        name="Profile"
+        name="ProfileTab"
         component={ProfileScreen}
-        options={{
-          tabBarLabel: 'โปรไฟล์',
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          tabBarLabel: 'ตั้งค่า',
-        }}
+        options={{ title: "โปรไฟล์" }}
       />
     </Tab.Navigator>
   );
 };
 
 export default MainTabNavigator;
-
-const styles = StyleSheet.create({
-  tabBarContainer: {
-    flexDirection: 'row',
-    height: 60,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingBottom: 5,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  tabButton: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 6,
-  },
-  tabLabel: {
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-});
