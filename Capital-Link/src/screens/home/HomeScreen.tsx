@@ -24,7 +24,15 @@ const { width } = Dimensions.get("window");
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
 
-  
+  // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
+  const handleDepositPress = () => {
+    //navigation.navigate("DepositDetail", { accountId: "default" });
+  };
+
+  // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
+  const handleLoanPress = () => {
+    //navigation.navigate("LoanDetail", { loanId: "default" });
+  };
 
   // ตัวอย่าง URLs
   const externalLinks = [
@@ -83,10 +91,30 @@ const HomeScreen: React.FC = () => {
             <Text style={styles.userName}>MININ</Text>
           </View>
         </LinearGradient>
+     
 
         <View style={styles.container}>
+          {/* เพิ่มปุ่มสี่เหลี่ยม: เงินฝาก, สินเชื่อ ตรงนี้ */}
+          <View style={styles.menuRow}>
+            <TouchableOpacity
+              style={styles.menuBox}
+              onPress={handleDepositPress}
+            >
+              <Ionicons name="wallet-outline" size={28} color="#CFA459" style={styles.menuIcon} />
+              <Text style={styles.menuBoxTitle}>เงินฝาก</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuBox}
+              onPress={handleLoanPress}
+            >
+              <Ionicons name="card-outline" size={28} color="#4F7FE3" style={styles.menuIcon} />
+              <Text style={styles.menuBoxTitle}>สินเชื่อ</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* แบนเนอร์ 4 อัน (กดแล้วไปเว็บนอก) */}
           <View style={styles.bannerContainer}>
+            
             {externalLinks.map((item) => (
               <TouchableOpacity
                 key={item.id}
@@ -120,6 +148,7 @@ const HomeScreen: React.FC = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+  // styles อื่นๆ เหมือนเดิม
   safeArea: {
     flex: 1,
     backgroundColor: "#ffffff",
@@ -156,6 +185,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000",
+  },
+  menuRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  menuBox: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    marginHorizontal: 5,
+    padding: 16,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  menuIcon: {
+    marginBottom: 10,
+  },
+  menuBoxTitle: {
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
   },
   bannerContainer: {
     marginBottom: 20,
