@@ -12,23 +12,23 @@ import {
   StatusBar,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
 
+// ไม่ต้องใช้ NativeStackNavigationProp เพื่อลดความซับซ้อน
+// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+// import { RootStackParamList } from "../../navigation/RootNavigator";
+
 // นำเข้า CustomTabBar
 import CustomTabBar from "../../components/common/CustomTabBar";
-
-type HomeScreenNavProp = NativeStackNavigationProp<RootStackParamList, "HomeScreen">;
 
 const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<HomeScreenNavProp>();
+  const navigation = useNavigation();
 
-  // โหลดฟอนต์ TimesNewRoman ถ้าต้องการ
+  // โหลดฟอนต์ TimesNewRoman
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
@@ -69,16 +69,6 @@ const HomeScreen: React.FC = () => {
     Linking.openURL(linkUrl);
   };
 
-  // // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
-  // const handleDepositPress = () => {
-  //   navigation.navigate("DepositDetail", { accountId: "default" });
-  // };
-
-  // // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
-  // const handleLoanPress = () => {
-  //   navigation.navigate("LoanDetail", { loanId: "default" });
-  // };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -87,7 +77,7 @@ const HomeScreen: React.FC = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* ส่วนบน: โปรไฟล์ผู้ใช้ ไล่สีแบบ LinearGradient ตามรูป */}
+        {/* ส่วนบน: โปรไฟล์ผู้ใช้ ไล่สีทอง */}
         <LinearGradient
           colors={['#E9D9B5', '#D4B976']}
           start={{ x: 0, y: 0 }}
@@ -103,25 +93,7 @@ const HomeScreen: React.FC = () => {
           </View>
         </LinearGradient>
 
-        {/* <View style={styles.container}> */}
-          {/* ปุ่มสี่เหลี่ยม: เงินฝาก, สินเชื่อ */}
-          {/* <View style={styles.menuRow}>
-            <TouchableOpacity
-              style={styles.menuBox}
-              onPress={handleDepositPress}
-            >
-              <Ionicons name="wallet-outline" size={28} color="#CFA459" style={styles.menuIcon} />
-              <Text style={styles.menuBoxTitle}>เงินฝาก</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuBox}
-              onPress={handleLoanPress}
-            >
-              <Ionicons name="card-outline" size={28} color="#4F7FE3" style={styles.menuIcon} />
-              <Text style={styles.menuBoxTitle}>สินเชื่อ</Text>
-            </TouchableOpacity>
-          </View> */}
-
+        <View style={styles.container}>
           {/* แบนเนอร์ 4 อัน (กดแล้วไปเว็บนอก) */}
           <View style={styles.bannerContainer}>
             {externalLinks.map((item) => (
@@ -148,7 +120,7 @@ const HomeScreen: React.FC = () => {
         </View>
       </ScrollView>
       
-      {/* ใช้ CustomTabBar แทน Tab Bar เดิม โดยกำหนด activeTab เป็น 'home' */}
+      {/* ใช้ CustomTabBar ที่แยกออกมา */}
       <CustomTabBar activeTab="home" />
     </SafeAreaView>
   );
@@ -193,36 +165,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000",
-  },
-  menuRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  menuBox: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    marginHorizontal: 5,
-    padding: 16,
-    paddingVertical: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-  },
-  menuIcon: {
-    marginBottom: 10,
-  },
-  menuBoxTitle: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "500",
   },
   bannerContainer: {
     marginBottom: 20,

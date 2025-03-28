@@ -9,11 +9,12 @@ import PinConfirmScreen from "../screens/pin/PinConfirmScreen";
 import PinEntryScreen from "../screens/pin/PinEntryScreen";
 import HomeScreen from "../screens/home/HomeScreen";
 import AccountScreen from "../screens/accounts/AccountScreen";
-import MainTab from "../navigation/MainTabNavigator";
 
-// เพิ่มการนำเข้าหน้าจอรายละเอียด
-import DepositDetailScreen from "../screens/accounts/DepositDetailScreen";
-import LoanDetailScreen from "../screens/accounts/LoanDetailScreen";
+// ถ้ายังไม่มีหน้าเหล่านี้ให้สร้างก่อน หรือคอมเมนต์ไว้
+// import DepositDetailScreen from "../screens/accounts/DepositDetailScreen";
+// import LoanDetailScreen from "../screens/accounts/LoanDetailScreen";
+// import NotificationScreen from "../screens/notifications/NotificationScreen";
+// import ProfileScreen from "../screens/profile/ProfileScreen";
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -26,10 +27,13 @@ export type RootStackParamList = {
   PinEntry: undefined;
   HomeScreen: undefined; 
   AccountScreen: undefined; 
-  MainTab: undefined;
-  // เพิ่ม route สำหรับหน้ารายละเอียด
-  DepositDetail: { accountId?: string };
-  LoanDetail: { loanId?: string };
+ // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
+ NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
+ ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
+ 
+ // หน้ารายละเอียด
+ DepositDetail: { accountId?: string };
+ LoanDetail: { loanId?: string };
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -54,11 +58,14 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="PinEntry" component={PinEntryScreen} />
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
-      <Stack.Screen name="MainTab" component={MainTab} /> 
+ 
+      {/* เพิ่มหน้า Notification และ Profile ที่เรียกจาก CustomTabBar */}
+      {/* <Stack.Screen name="NotificationScreen" component={NotificationScreen} /> */}
+      {/* <Stack.Screen name="ProfileScreen" component={ProfileScreen} /> */}
       
-      {/* เพิ่ม Screen สำหรับหน้ารายละเอียด */}
-      <Stack.Screen name="DepositDetail" component={DepositDetailScreen} />
-      <Stack.Screen name="LoanDetail" component={LoanDetailScreen} />
+      {/* Detail Screens */}
+      {/* <Stack.Screen name="DepositDetail" component={DepositDetailScreen} /> */}
+      {/* <Stack.Screen name="LoanDetail" component={LoanDetailScreen} /> */}
     </Stack.Navigator>
   );
 };

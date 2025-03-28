@@ -1,159 +1,164 @@
-// import React from 'react';
-// import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-// import { Ionicons } from '@expo/vector-icons';
-// import { useNavigation } from '@react-navigation/native';
-// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { RootStackParamList } from '../../navigation/RootNavigator';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// // ประเภทของแท็บที่สามารถใช้ได้
-// export type TabName = 'home' | 'account' | 'notification' | 'profile';
+// แบบง่าย ไม่ต้องเชื่อมกับ RootStackParamList ที่อาจจะมีปัญหา
+type AnyNavigation = NativeStackNavigationProp<any>;
 
-// // Props ที่ส่งเข้ามาใน CustomTabBar
-// interface CustomTabBarProps {
-//   activeTab: TabName; // แท็บที่กำลังแสดงอยู่
-//   onTabPress?: (tabName: TabName) => void; // ฟังก์ชันที่จะเรียกเมื่อกดแท็บ (optional)
-// }
+// ประเภทของแท็บ
+export type TabName = 'home' | 'account' | 'notification' | 'profile';
 
-// const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) => {
-//   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+interface CustomTabBarProps {
+  activeTab: TabName;
+  onTabPress?: (tabName: TabName) => void;
+}
 
-//   // ฟังก์ชันสำหรับจัดการเมื่อกดแท็บ
-//   const handleTabPress = (tabName: TabName) => {
-//     // ถ้ามีการส่ง onTabPress มาให้ใช้ฟังก์ชันนั้น
-//     if (onTabPress) {
-//       onTabPress(tabName);
-//       return;
-//     }
+const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) => {
+  const navigation = useNavigation<AnyNavigation>();
 
-//     // ถ้าไม่มี onTabPress ใช้ navigation ไปยังหน้าต่างๆ ตาม tabName
-//     switch (tabName) {
-//       case 'home':
-//         navigation.navigate('MainTab', { screen: 'HomeTab' });
-//         break;
-//       case 'account':
-//         navigation.navigate('MainTab', { screen: 'AccountsTab' });
-//         break;
-//       case 'notification':
-//         navigation.navigate('MainTab', { screen: 'NotifyTab' });
-//         break;
-//       case 'profile':
-//         navigation.navigate('MainTab', { screen: 'ProfileTab' });
-//         break;
-//     }
-//   };
+  // ฟังก์ชันสำหรับจัดการเมื่อกดแท็บ
+  const handleTabPress = (tabName: TabName) => {
+    // ถ้ามีการส่ง onTabPress มาให้ใช้ฟังก์ชันนั้น
+    if (onTabPress) {
+      onTabPress(tabName);
+      return;
+    }
 
-//   return (
-//     <View style={styles.tabBar}>
-//       {/* หน้าหลัก */}
-//       <TouchableOpacity 
-//         style={styles.tabItem} 
-//         onPress={() => handleTabPress('home')}
-//       >
-//         <Ionicons 
-//           name={activeTab === 'home' ? "home" : "home-outline"} 
-//           size={22} 
-//           color={activeTab === 'home' ? "#000" : "#888"} 
-//         />
-//         <Text 
-//           style={[
-//             styles.tabLabel, 
-//             activeTab === 'home' && styles.activeTab
-//           ]}
-//         >
-//           หน้าหลัก
-//         </Text>
-//       </TouchableOpacity>
+    // ใช้การนำทางแบบตรงๆ ไปยังหน้าที่ต้องการ
+    switch (tabName) {
+      case 'home':
+        navigation.navigate('HomeScreen');
+        break;
+      case 'account':
+        navigation.navigate('AccountScreen');
+        break;
+      case 'notification':
+        // สร้างหน้านี้ถ้ายังไม่มี
+        // navigation.navigate('NotificationScreen');
+        console.log('Navigate to notification page');
+        break;
+      case 'profile':
+        // สร้างหน้านี้ถ้ายังไม่มี
+        // navigation.navigate('ProfileScreen');
+        console.log('Navigate to profile page');
+        break;
+    }
+  };
+
+  return (
+    <View style={styles.tabBar}>
+      {/* หน้าหลัก */}
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => handleTabPress('home')}
+      >
+        <Ionicons 
+          name={activeTab === 'home' ? "home" : "home-outline"} 
+          size={22} 
+          color={activeTab === 'home' ? "#CFA459" : "#888"} 
+        />
+        <Text 
+          style={[
+            styles.tabLabel, 
+            activeTab === 'home' && styles.activeTab
+          ]}
+        >
+          หน้าหลัก
+        </Text>
+      </TouchableOpacity>
       
-//       {/* บัญชี */}
-//       <TouchableOpacity 
-//         style={styles.tabItem} 
-//         onPress={() => handleTabPress('account')}
-//       >
-//         <Ionicons 
-//           name={activeTab === 'account' ? "card" : "card-outline"} 
-//           size={22} 
-//           color={activeTab === 'account' ? "#000" : "#888"} 
-//         />
-//         <Text 
-//           style={[
-//             styles.tabLabel, 
-//             activeTab === 'account' && styles.activeTab
-//           ]}
-//         >
-//           บัญชี
-//         </Text>
-//       </TouchableOpacity>
+      {/* บัญชี */}
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => handleTabPress('account')}
+      >
+        <Ionicons 
+          name={activeTab === 'account' ? "card" : "card-outline"} 
+          size={22} 
+          color={activeTab === 'account' ? "#CFA459" : "#888"} 
+        />
+        <Text 
+          style={[
+            styles.tabLabel, 
+            activeTab === 'account' && styles.activeTab
+          ]}
+        >
+          บัญชี
+        </Text>
+      </TouchableOpacity>
       
-//       {/* การแจ้งเตือน */}
-//       <TouchableOpacity 
-//         style={styles.tabItem} 
-//         onPress={() => handleTabPress('notification')}
-//       >
-//         <Ionicons 
-//           name={activeTab === 'notification' ? "notifications" : "notifications-outline"} 
-//           size={22} 
-//           color={activeTab === 'notification' ? "#000" : "#888"} 
-//         />
-//         <Text 
-//           style={[
-//             styles.tabLabel, 
-//             activeTab === 'notification' && styles.activeTab
-//           ]}
-//         >
-//           การแจ้งเตือน
-//         </Text>
-//       </TouchableOpacity>
+      {/* การแจ้งเตือน */}
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => handleTabPress('notification')}
+      >
+        <Ionicons 
+          name={activeTab === 'notification' ? "notifications" : "notifications-outline"} 
+          size={22} 
+          color={activeTab === 'notification' ? "#CFA459" : "#888"} 
+        />
+        <Text 
+          style={[
+            styles.tabLabel, 
+            activeTab === 'notification' && styles.activeTab
+          ]}
+        >
+          การแจ้งเตือน
+        </Text>
+      </TouchableOpacity>
       
-//       {/* โปรไฟล์ */}
-//       <TouchableOpacity 
-//         style={styles.tabItem} 
-//         onPress={() => handleTabPress('profile')}
-//       >
-//         <Ionicons 
-//           name={activeTab === 'profile' ? "person" : "person-outline"} 
-//           size={22} 
-//           color={activeTab === 'profile' ? "#000" : "#888"} 
-//         />
-//         <Text 
-//           style={[
-//             styles.tabLabel, 
-//             activeTab === 'profile' && styles.activeTab
-//           ]}
-//         >
-//           โปรไฟล์
-//         </Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
+      {/* โปรไฟล์ */}
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => handleTabPress('profile')}
+      >
+        <Ionicons 
+          name={activeTab === 'profile' ? "person" : "person-outline"} 
+          size={22} 
+          color={activeTab === 'profile' ? "#CFA459" : "#888"} 
+        />
+        <Text 
+          style={[
+            styles.tabLabel, 
+            activeTab === 'profile' && styles.activeTab
+          ]}
+        >
+          โปรไฟล์
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
-// const styles = StyleSheet.create({
-//   tabBar: {
-//     flexDirection: 'row',
-//     height: 60,
-//     backgroundColor: '#FFFFFF',
-//     borderTopWidth: 1,
-//     borderTopColor: '#EEEEEE',
-//     position: 'absolute',
-//     bottom: 0,
-//     left: 0,
-//     right: 0,
-//     paddingTop: 5,
-//   },
-//   tabItem: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   tabLabel: {
-//     fontSize: 10,
-//     marginTop: 4,
-//     color: '#888',
-//   },
-//   activeTab: {
-//     color: '#000',
-//     fontWeight: '600',
-//   },
-// });
+const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 5,
+  },
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: 10,
+    marginTop: 4,
+    color: '#888',
+  },
+  activeTab: {
+    color: '#CFA459', // เปลี่ยนเป็นสีทองตามธีมของแอป
+    fontWeight: '600',
+  },
+});
 
-// export default CustomTabBar;
+export default CustomTabBar;
