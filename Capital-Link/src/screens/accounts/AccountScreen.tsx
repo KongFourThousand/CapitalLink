@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFonts } from "expo-font";
+import CustomTabBar from "../../components/common/CustomTabBar";
 
 // ชื่อ Route สมมติว่าคุณใส่ใน MainTabNavigator ว่า "AccountsTab"
 type AccountScreenNavProp = NativeStackNavigationProp<RootStackParamList, "AccountScreen">;
@@ -24,11 +24,6 @@ const { width } = Dimensions.get("window");
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountScreenNavProp>();
 
-  // โหลดฟอนต์ (ถ้ามี)
-  const [fontsLoaded] = useFonts({
-    TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
-  });
-  if (!fontsLoaded) return null;
 
   // กดดูรายละเอียด "เงินฝาก"
   const handlePressDeposit = () => {
@@ -47,14 +42,14 @@ const AccountScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header ไล่สีทอง */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={["#E9D9B5", "#D4B976"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
-      >
+      > */}
         <Text style={styles.headerTitle}>บัญชี</Text>
-      </LinearGradient>
+      {/* </LinearGradient> */}
 
       {/* เนื้อหาเลื่อนสกอล */}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -90,6 +85,7 @@ const AccountScreen: React.FC = () => {
           <View style={{ height: 50 }} />
         </View>
       </ScrollView>
+      <CustomTabBar activeTab="account" />
     </SafeAreaView>
   );
 };
