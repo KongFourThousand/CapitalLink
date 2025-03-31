@@ -57,7 +57,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'home' ? "home" : "home-outline"} 
           size={22} 
-          color={activeTab === 'home' ? "#CFA459" : "#888"} 
+          color={activeTab === 'home' ? "#CFA459" : " 
+            "} 
         />
         <Text 
           style={[
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 15,
     marginTop: 4,
     color: '#888',
   },
