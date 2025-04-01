@@ -104,7 +104,7 @@ const RegisterScreen: React.FC = () => {
 
   const renderCorporateForm = () => (
     <>
-      <Text style={styles.inputLabel}>เลขประจำตัวผู้เสียภาษี</Text>
+      {/* <Text style={styles.inputLabel}>เลขประจำตัวผู้เสียภาษี</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons name="file-document-outline" size={20} color="#999999" />
@@ -118,7 +118,7 @@ const RegisterScreen: React.FC = () => {
           keyboardType="number-pad"
           maxLength={13}
         />
-      </View>
+      </View> */}
 
       <Text style={styles.inputLabel}>เลขทะเบียนนิติบุคคล</Text>
       <View style={styles.inputContainer}>

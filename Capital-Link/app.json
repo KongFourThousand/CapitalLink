@@ -4,11 +4,11 @@
     "slug": "Capital-Link",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/CLlogo.png",
+    "icon": "./assets/CLlogo+NoBG.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/CLlogo.png",
+      "image": "./assets/CLlogo+NoBG.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

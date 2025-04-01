@@ -7,11 +7,12 @@ import InitialEntry from "../screens/auth/InitialEntryScreen";
 import PinSetupScreen from "../screens/pin/PinSetupScreen";
 import PinConfirmScreen from "../screens/pin/PinConfirmScreen";
 import PinEntryScreen from "../screens/pin/PinEntryScreen";
-import HomeScreen from "../screens/home/HomeScreen";
-import AccountScreen from "../screens/accounts/AccountScreen";
+import Home from "../screens/home/HomeScreen";
+import Account from "../screens/accounts/AccountScreen";
+import Deposit from "../screens/accounts/DepositScreen";
 
 // ถ้ายังไม่มีหน้าเหล่านี้ให้สร้างก่อน หรือคอมเมนต์ไว้
-// import DepositDetailScreen from "../screens/accounts/DepositDetailScreen";
+
 // import LoanDetailScreen from "../screens/accounts/LoanDetailScreen";
 // import NotificationScreen from "../screens/notifications/NotificationScreen";
 // import ProfileScreen from "../screens/profile/ProfileScreen";
@@ -23,17 +24,17 @@ export type RootStackParamList = {
   Register: undefined;
   OtpVerification: { from: "Login" | "Register" };
   PinSetup: undefined;
-  PinConfirm: { firstPin: string }; 
+  PinConfirm: { firstPin: string };
   PinEntry: undefined;
-  HomeScreen: undefined; 
-  AccountScreen: undefined; 
- // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
- NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
- ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
- 
- // หน้ารายละเอียด
- DepositDetail: { accountId?: string };
- LoanDetail: { loanId?: string };
+  Home: undefined;
+  Account: undefined;
+  Deposit: { accountId?: string };
+  Loan: { loanId?: string };
+  // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
+  NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
+  ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
+
+  
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -44,7 +45,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="HomeScreen"
+      initialRouteName="Deposit"
       //initialRouteName="InitialEntry"
       screenOptions={{ headerShown: false }}
     >
@@ -56,15 +57,15 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="PinSetup" component={PinSetupScreen} />
       <Stack.Screen name="PinConfirm" component={PinConfirmScreen} />
       <Stack.Screen name="PinEntry" component={PinEntryScreen} />
-      <Stack.Screen name="HomeScreen" component={HomeScreen} />
-      <Stack.Screen name="AccountScreen" component={AccountScreen} /> 
- 
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="Deposit" component={Deposit} />
+
       {/* เพิ่มหน้า Notification และ Profile ที่เรียกจาก CustomTabBar */}
       {/* <Stack.Screen name="NotificationScreen" component={NotificationScreen} /> */}
       {/* <Stack.Screen name="ProfileScreen" component={ProfileScreen} /> */}
-      
+
       {/* Detail Screens */}
-      {/* <Stack.Screen name="DepositDetail" component={DepositDetailScreen} /> */}
       {/* <Stack.Screen name="LoanDetail" component={LoanDetailScreen} /> */}
     </Stack.Navigator>
   );

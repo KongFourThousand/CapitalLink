@@ -17,12 +17,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
 
 // ชื่อ Route สมมติว่าคุณใส่ใน MainTabNavigator ว่า "AccountsTab"
-type AccountScreenNavProp = NativeStackNavigationProp<RootStackParamList, "AccountScreen">;
+type AccountNavProp = NativeStackNavigationProp<RootStackParamList, "Account">;
 
 const { width } = Dimensions.get("window");
 
 const AccountScreen: React.FC = () => {
-  const navigation = useNavigation<AccountScreenNavProp>();
+  const navigation = useNavigation<AccountNavProp>();
 
 
   // กดดูรายละเอียด "เงินฝาก"
@@ -58,7 +58,7 @@ const AccountScreen: React.FC = () => {
           {/* Card: เงินฝาก */}
           <TouchableOpacity style={styles.accountCard} onPress={handlePressDeposit}>
             <Image
-              source={require("../../../assets/banner1.png")}
+              source={require("../../../assets/account.png")}
               style={styles.cardImage}
               resizeMode="cover"
             />
@@ -71,7 +71,7 @@ const AccountScreen: React.FC = () => {
           {/* Card: สินเชื่อ */}
           <TouchableOpacity style={styles.accountCard} onPress={handlePressLoan}>
             <Image
-              source={require("../../../assets/banner2.png")}
+              source={require("../../../assets/Credit.png")}
               style={styles.cardImage}
               resizeMode="cover"
             />
@@ -106,7 +106,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#000",
+    color: "#a2754c",
+    textAlign: "center", 
   },
   scrollView: {
     flex: 1,
@@ -117,10 +118,10 @@ const styles = StyleSheet.create({
   },
   accountCard: {
     width: "100%",
-    height: 140,
-    borderRadius: 12,
+    height: 200,
+    borderRadius: 20,
     overflow: "hidden",
-    marginBottom: 16,
+    marginBottom: 30,
     backgroundColor: "#FFF",
     // shadow
     shadowColor: "#000",

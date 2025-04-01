@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  SafeAreaView, 
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
@@ -56,6 +57,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
   };
 
   return (
+    <SafeAreaView style={styles.safeArea}>
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity
@@ -116,7 +118,9 @@ const PinEntryKeyboardScreen: React.FC = () => {
         </View>
       </View>
     </View>
+    </SafeAreaView>
   );
+  
 };
 
 /** ปุ่มแต่ละอัน (ตัวเลข) */
@@ -124,6 +128,7 @@ const PinKey: React.FC<{ label: string; onPress: () => void }> = ({ label, onPre
   <TouchableOpacity style={styles.keyButton} onPress={onPress}>
     <Text style={styles.keyText}>{label}</Text>
   </TouchableOpacity>
+
 );
 
 export default PinEntryKeyboardScreen;
@@ -134,6 +139,10 @@ const DOT_SIZE = 20;
 const DOT_FILLED_SIZE = 15;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",

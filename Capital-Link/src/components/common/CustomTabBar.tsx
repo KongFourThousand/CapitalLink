@@ -29,10 +29,10 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
     // ใช้การนำทางแบบตรงๆ ไปยังหน้าที่ต้องการ
     switch (tabName) {
       case 'home':
-        navigation.navigate('HomeScreen');
+        navigation.navigate('Home');
         break;
       case 'account':
-        navigation.navigate('AccountScreen');
+        navigation.navigate('Account');
         break;
       case 'notification':
         // สร้างหน้านี้ถ้ายังไม่มี
@@ -57,8 +57,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'home' ? "home" : "home-outline"} 
           size={22} 
-          color={activeTab === 'home' ? "#CFA459" : " 
-            "} 
+          color={activeTab === 'home' ? "#CFA459" : "#888"} 
         />
         <Text 
           style={[
