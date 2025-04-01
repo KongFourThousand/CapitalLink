@@ -46,15 +46,16 @@ const DepositScreen: React.FC = () => {
 
           <View style={styles.cardContent}>
             <View style={styles.headerRow}>
-              <Text style={styles.accountName}>บัญชีสะสมทรัพย์</Text>
+              <View style={styles.accountInfo}>
+                <Text style={styles.accountName}>บัญชีสะสมทรัพย์</Text>
+                <Text style={styles.accountNumber}>580-4-xxx571</Text>
+                <Text style={styles.accountOwner}>นาย ก</Text>
+              </View>
               <View style={styles.balanceContainer}>
                 <Text style={styles.accountBalance}>1,000,000.00</Text>
                 <Text style={styles.currency}>THB</Text>
               </View>
             </View>
-
-            <Text style={styles.accountNumber}>580-4-xxx571</Text>
-            <Text style={styles.accountOwner}>นาย ก</Text>
 
             <View style={styles.divider}></View>
 
@@ -89,7 +90,7 @@ const DepositScreen: React.FC = () => {
 
           {/* ปุ่มกดดูรายละเอียดเพิ่มเติม */}
           <LinearGradient
-            colors={["#e0c080", "#d4af71", "#c49a45"]}
+            colors={["#c49a45", "#d4af71", "#e0c080"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.moreButton}
@@ -128,11 +129,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#CFA459",
+    color: "#a2754c",
     textAlign: "center",
-    marginTop: 50,
+    marginTop: 40,
     marginBottom: 20,
-    fontFamily: "TimesNewRoman",
   },
   contentContainer: {
     paddingHorizontal: 16,
@@ -141,16 +141,18 @@ const styles = StyleSheet.create({
   infoCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
+    marginTop: 20,
     marginBottom: 15,
     flexDirection: "row",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 10, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
   },
   sideBar: {
     width: 5,
+    //height:50,
     backgroundColor: "#CFA459",
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
@@ -165,11 +167,13 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 5,
   },
+  accountInfo: {
+    alignItems: "flex-start",
+  },
   accountName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
-    fontFamily: "TimesNewRoman",
   },
   balanceContainer: {
     alignItems: "flex-end",
@@ -186,6 +190,7 @@ const styles = StyleSheet.create({
   accountNumber: {
     fontSize: 14,
     color: "#666",
+    marginTop: 10,
     marginBottom: 2,
   },
   accountOwner: {
@@ -195,8 +200,8 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#eee",
-    marginVertical: 10,
+    backgroundColor: "#666",
+    marginBottom: 15,
   },
   detailRow: {
     flexDirection: "row",
@@ -219,9 +224,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
   },
   dateRow: {
     flexDirection: "row",
