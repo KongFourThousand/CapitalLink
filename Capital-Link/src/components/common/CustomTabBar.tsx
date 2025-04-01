@@ -57,7 +57,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'home' ? "home" : "home-outline"} 
           size={22} 
-          color={activeTab === 'home' ? "#CFA459" : "#888"} 
+          color={activeTab === 'home' ? "#CFA459" : "#616a76"} 
         />
         <Text 
           style={[
@@ -77,7 +77,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'account' ? "card" : "card-outline"} 
           size={22} 
-          color={activeTab === 'account' ? "#CFA459" : "#888"} 
+          color={activeTab === 'account' ? "#CFA459" : "#616a76"} 
         />
         <Text 
           style={[
@@ -97,7 +97,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'notification' ? "notifications" : "notifications-outline"} 
           size={22} 
-          color={activeTab === 'notification' ? "#CFA459" : "#888"} 
+          color={activeTab === 'notification' ? "#CFA459" : "#616a76"} 
         />
         <Text 
           style={[
@@ -117,7 +117,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         <Ionicons 
           name={activeTab === 'profile' ? "person" : "person-outline"} 
           size={22} 
-          color={activeTab === 'profile' ? "#CFA459" : "#888"} 
+          color={activeTab === 'profile' ? "#CFA459" : "#616a76"} 
         />
         <Text 
           style={[
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 15,
     marginTop: 4,
-    color: '#888',
+    color: '#616a76',
   },
   activeTab: {
     color: '#CFA459', // เปลี่ยนเป็นสีทองตามธีมของแอป

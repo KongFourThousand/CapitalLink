@@ -10,10 +10,10 @@ import PinEntryScreen from "../screens/pin/PinEntryScreen";
 import Home from "../screens/home/HomeScreen";
 import Account from "../screens/accounts/AccountScreen";
 import Deposit from "../screens/accounts/DepositScreen";
+import Loan from "../screens/accounts/LoanScreen";
 
 // ถ้ายังไม่มีหน้าเหล่านี้ให้สร้างก่อน หรือคอมเมนต์ไว้
 
-// import LoanDetailScreen from "../screens/accounts/LoanDetailScreen";
 // import NotificationScreen from "../screens/notifications/NotificationScreen";
 // import ProfileScreen from "../screens/profile/ProfileScreen";
 
@@ -28,8 +28,8 @@ export type RootStackParamList = {
   PinEntry: undefined;
   Home: undefined;
   Account: undefined;
-  Deposit: { accountId?: string };
-  Loan: { loanId?: string };
+  Deposit: undefined;
+  Loan: undefined;
   // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
   NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
   ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
@@ -45,7 +45,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="Deposit"
+      initialRouteName="Loan"
       //initialRouteName="InitialEntry"
       screenOptions={{ headerShown: false }}
     >
@@ -60,13 +60,11 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Account" component={Account} />
       <Stack.Screen name="Deposit" component={Deposit} />
+      <Stack.Screen name="Loan" component={Loan} />
 
       {/* เพิ่มหน้า Notification และ Profile ที่เรียกจาก CustomTabBar */}
       {/* <Stack.Screen name="NotificationScreen" component={NotificationScreen} /> */}
       {/* <Stack.Screen name="ProfileScreen" component={ProfileScreen} /> */}
-
-      {/* Detail Screens */}
-      {/* <Stack.Screen name="LoanDetail" component={LoanDetailScreen} /> */}
     </Stack.Navigator>
   );
 };

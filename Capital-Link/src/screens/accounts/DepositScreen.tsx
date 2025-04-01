@@ -13,17 +13,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/RootNavigator";
 
 const { width } = Dimensions.get("window");
 
 const DepositScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
 
   // กดปุ่ม Back → กลับหน้า "บัญชี" (หรือ goBack())
   const handleBack = () => {
     // ถ้าต้องการไปหน้าบัญชีโดยเฉพาะ: navigation.navigate("Account");
     // หรือถ้าจะกลับหน้าเดิม:
-    navigation.goBack();
+    // navigation.goBack();
+    navigation.navigate("Account");
   };
 
   return (
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   accountInfo: {
-    alignItems: "flex-start",
+    alignItems: "flex-start", 
   },
   accountName: {
     fontSize: 16,

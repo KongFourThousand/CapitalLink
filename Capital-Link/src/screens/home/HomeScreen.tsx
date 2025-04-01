@@ -10,28 +10,31 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-
-
-// นำเข้า CustomTabBar
 import CustomTabBar from "../../components/common/CustomTabBar";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/RootNavigator";
+
+
 
 const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
 
   // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
   const handleDepositPress = () => {
-    //navigation.navigate("DepositDetail", { accountId: "default" });
+    navigation.navigate("Deposit");
+
   };
 
   // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
   const handleLoanPress = () => {
-    //navigation.navigate("LoanDetail", { loanId: "default" });
+    navigation.navigate("Loan");
   };
 
   // ตัวอย่าง URLs
@@ -61,12 +64,12 @@ const HomeScreen: React.FC = () => {
       url: "https://www.capitallink.co.th/clc",
     },
   ];
-
   // ฟังก์ชันกดเปิดเว็บ
   const handleOpenLink = (linkUrl: string) => {
     // ใช้ Linking เพื่อเปิดเว็บภายนอก
     Linking.openURL(linkUrl);
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -102,6 +105,7 @@ const HomeScreen: React.FC = () => {
             >
               <Ionicons name="wallet-outline" size={28} color="#CFA459" style={styles.menuIcon} />
               <Text style={styles.menuBoxTitle}>เงินฝาก</Text>
+              
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuBox}

@@ -27,13 +27,13 @@ const AccountScreen: React.FC = () => {
 
   // กดดูรายละเอียด "เงินฝาก"
   const handlePressDeposit = () => {
-    // navigation.navigate("DepositDashboard") เป็นต้น
+    navigation.navigate("Deposit");
     console.log("Navigate to Deposit Details");
   };
 
   // กดดูรายละเอียด "สินเชื่อ"
   const handlePressLoan = () => {
-    // navigation.navigate("LoanDashboard") เป็นต้น
+    navigation.navigate("Loan");
     console.log("Navigate to Loan Details");
   };
 
