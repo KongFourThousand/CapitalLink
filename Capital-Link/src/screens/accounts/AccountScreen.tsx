@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#a2754c",
     textAlign: "center", 
+    marginTop: 25,
+    marginBottom: 15,
   },
   scrollView: {
     flex: 1,

@@ -20,7 +20,7 @@ const { width } = Dimensions.get("window");
 
 const DepositScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
-
+  
   // กดปุ่ม Back → กลับหน้า "บัญชี" (หรือ goBack())
   const handleBack = () => {
     // ถ้าต้องการไปหน้าบัญชีโดยเฉพาะ: navigation.navigate("Account");

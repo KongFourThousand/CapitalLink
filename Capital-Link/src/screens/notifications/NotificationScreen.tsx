@@ -181,6 +181,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#a2754c",
+    marginTop: 20,
+    marginBottom: 20,
+   
   },
   listContainer: {
     padding: 16,
