@@ -53,6 +53,14 @@ const mockNotifications: Notification[] = [
     date: "19/03/2024",
     read: false,
   },
+  {
+    id: "4",
+    title: "อัปเดตระบบ",
+    message:
+      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
+    date: "19/03/2024",
+    read: false,
+  },
 ];
 
 const READ_NOTIFICATIONS_KEY = "readNotifications";
