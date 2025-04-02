@@ -11,6 +11,7 @@ import Home from "../screens/home/HomeScreen";
 import Account from "../screens/accounts/AccountScreen";
 import Deposit from "../screens/accounts/DepositScreen";
 import Loan from "../screens/accounts/LoanScreen";
+import Notification from "../screens/notifications/NotificationScreen";
 
 // ถ้ายังไม่มีหน้าเหล่านี้ให้สร้างก่อน หรือคอมเมนต์ไว้
 
@@ -31,8 +32,8 @@ export type RootStackParamList = {
   Deposit: undefined;
   Loan: undefined;
   // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
-  NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
-  ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
+  Notification: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
+  Profile: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -43,7 +44,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="Loan"
+      initialRouteName="Notification"
       //initialRouteName="InitialEntry"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
@@ -59,9 +60,9 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="Account" component={Account} />
       <Stack.Screen name="Deposit" component={Deposit} />
       <Stack.Screen name="Loan" component={Loan} />
+      <Stack.Screen name="Notification" component={Notification} />
 
       {/* เพิ่มหน้า Notification และ Profile ที่เรียกจาก CustomTabBar */}
-      {/* <Stack.Screen name="NotificationScreen" component={NotificationScreen} /> */}
       {/* <Stack.Screen name="ProfileScreen" component={ProfileScreen} /> */}
     </Stack.Navigator>
   );

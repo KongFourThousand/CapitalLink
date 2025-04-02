@@ -35,9 +35,8 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
         navigation.navigate('Account');
         break;
       case 'notification':
-        // สร้างหน้านี้ถ้ายังไม่มี
-        // navigation.navigate('NotificationScreen');
-        console.log('Navigate to notification page');
+        navigation.navigate('Notification');
+
         break;
       case 'profile':
         // สร้างหน้านี้ถ้ายังไม่มี
@@ -138,7 +137,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#e5dfdf',
+    borderTopColor: '#c8c6c5',
     position: 'absolute',
     bottom: 0,
     left: 0,
