@@ -39,9 +39,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ activeTab, onTabPress }) =>
 
         break;
       case 'profile':
-        // สร้างหน้านี้ถ้ายังไม่มี
-        // navigation.navigate('ProfileScreen');
-        console.log('Navigate to profile page');
+        navigation.navigate('Profile');
         break;
     }
   };
