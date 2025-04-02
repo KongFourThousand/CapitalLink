@@ -51,7 +51,7 @@ const ProfileScreen: React.FC = () => {
   // เมื่อยืนยันออกจากระบบ
   const confirmLogout = () => {
     setModalVisible(false);
-    navigation.replace("Home");
+    navigation.replace("InitialEntry");
   };
 
   // เมื่อยกเลิกออกจากระบบ
@@ -228,7 +228,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 50,
     marginBottom: 20,
-    fontFamily: "TimesNewRoman",
   },
   contentContainer: {
     paddingHorizontal: 16,
@@ -250,13 +249,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
     marginBottom: 4,
-    fontFamily: "TimesNewRoman",
   },
   profilePhone: {
     fontSize: 14,
     color: "#000",
     opacity: 0.7,
-    fontFamily: "TimesNewRoman",
   },
   /* Section Header */
   sectionHeader: {
@@ -266,7 +263,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
-    fontFamily: "TimesNewRoman",
+ 
   },
   /* Menu Card */
   menuCard: {
