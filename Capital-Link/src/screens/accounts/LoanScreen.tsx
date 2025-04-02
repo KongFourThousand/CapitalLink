@@ -28,7 +28,7 @@ const LoanScreen: React.FC = () => {
   };
 
   // ตัวอย่างปุ่ม "ชำระเงิน"
-  const handlePay = () => {
+  const handlePay = () => { 
     // ใส่ logic การชำระเงินตามที่ต้องการ
     console.log("ชำระเงิน");
   };

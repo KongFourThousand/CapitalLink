@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    borderTopColor: '#e5dfdf',
     position: 'absolute',
     bottom: 0,
     left: 0,

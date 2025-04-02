@@ -33,8 +33,6 @@ export type RootStackParamList = {
   // หน้าหลักที่ CustomTabBar ใช้ในการนำทาง
   NotificationScreen: undefined; // เพิ่มสำหรับหน้าแจ้งเตือน
   ProfileScreen: undefined; // เพิ่มสำหรับหน้าโปรไฟล์
-
-  
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -47,7 +45,7 @@ const RootNavigator: React.FC = () => {
       id={undefined}
       initialRouteName="Loan"
       //initialRouteName="InitialEntry"
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
       <Stack.Screen name="InitialEntry" component={InitialEntry} />
