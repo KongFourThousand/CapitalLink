@@ -3,10 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   SafeAreaView,
-  Keyboard,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,83 +15,59 @@ import { useFonts } from "expo-font";
 
 const { width } = Dimensions.get("window");
 
-type PinSetupScreenNavProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "PinSetup"
->;
+type PinSetupScreenNavProp = NativeStackNavigationProp<RootStackParamList, "PinSetup">;
 
 const PinSetupScreen: React.FC = () => {
-  const navigation = useNavigation<PinSetupScreenNavProp>();
-  const [pin, setPin] = useState('');
-  const inputRef = useRef<TextInput>(null);
-  const [isFocused, setIsFocused] = useState(false);
-
+  // เรียกใช้ useFonts เป็น Hook ตัวแรก
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
+  // ถ้าไฟล์ฟอนต์ยังไม่โหลดเสร็จ ให้คืนค่า null ทันที
+  if (!fontsLoaded) return null;
 
-  useEffect(() => {
-    // ให้ TextInput เป็น focus เมื่อหน้าโหลดเสร็จ
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 300);
+  // จากนี้ไปเรียกใช้ hook อื่น ๆ ได้ตามปกติ
+  const navigation = useNavigation<PinSetupScreenNavProp>();
+  const [pin, setPin] = useState("");
+  const [showLast, setShowLast] = useState(false);
+  // ใช้ ReturnType<typeof setTimeout> แทน NodeJS.Timeout
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // เพิ่ม keyboard event listener เพื่อเช็คว่า keyboard เปิดอยู่หรือไม่
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setIsFocused(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setIsFocused(false);
-      }
-    );
-
-    // Clear event listeners
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  // อัพเดท PIN
-  const handleChangePin = (text: string) => {
-    // อนุญาตเฉพาะตัวเลข และความยาวไม่เกิน 6 หลัก
-    const newPin = text.replace(/[^0-9]/g, '').slice(0, 6);
-    setPin(newPin);
-    
-    // ถ้ากรอกครบ 6 หลัก ให้ไปหน้าถัดไป
-    if (newPin.length === 6) {
-      setTimeout(() => {
-        handleNext();
-      }, 300);
+  // เมื่อกดตัวเลข ให้เพิ่ม PIN แล้วแสดงตัวเลขล่าสุดก่อนเปลี่ยนเป็น dot
+  const handleNumberPress = (num: string) => {
+    if (pin.length < 6) {
+      const newPin = pin + num;
+      setPin(newPin);
+      setShowLast(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setShowLast(false);
+      }, 800);
     }
   };
 
-  // ไปหน้าถัดไป
-  const handleNext = () => {
-    // ส่งไปหน้าถัดไปพร้อม PIN
-    navigation.navigate("PinConfirm", { firstPin: pin });
+  // ฟังก์ชันลบตัวเลขล่าสุด
+  const handleBackspace = () => {
+    if (pin.length > 0) {
+      setPin(pin.slice(0, -1));
+      setShowLast(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
   };
 
-  // ช่วยให้แตะที่ PIN boxes เพื่อเปิด keyboard
-  const handlePinBoxPress = () => {
-    inputRef.current?.focus();
-  };
-
-  if (!fontsLoaded) return null;
+  // เมื่อ PIN ครบ 6 หลัก ให้ไปหน้าถัดไป
+  useEffect(() => {
+    if (pin.length === 6) {
+      setTimeout(() => {
+        navigation.navigate("PinConfirm", { firstPin: pin });
+      }, 300);
+    }
+  }, [pin]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Back Button */}
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
-        >
+        {/* ปุ่มย้อนกลับ */}
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
         </TouchableOpacity>
 
@@ -103,42 +77,59 @@ const PinSetupScreen: React.FC = () => {
           <Text style={styles.subtitle}>กรุณากรอกรหัส PIN 6 หลัก</Text>
           <Text style={styles.description}>รหัส PIN สำหรับเข้าใช้งานในครั้งถัดไป</Text>
 
-          {/* PIN Input Boxes */}
-          <TouchableOpacity 
-            activeOpacity={0.9}
-            style={styles.pinContainer} 
-            onPress={handlePinBoxPress}
-          >
-            {[0, 1, 2, 3, 4, 5].map(index => (
-              <View 
-                key={index} 
-                style={[
-                  styles.pinBox,
-                  // เน้นช่องที่จะรับข้อมูลถัดไป
-                  pin.length === index && isFocused ? styles.pinBoxActive : {}
-                ]}
-              >
-                {pin.length > index && (
-                  <View style={styles.pinDot} />
-                )}
+          {/* ช่องสำหรับแสดง PIN */}
+          <View style={styles.pinContainer}>
+            {[0, 1, 2, 3, 4, 5].map((index) => {
+              const filled = index < pin.length;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.pinBox,
+                    pin.length === index ? styles.pinBoxActive : {},
+                  ]}
+                >
+                  {filled ? (
+                    index === pin.length - 1 && showLast ? (
+                      <Text style={styles.digitText}>{pin[index]}</Text>
+                    ) : (
+                      <View style={styles.pinDot} />
+                    )
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Custom Numpad */}
+          <View style={styles.keypadContainer}>
+            <View style={styles.keypadRow}>
+              <PinKey label="1" onPress={() => handleNumberPress("1")} />
+              <PinKey label="2" onPress={() => handleNumberPress("2")} />
+              <PinKey label="3" onPress={() => handleNumberPress("3")} />
+            </View>
+            <View style={styles.keypadRow}>
+              <PinKey label="4" onPress={() => handleNumberPress("4")} />
+              <PinKey label="5" onPress={() => handleNumberPress("5")} />
+              <PinKey label="6" onPress={() => handleNumberPress("6")} />
+            </View>
+            <View style={styles.keypadRow}>
+              <PinKey label="7" onPress={() => handleNumberPress("7")} />
+              <PinKey label="8" onPress={() => handleNumberPress("8")} />
+              <PinKey label="9" onPress={() => handleNumberPress("9")} />
+            </View>
+            <View style={styles.keypadRow}>
+              {/* ช่องซ้ายสำหรับ "ลืมรหัส PIN?" (ถ้าต้องการ) */}
+              <View style={styles.forgotPinButton}>
+                <Text style={styles.forgotPinText}></Text>
               </View>
-            ))}
-          </TouchableOpacity>
+              <PinKey label="0" onPress={() => handleNumberPress("0")} />
+              <TouchableOpacity onPress={handleBackspace} style={styles.keyButton}>
+                <Ionicons name="backspace-outline" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-          {/* Text Input ที่ซ่อนไว้ (รับ input จริง) */}
-          <TextInput
-            ref={inputRef}
-            style={styles.hiddenInput}
-            value={pin}
-            onChangeText={handleChangePin}
-            keyboardType="number-pad"
-            maxLength={6}
-            caretHidden={true}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-          />
-
-          {/* Capital Link text */}
           <Text style={styles.brandText}>Capital Link</Text>
         </View>
       </View>
@@ -146,7 +137,22 @@ const PinSetupScreen: React.FC = () => {
   );
 };
 
+type PinKeyProps = {
+  label: string;
+  onPress: () => void;
+};
+
+const PinKey: React.FC<PinKeyProps> = ({ label, onPress }) => (
+  <TouchableOpacity style={styles.keyButton} onPress={onPress}>
+    <Text style={styles.keyText}>{label}</Text>
+  </TouchableOpacity>
+);
+
 export default PinSetupScreen;
+
+const circleSize = 80;
+const DOT_SIZE = 20;
+const DOT_FILLED_SIZE = 15;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -155,21 +161,21 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 20,
   },
   backButton: {
-    position: 'absolute',
-    top: 40,     
+    position: "absolute",
+    top: 60,
     left: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    zIndex: 999, 
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 999,
   },
-  
   title: {
     fontSize: 20,
     fontWeight: "700",
-    marginTop: 60,
+    marginTop: 80,
     marginBottom: 20,
     color: "#333",
     textAlign: "center",
@@ -219,11 +225,46 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: "#333",
   },
-  hiddenInput: {
-    position: "absolute",
-    opacity: 0,
-    height: 0,
-    width: 0,
+  digitText: {
+    fontSize: 24,
+    color: "#333",
+    fontWeight: "600",
+  },
+  keypadContainer: {
+    width: "80%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30,
+  },
+  keypadRow: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-around",
+    marginVertical: 5,
+  },
+  keyButton: {
+    width: circleSize,
+    height: circleSize,
+    borderRadius: circleSize / 2,
+    backgroundColor: "#f8f8f8",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  keyText: {
+    fontSize: 35,
+    color: "#333",
+    fontWeight: "600",
+  },
+  forgotPinButton: {
+    width: circleSize,
+    height: circleSize,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  forgotPinText: {
+    fontSize: 10,
+    color: "#CFA459",
+    textDecorationLine: "underline",
   },
   brandText: {
     color: "#CFA459",

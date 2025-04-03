@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   keyText: {
-    fontSize: 40,
+    fontSize: 35,
     color: "#333",
     fontWeight: "600",
   },
