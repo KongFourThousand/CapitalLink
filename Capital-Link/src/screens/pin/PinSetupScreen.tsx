@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   keypadContainer: {
-    width: "80%",
+    width: "90%",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 30,
