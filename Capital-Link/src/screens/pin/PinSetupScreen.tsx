@@ -18,14 +18,10 @@ const { width } = Dimensions.get("window");
 type PinSetupScreenNavProp = NativeStackNavigationProp<RootStackParamList, "PinSetup">;
 
 const PinSetupScreen: React.FC = () => {
-  // เรียกใช้ useFonts เป็น Hook ตัวแรก
+  // เรียกใช้ Hook ทั้งหมดก่อน มีเงื่อนไขหรือ return
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
-  // ถ้าไฟล์ฟอนต์ยังไม่โหลดเสร็จ ให้คืนค่า null ทันที
-  if (!fontsLoaded) return null;
-
-  // จากนี้ไปเรียกใช้ hook อื่น ๆ ได้ตามปกติ
   const navigation = useNavigation<PinSetupScreenNavProp>();
   const [pin, setPin] = useState("");
   const [showLast, setShowLast] = useState(false);
@@ -61,7 +57,10 @@ const PinSetupScreen: React.FC = () => {
         navigation.navigate("PinConfirm", { firstPin: pin });
       }, 300);
     }
-  }, [pin]);
+  }, [pin, navigation]);
+
+  // ถ้าไฟล์ฟอนต์ยังไม่โหลดเสร็จ ให้คืนค่า null หลังจากประกาศ hooks ทั้งหมดแล้ว
+  if (!fontsLoaded) return null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -100,7 +99,7 @@ const PinSetupScreen: React.FC = () => {
               );
             })}
           </View>
-
+          <Text style={styles.brandText}>Capital Link</Text>
           {/* Custom Numpad */}
           <View style={styles.keypadContainer}>
             <View style={styles.keypadRow}>
@@ -129,8 +128,6 @@ const PinSetupScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-
-          <Text style={styles.brandText}>Capital Link</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -267,7 +264,7 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   brandText: {
-    color: "#CFA459",
+    color: "#a2754c",
     fontSize: 16,
     marginVertical: 20,
     fontFamily: "TimesNewRoman",
