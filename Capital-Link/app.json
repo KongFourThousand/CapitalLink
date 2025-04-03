@@ -4,11 +4,11 @@
     "slug": "Capital-Link",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/CLlogo+NoBG.png",
+    "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/CLlogo+NoBG.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/CLlogo.png",
+        "foregroundImage": "./assets/splash.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.botandlife.CapitalLink"
