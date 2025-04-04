@@ -13,11 +13,9 @@ import Deposit from "../screens/accounts/DepositScreen";
 import Loan from "../screens/accounts/LoanScreen";
 import Notification from "../screens/notifications/NotificationScreen";
 import Profile from "../screens/Profile/ProfileScreen";
-
-// ถ้ายังไม่มีหน้าเหล่านี้ให้สร้างก่อน หรือคอมเมนต์ไว้
-
-// import NotificationScreen from "../screens/notifications/NotificationScreen";
-// import ProfileScreen from "../screens/profile/ProfileScreen";
+import OldPin from "../screens/pin/OldPinVerifyScreen";
+import NameChange from "../screens/Profile/NameChangeRequestScreen";
+import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -34,6 +32,9 @@ export type RootStackParamList = {
   Loan: undefined;
   Notification: undefined; 
   Profile: undefined; 
+  OldPin: undefined;
+  NameChange: undefined;
+  PhoneChange: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -45,7 +46,7 @@ const RootNavigator: React.FC = () => {
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
        //initialRouteName="PinSetup"
-       initialRouteName="PinEntry"
+       initialRouteName="PhoneChange"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
@@ -62,9 +63,9 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="Loan" component={Loan} />
       <Stack.Screen name="Notification" component={Notification} />
       <Stack.Screen name="Profile" component={Profile} />
-
-      {/* เพิ่มหน้า Notification และ Profile ที่เรียกจาก CustomTabBar */}
-      {/* <Stack.Screen name="ProfileScreen" component={ProfileScreen} /> */}
+      <Stack.Screen name="OldPin" component={OldPin} />
+      <Stack.Screen name="NameChange" component={NameChange} />
+      <Stack.Screen name="PhoneChange" component={PhoneChange} />
     </Stack.Navigator>
   );
 };

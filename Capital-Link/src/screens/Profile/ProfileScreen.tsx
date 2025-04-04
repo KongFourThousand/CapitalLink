@@ -32,7 +32,7 @@ const ProfileScreen: React.FC = () => {
 
   // ฟังก์ชันสำหรับเมนูตั้งค่าต่าง ๆ 
   const handleChangePin = () => {
-    console.log("เปลี่ยนรหัส PIN");
+    navigation.navigate("OldPin");
   };
   const handleRequestNameChange = () => {
     console.log("ขอเปลี่ยนชื่อ-นามสกุล");
@@ -99,7 +99,7 @@ const ProfileScreen: React.FC = () => {
               <Ionicons name="key-outline" size={22} color="#CFA459" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuText}>เปลี่ยนรหัส PIN</Text>
+              <Text style={styles.menuText} >เปลี่ยนรหัส PIN</Text>
               <Text style={styles.menuDescription}>
                 แก้ไขรหัส PIN สำหรับเข้าสู่ระบบ
               </Text>

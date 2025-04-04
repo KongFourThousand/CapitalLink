@@ -133,7 +133,6 @@ const PinConfirmScreen: React.FC = () => {
             onNumberPress={handleNumberPress}
             onBackspace={handleBackspace}
             keySize={80}
-            showForgotPin={false}
             customStyles={{ container: { width: "90%" } }}
           />
         </View>
