@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 15,
   },
   dotFilled: {
     width: 15,
