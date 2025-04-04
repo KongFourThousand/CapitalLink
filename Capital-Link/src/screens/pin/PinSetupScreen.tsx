@@ -12,10 +12,15 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useFonts } from "expo-font";
+import CustomNumpad from "../../components/common/CustomNumpad";
+import PinDotsDisplay from "../../components/common/PinDotsDisplay";
 
 const { width } = Dimensions.get("window");
 
-type PinSetupScreenNavProp = NativeStackNavigationProp<RootStackParamList, "PinSetup">;
+type PinSetupScreenNavProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "PinSetup"
+>;
 
 const PinSetupScreen: React.FC = () => {
   // เรียกใช้ Hook ทั้งหมดก่อน มีเงื่อนไขหรือ return
@@ -66,7 +71,10 @@ const PinSetupScreen: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* ปุ่มย้อนกลับ */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
         </TouchableOpacity>
 
@@ -74,82 +82,26 @@ const PinSetupScreen: React.FC = () => {
 
         <View style={styles.mainContent}>
           <Text style={styles.subtitle}>กรุณากรอกรหัส PIN 6 หลัก</Text>
-          <Text style={styles.description}>รหัส PIN สำหรับเข้าใช้งานในครั้งถัดไป</Text>
+          <Text style={styles.description}>
+            รหัส PIN สำหรับเข้าใช้งานในครั้งถัดไป
+          </Text>
 
-          {/* ช่องสำหรับแสดง PIN */}
-          <View style={styles.pinContainer}>
-            {[0, 1, 2, 3, 4, 5].map((index) => {
-              const filled = index < pin.length;
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.pinBox,
-                    pin.length === index ? styles.pinBoxActive : {},
-                  ]}
-                >
-                  {filled ? (
-                    index === pin.length - 1 && showLast ? (
-                      <Text style={styles.digitText}>{pin[index]}</Text>
-                    ) : (
-                      <View style={styles.pinDot} />
-                    )
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
+          <PinDotsDisplay pin={pin} showLast={showLast} maxLength={6} />
           <Text style={styles.brandText}>Capital Link</Text>
-          {/* Custom Numpad */}
-          <View style={styles.keypadContainer}>
-            <View style={styles.keypadRow}>
-              <PinKey label="1" onPress={() => handleNumberPress("1")} />
-              <PinKey label="2" onPress={() => handleNumberPress("2")} />
-              <PinKey label="3" onPress={() => handleNumberPress("3")} />
-            </View>
-            <View style={styles.keypadRow}>
-              <PinKey label="4" onPress={() => handleNumberPress("4")} />
-              <PinKey label="5" onPress={() => handleNumberPress("5")} />
-              <PinKey label="6" onPress={() => handleNumberPress("6")} />
-            </View>
-            <View style={styles.keypadRow}>
-              <PinKey label="7" onPress={() => handleNumberPress("7")} />
-              <PinKey label="8" onPress={() => handleNumberPress("8")} />
-              <PinKey label="9" onPress={() => handleNumberPress("9")} />
-            </View>
-            <View style={styles.keypadRow}>
-              {/* ช่องซ้ายสำหรับ "ลืมรหัส PIN?" (ถ้าต้องการ) */}
-              <View style={styles.forgotPinButton}>
-                <Text style={styles.forgotPinText}></Text>
-              </View>
-              <PinKey label="0" onPress={() => handleNumberPress("0")} />
-              <TouchableOpacity onPress={handleBackspace} style={styles.keyButton}>
-                <Ionicons name="backspace-outline" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <CustomNumpad
+            onNumberPress={handleNumberPress}
+            onBackspace={handleBackspace}
+            keySize={80}
+            showForgotPin={false}
+            customStyles={{ container: { width: "90%" } }}
+          />
         </View>
       </View>
     </SafeAreaView>
   );
 };
 
-type PinKeyProps = {
-  label: string;
-  onPress: () => void;
-};
-
-const PinKey: React.FC<PinKeyProps> = ({ label, onPress }) => (
-  <TouchableOpacity style={styles.keyButton} onPress={onPress}>
-    <Text style={styles.keyText}>{label}</Text>
-  </TouchableOpacity>
-);
-
 export default PinSetupScreen;
-
-const circleSize = 80;
-const DOT_SIZE = 20;
-const DOT_FILLED_SIZE = 15;
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -194,74 +146,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
     marginBottom: 30,
-  },
-  pinContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-    width: "100%",
-    padding: 10,
-  },
-  pinBox: {
-    width: 45,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 6,
-    marginHorizontal: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  pinBoxActive: {
-    borderColor: "#CFA459",
-    borderWidth: 1.5,
-  },
-  pinDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#333",
-  },
-  digitText: {
-    fontSize: 24,
-    color: "#333",
-    fontWeight: "600",
-  },
-  keypadContainer: {
-    width: "90%",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 30,
-  },
-  keypadRow: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-around",
-    marginVertical: 5,
-  },
-  keyButton: {
-    width: circleSize,
-    height: circleSize,
-    borderRadius: circleSize / 2,
-    backgroundColor: "#f8f8f8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  keyText: {
-    fontSize: 35,
-    color: "#333",
-    fontWeight: "600",
-  },
-  forgotPinButton: {
-    width: circleSize,
-    height: circleSize,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  forgotPinText: {
-    fontSize: 10,
-    color: "#CFA459",
-    textDecorationLine: "underline",
   },
   brandText: {
     color: "#a2754c",

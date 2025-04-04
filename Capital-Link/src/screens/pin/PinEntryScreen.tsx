@@ -14,6 +14,7 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
+import CustomNumpad from "../../components/common/CustomNumpad";
 
 const { width } = Dimensions.get("window");
 
@@ -90,33 +91,13 @@ const PinEntryKeyboardScreen: React.FC = () => {
       </View>
 
       {/* Numeric Keypad */}
-      <View style={styles.keypadContainer}>
-        <View style={styles.keypadRow}>
-          <PinKey label="1" onPress={() => handleNumberPress("1")} />
-          <PinKey label="2" onPress={() => handleNumberPress("2")} />
-          <PinKey label="3" onPress={() => handleNumberPress("3")} />
-        </View>
-        <View style={styles.keypadRow}>
-          <PinKey label="4" onPress={() => handleNumberPress("4")} />
-          <PinKey label="5" onPress={() => handleNumberPress("5")} />
-          <PinKey label="6" onPress={() => handleNumberPress("6")} />
-        </View>
-        <View style={styles.keypadRow}>
-          <PinKey label="7" onPress={() => handleNumberPress("7")} />
-          <PinKey label="8" onPress={() => handleNumberPress("8")} />
-          <PinKey label="9" onPress={() => handleNumberPress("9")} />
-        </View>
-        <View style={styles.keypadRow}>
-          <TouchableOpacity onPress={handleForgotPin} style={styles.forgotPinButton}>
-            <Text style={styles.forgotPinText}>ลืมรหัส PIN?</Text>
-          </TouchableOpacity>
-          <PinKey label="0" onPress={() => handleNumberPress("0")} />
-          {/* Icon backspace */}
-          <TouchableOpacity onPress={handleBackspace} style={styles.keyButton}>
-            <Ionicons name="backspace-outline" size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <CustomNumpad
+            onNumberPress={handleNumberPress}
+            onBackspace={handleBackspace}
+            keySize={80}
+            showForgotPin={false}
+            customStyles={{ container: { width: "80%" } }}
+          />
     </View>
     </SafeAreaView>
   );

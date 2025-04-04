@@ -14,6 +14,8 @@ import * as SecureStore from "expo-secure-store";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useFonts } from "expo-font";
+import CustomNumpad from "../../components/common/CustomNumpad";
+import PinDotsDisplay from "../../components/common/PinDotsDisplay";
 
 const { width } = Dimensions.get("window");
 
@@ -123,64 +125,17 @@ const PinConfirmScreen: React.FC = () => {
           <Text style={styles.subtitle}>กรุณากรอกรหัส PIN อีกครั้ง</Text>
           <Text style={styles.description}>เพื่อยืนยันการตั้งรหัส PIN</Text>
 
-          {/* ช่องสำหรับแสดง PIN */}
-          <View style={styles.pinContainer}>
-            {/* ช่องสำหรับแสดง PIN */}
-            {[0, 1, 2, 3, 4, 5].map((index) => {
-              const filled = index < confirmPin.length;
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.pinBox,
-                    confirmPin.length === index ? styles.pinBoxActive : {},
-                  ]}
-                >
-                  {filled ? (
-                    index === confirmPin.length - 1 && showLast ? (
-                      <Text style={styles.digitText}>{confirmPin[index]}</Text>
-                    ) : (
-                      <View style={styles.pinDot} />
-                    )
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
+          <PinDotsDisplay pin={confirmPin} maxLength={6} showLast={showLast} />
 
           <Text style={styles.brandText}>Capital Link</Text>
 
-          {/* Custom Numpad */}
-          <View style={styles.keypadContainer}>
-            <View style={styles.keypadRow}>
-              <PinKey label="1" onPress={() => handleNumberPress("1")} />
-              <PinKey label="2" onPress={() => handleNumberPress("2")} />
-              <PinKey label="3" onPress={() => handleNumberPress("3")} />
-            </View>
-            <View style={styles.keypadRow}>
-              <PinKey label="4" onPress={() => handleNumberPress("4")} />
-              <PinKey label="5" onPress={() => handleNumberPress("5")} />
-              <PinKey label="6" onPress={() => handleNumberPress("6")} />
-            </View>
-            <View style={styles.keypadRow}>
-              <PinKey label="7" onPress={() => handleNumberPress("7")} />
-              <PinKey label="8" onPress={() => handleNumberPress("8")} />
-              <PinKey label="9" onPress={() => handleNumberPress("9")} />
-            </View>
-            <View style={styles.keypadRow}>
-              {/* ช่องซ้ายสำหรับ "ลืมรหัส PIN?" ถ้าต้องการ */}
-              <View style={styles.forgotPinButton}>
-                <Text style={styles.forgotPinText}></Text>
-              </View>
-              <PinKey label="0" onPress={() => handleNumberPress("0")} />
-              <TouchableOpacity
-                onPress={handleBackspace}
-                style={styles.keyButton}
-              >
-                <Ionicons name="backspace-outline" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          <CustomNumpad
+            onNumberPress={handleNumberPress}
+            onBackspace={handleBackspace}
+            keySize={80}
+            showForgotPin={false}
+            customStyles={{ container: { width: "90%" } }}
+          />
         </View>
       </View>
     </SafeAreaView>
