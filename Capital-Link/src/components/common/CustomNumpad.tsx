@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,21 +13,68 @@ const { width } = Dimensions.get("window");
 interface CustomNumpadProps {
   onNumberPress: (num: string) => void;
   onBackspace: () => void;
-  onForgotPin?: () => void; // Optional callback for "forgot PIN" action
-  showForgotPin?: boolean; // Whether to show the "forgot PIN" button
-  forgotPinText?: string; // Text for "forgot PIN" button
-  keySize?: number; // Optional size for numpad keys
-  keyColor?: string; // Optional color for numpad keys
-  textColor?: string; // Optional color for numpad text
+  onForgotPin?: () => void;
+  showForgotPin?: boolean;
+  forgotPinText?: string;
+  keySize?: number;
+  keyColor?: string;
+  textColor?: string;
   customStyles?: {
-    container?: object; // Custom styles for container
-    keypadRow?: object; // Custom styles for row
-    keyButton?: object; // Custom styles for button
-    keyText?: object; // Custom styles for text
+    container?: object;
+    keypadRow?: object;
+    keyButton?: object;
+    keyText?: object;
   };
 }
 
-const CustomNumpad: React.FC<CustomNumpadProps> = ({
+// แยก PinKey ออกมาและใช้ memo
+const PinKey = React.memo<{ 
+  label: string; 
+  onPress: (label: string) => void; 
+  style: any; 
+  textStyle: any;
+}>(({ label, onPress, style, textStyle }) => (
+  <TouchableOpacity
+    style={style}
+    onPress={() => onPress(label)}
+    activeOpacity={0.5} // ลดค่าเพื่อตอบสนองชัดเจนขึ้น
+  >
+    <Text style={textStyle}>{label}</Text>
+  </TouchableOpacity>
+));
+
+// แยกปุ่ม Backspace ออกมาและใช้ memo
+const BackspaceKey = React.memo<{
+  onPress: () => void;
+  style: any;
+  iconColor: string;
+  iconSize: number;
+}>(({ onPress, style, iconColor, iconSize }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    style={style}
+    activeOpacity={0.5}
+  >
+    <Ionicons name="backspace-outline" size={iconSize} color={iconColor} />
+  </TouchableOpacity>
+));
+
+// แยก ForgotPinButton ออกมาและใช้ memo
+const ForgotPinButton = React.memo<{
+  onPress?: () => void;
+  text: string;
+  style: any;
+}>(({ onPress, text, style }) => (
+  <TouchableOpacity
+    style={style}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <Text style={styles.forgotPinText}>{text}</Text>
+  </TouchableOpacity>
+));
+
+const CustomNumpad = React.memo<CustomNumpadProps>(({
   onNumberPress,
   onBackspace,
   onForgotPin,
@@ -38,79 +85,122 @@ const CustomNumpad: React.FC<CustomNumpadProps> = ({
   textColor = "#333",
   customStyles = {},
 }) => {
-  // PinKey component for individual number keys
-  const PinKey: React.FC<{ label: string }> = ({ label }) => (
-    <TouchableOpacity
-      style={[
-        styles.keyButton,
-        { width: keySize, height: keySize, borderRadius: keySize / 2, backgroundColor: keyColor },
-        customStyles.keyButton
-      ]}
-      onPress={() => onNumberPress(label)}
-    >
-      <Text style={[styles.keyText, { color: textColor }, customStyles.keyText]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-
+  // ป้องกัน undefined
+  const safeCustomStyles = customStyles || {};
+  
+  // Memoize event handlers
+  const handleNumberPress = useCallback((label: string) => {
+    onNumberPress(label);
+  }, [onNumberPress]);
+  
+  const handleBackspace = useCallback(() => {
+    onBackspace();
+  }, [onBackspace]);
+  
+  const handleForgotPin = useCallback(() => {
+    if (onForgotPin) {
+      onForgotPin();
+    }
+  }, [onForgotPin]);
+  
+  // Memoize styles
+  const buttonStyle = useMemo(() => [
+    styles.keyButton,
+    { 
+      width: keySize, 
+      height: keySize, 
+      borderRadius: keySize / 2, 
+      backgroundColor: keyColor 
+    },
+    safeCustomStyles.keyButton
+  ], [keySize, keyColor, safeCustomStyles.keyButton]);
+  
+  const textStyle = useMemo(() => [
+    styles.keyText, 
+    { color: textColor }, 
+    safeCustomStyles.keyText
+  ], [textColor, safeCustomStyles.keyText]);
+  
+  const containerStyle = useMemo(() => [
+    styles.keypadContainer, 
+    safeCustomStyles.container
+  ], [safeCustomStyles.container]);
+  
+  const rowStyle = useMemo(() => [
+    styles.keypadRow, 
+    safeCustomStyles.keypadRow
+  ], [safeCustomStyles.keypadRow]);
+  
+  const forgotButtonStyle = useMemo(() => [
+    { width: keySize, height: keySize }, 
+    styles.forgotPinButton
+  ], [keySize]);
+  
+  const emptyViewStyle = useMemo(() => ({ 
+    width: keySize, 
+    height: keySize 
+  }), [keySize]);
+  
+  // Memoize the number buttons to avoid re-creating them each render
+  const numberButtons = useMemo(() => {
+    const numbers = [
+      ['1', '2', '3'],
+      ['4', '5', '6'],
+      ['7', '8', '9']
+    ];
+    
+    return numbers.map((row, rowIndex) => (
+      <View key={`row-${rowIndex}`} style={rowStyle}>
+        {row.map(num => (
+          <PinKey 
+            key={num}
+            label={num} 
+            onPress={handleNumberPress} 
+            style={buttonStyle}
+            textStyle={textStyle}
+          />
+        ))}
+      </View>
+    ));
+  }, [rowStyle, buttonStyle, textStyle, handleNumberPress]);
+  
+  // Render with optimized components
   return (
-    <View style={[styles.keypadContainer, customStyles.container]}>
-      <View style={[styles.keypadRow, customStyles.keypadRow]}>
-        <PinKey label="1" />
-        <PinKey label="2" />
-        <PinKey label="3" />
-      </View>
-      <View style={[styles.keypadRow, customStyles.keypadRow]}>
-        <PinKey label="4" />
-        <PinKey label="5" />
-        <PinKey label="6" />
-      </View>
-      <View style={[styles.keypadRow, customStyles.keypadRow]}>
-        <PinKey label="7" />
-        <PinKey label="8" />
-        <PinKey label="9" />
-      </View>
-      <View style={[styles.keypadRow, customStyles.keypadRow]}>
+    <View style={containerStyle}>
+      {numberButtons}
+      <View style={rowStyle}>
         {showForgotPin ? (
-          <TouchableOpacity
-            style={[{ width: keySize, height: keySize }, styles.forgotPinButton]}
-            onPress={onForgotPin}
-          >
-            <Text style={styles.forgotPinText}>{forgotPinText}</Text>
-          </TouchableOpacity>
+          <ForgotPinButton 
+            onPress={handleForgotPin}
+            text={forgotPinText}
+            style={forgotButtonStyle}
+          />
         ) : (
-          <View style={{ width: keySize, height: keySize }} />
+          <View style={emptyViewStyle} />
         )}
-        <PinKey label="0" />
-        <TouchableOpacity
-          onPress={onBackspace}
-          style={[
-            styles.keyButton,
-            {
-              width: keySize,
-              height: keySize,
-              borderRadius: keySize / 2,
-              backgroundColor: keyColor
-            },
-            customStyles.keyButton
-          ]}
-        >
-          <Ionicons name="backspace-outline" size={24} color={textColor} />
-        </TouchableOpacity>
+        <PinKey 
+          label="0" 
+          onPress={handleNumberPress} 
+          style={buttonStyle}
+          textStyle={textStyle}
+        />
+        <BackspaceKey 
+          onPress={handleBackspace}
+          style={buttonStyle}
+          iconColor={textColor}
+          iconSize={24}
+        />
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   keypadContainer: {
-    // width: "80%",
     width: "90%",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 30,
-    // backgroundColor: "blue"
   },
   keypadRow: {
     flexDirection: "row",

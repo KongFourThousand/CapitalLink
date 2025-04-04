@@ -61,7 +61,7 @@ const PinConfirmScreen: React.FC = () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         setShowLast(false);
-      }, 800);
+      }, 300);
 
       // handleNumberPress:
       if (newPin.length === 6) {

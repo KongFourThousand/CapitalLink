@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import CustomNumpad from "../../components/common/CustomNumpad";
+import PinDotRow from "../../components/common/PinDotRow";
 
 const { width } = Dimensions.get("window");
 
@@ -78,17 +79,8 @@ const PinEntryKeyboardScreen: React.FC = () => {
       {/* Title */}
       <Text style={styles.title}>กรุณากรอกรหัส PIN</Text>
 
-      {/* PIN Dot Row */}
-      <View style={styles.pinDotRow}>
-        {[0, 1, 2, 3, 4, 5].map((index) => {
-          const filled = index < pin.length;
-          return (
-            <View key={index} style={styles.dotContainer}>
-              {filled ? <View style={styles.dotFilled} /> : null}
-            </View>
-          );
-        })}
-      </View>
+        {/* PIN Dot Row โดยใช้ PinDotRow */}
+        <PinDotRow pin={pin} maxLength={6} showLast={false} />
 
       {/* Numeric Keypad */}
       <CustomNumpad
