@@ -25,13 +25,30 @@ type PinConfirmNavProp = NativeStackNavigationProp<
 const PinConfirmScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation<PinConfirmNavProp>();
-  const { firstPin } = route.params as { firstPin: string };
+  // รับค่า firstPin และแปลงเป็น string เพื่อให้แน่ใจว่าเป็นชนิดข้อมูลเดียวกัน
+  const firstPinFromRoute = route.params
+    ? (route.params as { firstPin: string }).firstPin
+    : "";
+  const [firstPin, setFirstPin] = useState<string>(String(firstPinFromRoute));
+
   const [confirmPin, setConfirmPin] = useState("");
   const [showLast, setShowLast] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
+
+  useEffect(() => {
+    // ใส่ console.log ไว้ตรวจสอบค่า firstPin
+    console.log("firstPin จาก route:", firstPinFromRoute);
+    console.log("ประเภทข้อมูลของ firstPin:", typeof firstPinFromRoute);
+
+    // ถ้าไม่มีค่า firstPin ให้ย้อนกลับ
+    if (!firstPinFromRoute) {
+      Alert.alert("ข้อผิดพลาด", "ไม่พบรหัส PIN ที่ตั้งไว้ กรุณาลองใหม่");
+      navigation.goBack();
+    }
+  }, [firstPinFromRoute, navigation]);
 
   const handleNumberPress = (num: string) => {
     if (confirmPin.length < 6) {
@@ -44,8 +61,9 @@ const PinConfirmScreen: React.FC = () => {
         setShowLast(false);
       }, 800);
 
+      // handleNumberPress:
       if (newPin.length === 6) {
-        setTimeout(() => handleConfirm(), 300);
+        setTimeout(() => handleConfirm(newPin), 300);
       }
     }
   };
@@ -57,12 +75,30 @@ const PinConfirmScreen: React.FC = () => {
     }
   };
 
-  const handleConfirm = async () => {
-    if (confirmPin === firstPin) {
-      await SecureStore.setItemAsync("userPin", confirmPin);
-      // ไปหน้า Home
-      navigation.replace("Home");
+  const handleConfirm = async (pinToCheck: string) => {
+    // เพิ่ม console.log เพื่อตรวจสอบค่าที่กำลังเปรียบเทียบ
+    console.log("pinToCheck:", pinToCheck, "ความยาว:", pinToCheck.length);
+    console.log("firstPin:", firstPin, "ความยาว:", firstPin.length);
+
+    // แปลง string เป็นค่าเดียวกันก่อนเปรียบเทียบ
+    const normalizedFirstPin = String(firstPin).trim();
+    const normalizedConfirmPin = String(pinToCheck).trim();
+
+    console.log("หลังจาก normalize - firstPin:", normalizedFirstPin);
+    console.log("หลังจาก normalize - confirmPin:", normalizedConfirmPin);
+
+    if (normalizedConfirmPin === normalizedFirstPin) {
+      try {
+        // บันทึกค่า PIN เป็น string
+        await SecureStore.setItemAsync("userPin", normalizedConfirmPin);
+        // ไปหน้า Home
+        navigation.replace("Home");
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการบันทึก PIN:", error);
+        Alert.alert("ข้อผิดพลาด", "ไม่สามารถบันทึกรหัส PIN ได้ กรุณาลองใหม่");
+      }
     } else {
+      console.log("PIN ไม่ตรงกัน!");
       Alert.alert("แจ้งเตือน", "PIN ไม่ตรงกัน กรุณาลองใหม่");
       setConfirmPin("");
     }
