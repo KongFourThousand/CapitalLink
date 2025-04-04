@@ -86,6 +86,8 @@ const PinConfirmScreen: React.FC = () => {
         <View style={styles.mainContent}>
           <Text style={styles.subtitle}>กรุณากรอกรหัส PIN อีกครั้ง</Text>
           <Text style={styles.description}>เพื่อยืนยันการตั้งรหัส PIN</Text>
+
+          {/* ช่องสำหรับแสดง PIN */}
           <View style={styles.pinContainer}>
             {/* ช่องสำหรับแสดง PIN */}
             {[0, 1, 2, 3, 4, 5].map((index) => {
@@ -109,39 +111,39 @@ const PinConfirmScreen: React.FC = () => {
               );
             })}
           </View>
-        </View>
 
-        <Text style={styles.brandText}>Capital Link</Text>
+          <Text style={styles.brandText}>Capital Link</Text>
 
-        {/* Custom Numpad */}
-        <View style={styles.keypadContainer}>
-          <View style={styles.keypadRow}>
-            <PinKey label="1" onPress={() => handleNumberPress("1")} />
-            <PinKey label="2" onPress={() => handleNumberPress("2")} />
-            <PinKey label="3" onPress={() => handleNumberPress("3")} />
-          </View>
-          <View style={styles.keypadRow}>
-            <PinKey label="4" onPress={() => handleNumberPress("4")} />
-            <PinKey label="5" onPress={() => handleNumberPress("5")} />
-            <PinKey label="6" onPress={() => handleNumberPress("6")} />
-          </View>
-          <View style={styles.keypadRow}>
-            <PinKey label="7" onPress={() => handleNumberPress("7")} />
-            <PinKey label="8" onPress={() => handleNumberPress("8")} />
-            <PinKey label="9" onPress={() => handleNumberPress("9")} />
-          </View>
-          <View style={styles.keypadRow}>
-            {/* ช่องซ้ายสำหรับ "ลืมรหัส PIN?" ถ้าต้องการ */}
-            <View style={styles.forgotPinButton}>
-              <Text style={styles.forgotPinText}></Text>
+          {/* Custom Numpad */}
+          <View style={styles.keypadContainer}>
+            <View style={styles.keypadRow}>
+              <PinKey label="1" onPress={() => handleNumberPress("1")} />
+              <PinKey label="2" onPress={() => handleNumberPress("2")} />
+              <PinKey label="3" onPress={() => handleNumberPress("3")} />
             </View>
-            <PinKey label="0" onPress={() => handleNumberPress("0")} />
-            <TouchableOpacity
-              onPress={handleBackspace}
-              style={styles.keyButton}
-            >
-              <Ionicons name="backspace-outline" size={24} color="#333" />
-            </TouchableOpacity>
+            <View style={styles.keypadRow}>
+              <PinKey label="4" onPress={() => handleNumberPress("4")} />
+              <PinKey label="5" onPress={() => handleNumberPress("5")} />
+              <PinKey label="6" onPress={() => handleNumberPress("6")} />
+            </View>
+            <View style={styles.keypadRow}>
+              <PinKey label="7" onPress={() => handleNumberPress("7")} />
+              <PinKey label="8" onPress={() => handleNumberPress("8")} />
+              <PinKey label="9" onPress={() => handleNumberPress("9")} />
+            </View>
+            <View style={styles.keypadRow}>
+              {/* ช่องซ้ายสำหรับ "ลืมรหัส PIN?" ถ้าต้องการ */}
+              <View style={styles.forgotPinButton}>
+                <Text style={styles.forgotPinText}></Text>
+              </View>
+              <PinKey label="0" onPress={() => handleNumberPress("0")} />
+              <TouchableOpacity
+                onPress={handleBackspace}
+                style={styles.keyButton}
+              >
+                <Ionicons name="backspace-outline" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
@@ -173,17 +175,21 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 20,
   },
   backButton: {
+    position: "absolute",
+    top: 60,
+    left: 18,
     flexDirection: "row",
-    marginTop: 40,
-    alignSelf: "flex-start",
+    alignItems: "center",
+    zIndex: 999,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
-    // marginTop: 0,
+    marginTop: 80,
     marginBottom: 20,
     color: "#333",
     textAlign: "center",
@@ -211,8 +217,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 20,
     width: "100%",
-    padding: 100,
-    backgroundColor: "#000000",
+    padding: 10,
+    //backgroundColor: "#000000",
   },
   pinBox: {
     width: 45,
@@ -223,7 +229,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "red",
+    // backgroundColor: "red",
   },
   pinBoxActive: {
     borderColor: "#CFA459",
