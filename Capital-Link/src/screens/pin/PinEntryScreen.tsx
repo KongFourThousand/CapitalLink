@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+// Updated PinEntryKeyboardScreen.tsx
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,39 +8,35 @@ import {
   SafeAreaView,
   Dimensions,
   Image,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
 import CustomNumpad from "../../components/common/CustomNumpad";
 import PinDotRow from "../../components/common/PinDotRow";
-
-// 1) **เพิ่มการ import expo-secure-store** เพื่อนำมาใช้โหลด PIN ที่ผู้ใช้ตั้งไว้
 import * as SecureStore from "expo-secure-store";
+import { RootStackParamList } from "../../navigation/RootNavigator";
+import PinErrorModal from "../../components/common/PinErrorModal";
 
 const { width } = Dimensions.get("window");
 
-type PinKeyboardNavProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "PinEntry"
->;
+type PinKeyboardNavProp = NativeStackNavigationProp<RootStackParamList, "PinEntry">;
 
 const PinEntryKeyboardScreen: React.FC = () => {
   const navigation = useNavigation<PinKeyboardNavProp>();
   const [pin, setPin] = useState("");
-  
-  // 2) **สร้าง state สำหรับเก็บ PIN ที่เคยตั้งในเครื่อง (storedPin) และจำนวนครั้งที่กรอกผิด (attempts)**
   const [storedPin, setStoredPin] = useState<string | null>(null);
-  const [attempts, setAttempts] = useState(0);
+  
+  // สร้าง state สำหรับ modal แทนการใช้ errorMessage
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
-  // 3) **โหลด PIN จาก SecureStore เมื่อเปิดหน้านี้ครั้งแรก** (useEffect)
+  // โหลด PIN จาก SecureStore
   useEffect(() => {
     const loadStoredPin = async () => {
       try {
@@ -47,9 +44,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
         if (pinFromDevice) {
           setStoredPin(pinFromDevice);
         } else {
-          // ในกรณีที่ยังไม่มี PIN บันทึกไว้
-          // อาจแจ้งเตือนหรือปล่อยให้เป็น null เพื่อให้ user กรอกได้
-          console.log("ยังไม่มี PIN ในเครื่อง (userPin is null)");
+          console.log("ยังไม่มี PIN เก็บไว้ (userPin is null)");
         }
       } catch (error) {
         console.error("Error loading stored PIN:", error);
@@ -58,8 +53,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
     loadStoredPin();
   }, []);
 
-  // 4) **handleNumberPress** ใช้ useCallback + setPin แบบ callback
-  //   เพื่ออัปเดต state ได้อย่างถูกต้อง
+  // เมื่อกดตัวเลข
   const handleNumberPress = useCallback((num: string) => {
     setPin((prev) => {
       if (prev.length < 6) {
@@ -69,51 +63,46 @@ const PinEntryKeyboardScreen: React.FC = () => {
     });
   }, []);
 
-  // 5) **handleBackspace** เพื่อลบตัวเลขตัวสุดท้าย
+  // เมื่อกด Backspace
   const handleBackspace = useCallback(() => {
     setPin((prev) => prev.slice(0, -1));
   }, []);
 
-  // 6) **เมื่อผู้ใช้กดลืม PIN** อาจให้ navigation.replace("Login") หรือหน้าใดก็ได้
+  // เมื่อกด "ลืมรหัส PIN?"
   const handleForgotPin = useCallback(() => {
     navigation.replace("Login");
   }, [navigation]);
 
-  // 7) **useEffect สำหรับตรวจสอบ PIN** เมื่อ pin.length === 6
+  // เมื่อปิด Error Modal
+  const handleDismissError = useCallback(() => {
+    setIsErrorModalVisible(false);
+    setPin(""); // เคลียร์ PIN เมื่อปิด modal
+  }, []);
+
+  // ตรวจสอบ PIN เมื่อกรอกครบ 6 ตัว
   useEffect(() => {
-    // ถ้ายังไม่โหลดฟอนต์ / ยังไม่โหลด storedPin ก็ให้รอก่อน
-    // หรืออาจออกแบบให้ checkPin() ในภายหลังก็ได้
     if (!fontsLoaded) return;
-    
+
     if (pin.length === 6) {
-      // ถ้าไม่มี storedPin แปลว่ายังไม่เคยตั้ง PIN บนเครื่อง
-      // อาจปล่อยผ่านหรือแจ้งเตือน
+      // ถ้าไม่มี storedPin -> สมมติยังไม่เคยตั้ง
       if (storedPin === null) {
-        Alert.alert("ยังไม่เคยตั้ง PIN", "กรุณาไปตั้ง PIN ก่อน หรือเคยลบแอป?");
-        setPin("");
+        setErrorMessage("ยังไม่เคยตั้ง PIN ไว้ในเครื่อง");
+        setIsErrorModalVisible(true);
         return;
       }
-      
-      // ถ้ามี storedPin -> เปรียบเทียบ
+
+      // ถ้ามี storedPin -> เทียบค่า
       if (pin === storedPin) {
-        // กรอกถูกต้อง
+        // เข้าระบบได้
         navigation.replace("Home");
       } else {
-        // กรอกไม่ถูกต้อง
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        if (newAttempts >= 3) {
-          // ถ้าผิดเกิน 3 ครั้ง
-          navigation.replace("Login");
-        } else {
-          Alert.alert("PIN ไม่ถูกต้อง", `เหลือโอกาสอีก ${3 - newAttempts} ครั้ง`);
-          setPin("");
-        }
+        // ถ้าผิด -> แสดง error modal
+        setErrorMessage("PIN รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+        setIsErrorModalVisible(true);
       }
     }
-  }, [pin, storedPin, attempts, navigation, fontsLoaded]);
+  }, [pin, storedPin, navigation, fontsLoaded]);
 
-  // ถ้าฟอนต์ยังไม่โหลด
   if (!fontsLoaded) {
     return null;
   }
@@ -150,10 +139,17 @@ const PinEntryKeyboardScreen: React.FC = () => {
           customStyles={{ container: { width: "80%", marginTop: 15 } }}
         />
 
-        {/* Text ลืมรหัส PIN? ใหญ่ขึ้น + ขีดเส้นใต้ + กดได้ */}
+        {/* ลืมรหัส PIN? */}
         <TouchableOpacity onPress={handleForgotPin} style={styles.forgotPinContainer}>
           <Text style={styles.forgotPinTextLarge}>ลืมรหัส PIN?</Text>
         </TouchableOpacity>
+
+        {/* Error Modal */}
+        <PinErrorModal 
+          visible={isErrorModalVisible}
+          onDismiss={handleDismissError}
+          message={errorMessage}
+        />
       </View>
     </SafeAreaView>
   );
@@ -190,10 +186,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 20,
+    marginBottom: 15,
   },
   forgotPinContainer: {
-    marginTop: 20, // เว้นระยะจาก Numpad
+    marginTop: 20,
   },
   forgotPinTextLarge: {
     fontSize: 14,
@@ -201,4 +197,3 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
-
