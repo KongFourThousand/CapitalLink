@@ -16,6 +16,8 @@ import Profile from "../screens/Profile/ProfileScreen";
 import OldPin from "../screens/pin/OldPinVerifyScreen";
 import NameChange from "../screens/Profile/NameChangeRequestScreen";
 import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
+import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
+
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -35,6 +37,7 @@ export type RootStackParamList = {
   OldPin: undefined;
   NameChange: undefined;
   PhoneChange: undefined;
+  NotiSettings: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -46,7 +49,7 @@ const RootNavigator: React.FC = () => {
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
        //initialRouteName="PinSetup"
-       initialRouteName="PhoneChange"
+       initialRouteName="Profile"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
@@ -66,6 +69,7 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="OldPin" component={OldPin} />
       <Stack.Screen name="NameChange" component={NameChange} />
       <Stack.Screen name="PhoneChange" component={PhoneChange} />
+      <Stack.Screen name="NotiSettings" component={NotiSettings} />
     </Stack.Navigator>
   );
 };

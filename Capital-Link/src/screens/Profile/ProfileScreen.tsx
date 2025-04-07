@@ -34,14 +34,14 @@ const ProfileScreen: React.FC = () => {
   const handleChangePin = () => {
     navigation.navigate("OldPin");
   };
-  const handleRequestNameChange = () => {
-    console.log("ขอเปลี่ยนชื่อ-นามสกุล");
+  const handleRequestNameChange = () => { 
+    navigation.navigate("NameChange");
   };
   const handleRequestPhoneChange = () => {
-    console.log("ขอเปลี่ยนเบอร์โทรศัพท์");
+    navigation.navigate("PhoneChange");
   };
   const handleNotificationSettings = () => {
-    console.log("ตั้งค่าการแจ้งเตือน");
+    navigation.navigate("NotiSettings");
   };
  // เมื่อกดออกจากระบบ ให้เปิด modal
  const handleLogoutPress = () => {
