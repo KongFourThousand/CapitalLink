@@ -51,7 +51,8 @@ const ProfileScreen: React.FC = () => {
   // เมื่อยืนยันออกจากระบบ
   const confirmLogout = () => {
     setModalVisible(false);
-    navigation.replace("InitialEntry");
+    // navigation.replace("InitialEntry");
+    navigation.navigate("PinEntry")
   };
 
   // เมื่อยกเลิกออกจากระบบ
