@@ -25,28 +25,19 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   "NameChange"
 >;
 
-type ChangeType = "firstname" | "lastname" | "both" | null;
-
 const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-  
-  // สถานะสำหรับเลือกประเภทการเปลี่ยน
-  const [changeType, setChangeType] = useState<ChangeType>(null);
-  
-  // ชื่อ-นามสกุลปัจจุบัน (สมมติว่าดึงมาจาก API หรือ state อื่น)
-  const [currentFirstName, setCurrentFirstName] = useState("มินิน");
-  const [currentLastName, setCurrentLastName] = useState("ทดสอบ");
-  
-  // ชื่อ-นามสกุลใหม่
+
+  // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newFirstName, setNewFirstName] = useState("");
   const [newLastName, setNewLastName] = useState("");
-  
+
   // เอกสารแนบ
   const [document, setDocument] = useState<string | null>(null);
-  
+
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Refs สำหรับ TextInput
   const lastNameInputRef = useRef<TextInput>(null);
 
@@ -55,35 +46,20 @@ const NameChangeRequestScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  // ฟังก์ชันเลือกประเภทการเปลี่ยน
-  const handleSelectChangeType = (type: ChangeType) => {
-    setChangeType(type);
-    
-    // รีเซ็ตค่าตามประเภทที่เลือก
-    if (type === "firstname" || type === "both") {
-      setNewFirstName("");
-    } else {
-      setNewFirstName(currentFirstName);
-    }
-    
-    if (type === "lastname" || type === "both") {
-      setNewLastName("");
-    } else {
-      setNewLastName(currentLastName);
-    }
-  };
-
   // ฟังก์ชันเลือกรูปเอกสาร
   const handlePickDocument = async () => {
     try {
       // ขอสิทธิ์การเข้าถึง
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("การอนุญาต", "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ");
+        Alert.alert(
+          "การอนุญาต",
+          "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
+        );
         return;
       }
-      
+
       // เปิดคลังรูปภาพ
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -91,7 +67,7 @@ const NameChangeRequestScreen: React.FC = () => {
         aspect: [4, 3],
         quality: 0.8,
       });
-      
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setDocument(result.assets[0].uri);
       }
@@ -108,35 +84,26 @@ const NameChangeRequestScreen: React.FC = () => {
 
   // ฟังก์ชันยื่นคำขอ
   const handleSubmitRequest = () => {
-    // ตรวจสอบข้อมูล
-    if (!changeType) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาเลือกประเภทการเปลี่ยน");
+    // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
+    if (!newFirstName.trim() && !newLastName.trim()) {
+      Alert.alert(
+        "ข้อมูลไม่ครบถ้วน",
+        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง"
+      );
       return;
     }
-    
-    if ((changeType === "firstname" || changeType === "both") && !newFirstName) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกชื่อใหม่");
-      return;
-    }
-    
-    if ((changeType === "lastname" || changeType === "both") && !newLastName) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกนามสกุลใหม่");
-      return;
-    }
-    
+
+    // ถ้าไม่ได้แนบเอกสาร
     if (!document) {
       Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนชื่อ-นามสกุล");
       return;
     }
-    
-    // แสดงการโหลด
+
     setIsLoading(true);
-    
+
     // สมมติว่าส่งข้อมูลไปยัง API
     setTimeout(() => {
       setIsLoading(false);
-      
-      // แสดงแจ้งเตือนส่งสำเร็จ
       Alert.alert(
         "ส่งคำขอสำเร็จ",
         "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
@@ -150,27 +117,18 @@ const NameChangeRequestScreen: React.FC = () => {
     }, 2000);
   };
 
-  // ฟังก์ชันช่วยในการแสดงชื่อที่กำลังขอเปลี่ยน
-  const getNamePreview = () => {
-    const firstName = changeType === "firstname" || changeType === "both" 
-      ? newFirstName || "(รอกรอกชื่อใหม่)" 
-      : currentFirstName;
-      
-    const lastName = changeType === "lastname" || changeType === "both" 
-      ? newLastName || "(รอกรอกนามสกุลใหม่)" 
-      : currentLastName;
-    
-    return `${firstName} ${lastName}`;
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         {/* ปุ่ม Back */}
-        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={handleBack}
+          activeOpacity={0.7}
+        >
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
         </TouchableOpacity>
 
@@ -178,105 +136,43 @@ const NameChangeRequestScreen: React.FC = () => {
         <Text style={styles.headerTitle}>ขอเปลี่ยนชื่อ-นามสกุล</Text>
 
         <ScrollView contentContainerStyle={styles.contentContainer}>
-          {/* ชื่อ-นามสกุลปัจจุบัน */}
-          <View style={styles.infoCard}>
-            <Text style={styles.cardTitle}>ชื่อ-นามสกุลปัจจุบัน</Text>
-            <Text style={styles.currentName}>{currentFirstName} {currentLastName}</Text>
-          </View>
-
-          {/* เลือกประเภทการเปลี่ยน */}
-          <Text style={styles.sectionLabel}>เลือกประเภทการเปลี่ยน</Text>
-          <View style={styles.optionsContainer}>
-            <TouchableOpacity 
-              style={[
-                styles.optionButton, 
-                changeType === "firstname" && styles.optionButtonActive
-              ]}
-              onPress={() => handleSelectChangeType("firstname")}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.optionText,
-                changeType === "firstname" && styles.optionTextActive
-              ]}>เปลี่ยนชื่อ</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.optionButton, 
-                changeType === "lastname" && styles.optionButtonActive
-              ]}
-              onPress={() => handleSelectChangeType("lastname")}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.optionText,
-                changeType === "lastname" && styles.optionTextActive
-              ]}>เปลี่ยนนามสกุล</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.optionButton, 
-                changeType === "both" && styles.optionButtonActive
-              ]}
-              onPress={() => handleSelectChangeType("both")}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.optionText,
-                changeType === "both" && styles.optionTextActive
-              ]}>เปลี่ยนทั้งคู่</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* กรอกชื่อ-นามสกุลใหม่ */}
-          {changeType && (
-            <View style={styles.formContainer}>
-              {/* กรอกชื่อใหม่ */}
-              {(changeType === "firstname" || changeType === "both") && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>ชื่อใหม่</Text>
-                  <TextInput 
-                    style={styles.textInput}
-                    value={newFirstName}
-                    onChangeText={setNewFirstName}
-                    placeholder="กรอกชื่อใหม่"
-                    autoCapitalize="words"
-                    returnKeyType="next"
-                    onSubmitEditing={() => {
-                      if (changeType === "both") {
-                        lastNameInputRef.current?.focus();
-                      }
-                    }}
-                  />
-                </View>
-              )}
-              
-              {/* กรอกนามสกุลใหม่ */}
-              {(changeType === "lastname" || changeType === "both") && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
-                  <TextInput 
-                    ref={lastNameInputRef}
-                    style={styles.textInput}
-                    value={newLastName}
-                    onChangeText={setNewLastName}
-                    placeholder="กรอกนามสกุลใหม่"
-                    autoCapitalize="words"
-                  />
-                </View>
-              )}
-              
-              {/* แสดงตัวอย่างชื่อ-นามสกุลที่จะเปลี่ยน */}
-              <View style={styles.previewContainer}>
-                <Text style={styles.previewLabel}>
-                  ตัวอย่างชื่อ-นามสกุลที่จะเปลี่ยน:
-                </Text>
-                <Text style={styles.previewName}>{getNamePreview()}</Text>
-              </View>
+          {/* ฟอร์มชื่อ - นามสกุลใหม่ */}
+          <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text>
+          <View style={styles.formContainer}>
+            {/* กรอกชื่อใหม่ */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>ชื่อใหม่</Text>
+              <TextInput
+                style={styles.textInput}
+                value={newFirstName}
+                onChangeText={setNewFirstName}
+                placeholder="กรอกชื่อใหม่"
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => lastNameInputRef.current?.focus()}
+              />
             </View>
-          )}
+
+            {/* กรอกนามสกุลใหม่ */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
+              <TextInput
+                ref={lastNameInputRef}
+                style={styles.textInput}
+                value={newLastName}
+                onChangeText={setNewLastName}
+                placeholder="กรอกนามสกุลใหม่"
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
+
+          {/* หมายเหตุใต้ช่องกรอก */}
+          <Text style={styles.formNote}>
+            หากต้องการเปลี่ยนเพียงส่วนใดส่วนหนึ่ง (ชื่อหรือนามสกุล)
+            {"\n"}
+            สามารถปล่อยอีกช่องว่างได้
+          </Text>
 
           {/* แนบเอกสาร */}
           <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
@@ -284,15 +180,15 @@ const NameChangeRequestScreen: React.FC = () => {
             <Text style={styles.documentHint}>
               แนบภาพถ่ายเอกสารการเปลี่ยนชื่อ-นามสกุลที่ออกโดยหน่วยงานราชการ
             </Text>
-            
+
             {document ? (
               <View style={styles.documentPreview}>
-                <Image 
+                <Image
                   source={{ uri: document }}
-                  style={styles.documentImage}
+                  style={styles.documentImage} 
                   resizeMode="cover"
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.removeDocumentButton}
                   onPress={handleRemoveDocument}
                   activeOpacity={0.7}
@@ -301,12 +197,16 @@ const NameChangeRequestScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.uploadButton}
                 onPress={handlePickDocument}
                 activeOpacity={0.7}
               >
-                <Ionicons name="cloud-upload-outline" size={24} color="#CFA459" />
+                <Ionicons
+                  name="cloud-upload-outline"
+                  size={24}
+                  color="#CFA459"
+                />
                 <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
               </TouchableOpacity>
             )}
@@ -357,7 +257,7 @@ const NameChangeRequestScreen: React.FC = () => {
 
 export default NameChangeRequestScreen;
 
-// --- Styles ---
+/** --- Styles --- */
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -383,25 +283,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 30,
   },
-  infoCard: {
-    backgroundColor: "#FFF9EF",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: "#CFA459",
-  },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#666",
-    marginBottom: 8,
-  },
-  currentName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
   sectionLabel: {
     fontSize: 16,
     fontWeight: "600",
@@ -409,36 +290,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginTop: 5,
   },
-  optionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  optionButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 8,
-    marginHorizontal: 4,
-    alignItems: "center",
-  },
-  optionButtonActive: {
-    backgroundColor: "#FFEFD5",
-    borderWidth: 1,
-    borderColor: "#CFA459",
-  },
-  optionText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#666",
-  },
-  optionTextActive: {
-    color: "#CFA459",
-    fontWeight: "600",
-  },
   formContainer: {
-    marginBottom: 24,
+    marginBottom: 12,
   },
   inputGroup: {
     marginBottom: 16,
@@ -458,24 +311,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
   },
-  previewContainer: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: "#F9F9F9",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#EEE",
-    borderStyle: "dashed",
-  },
-  previewLabel: {
-    fontSize: 14,
+  formNote: {
+    fontSize: 13,
     color: "#666",
-    marginBottom: 8,
-  },
-  previewName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#444",
+    marginBottom: 24,
+    lineHeight: 18,
   },
   documentContainer: {
     marginBottom: 24,
@@ -488,24 +328,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 12,
     lineHeight: 20,
-  },
-  uploadButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#CFA459",
-    borderRadius: 8,
-    borderStyle: "dashed",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-  },
-  uploadButtonText: {
-    fontSize: 16,
-    color: "#CFA459",
-    marginLeft: 8,
-    fontWeight: "500",
   },
   documentPreview: {
     position: "relative",
@@ -526,6 +348,24 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 16,
     padding: 4,
+  },
+  uploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#CFA459",
+    borderRadius: 8,
+    borderStyle: "dashed",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  uploadButtonText: {
+    fontSize: 16,
+    color: "#CFA459",
+    marginLeft: 8,
+    fontWeight: "500",
   },
   submitGradient: {
     borderRadius: 12,
