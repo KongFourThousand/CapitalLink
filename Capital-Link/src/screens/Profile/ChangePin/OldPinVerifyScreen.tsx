@@ -12,16 +12,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import CustomNumpad from "../../components/common/CustomNumpad";
-import PinDotRow from "../../components/common/PinDotRow";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import CustomNumpad from "../../../components/common/CustomNumpad";
+import PinDotRow from "../../../components/common/PinDotRow";
+import { RootStackParamList } from "../../../navigation/RootNavigator";
 
+// 1) เพิ่ม import secure-store
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 
 type OldPinVerifyScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
-  "OldPin"
+  "OldPin" // ให้ตรงกับชื่อ route ใน RootNavigator
 >;
 
 const OldPinVerifyScreen: React.FC = () => {
@@ -37,27 +39,51 @@ const OldPinVerifyScreen: React.FC = () => {
 
   // โหลดฟอนต์ (ถ้าจำเป็น)
   const [fontsLoaded] = useFonts({
-    TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
+    TimesNewRoman: require("../../../../assets/fonts/times new roman.ttf"),
   });
 
+  // 2) state สำหรับเก็บ PIN ที่อ่านจาก SecureStore
+  const [storedPin, setStoredPin] = useState<string | null>(null);
 
-  // สมมุติว่านี่คือ PIN เก่าที่เก็บไว้ (เช่น อ่านจาก SecureStore)
-  const storedPin = "123456";
+  // 3) โหลด PIN เก่าจาก SecureStore เมื่อเปิดหน้านี้
+  useEffect(() => {
+    const loadOldPin = async () => {
+      try {
+        const oldPin = await SecureStore.getItemAsync("userPin"); 
+        // สมมุติว่า "userPin" เป็น key ที่เราเคยบันทึกไว้ตอนตั้ง PIN ครั้งแรก
+        if (oldPin) {
+          setStoredPin(oldPin);
+        } else {
+          // ถ้าไม่เจอ PIN ใดใน SecureStore (ผู้ใช้ยังไม่เคยตั้ง PIN)
+          Alert.alert("ไม่พบ PIN เก่า", "คุณยังไม่เคยตั้ง PIN ไว้ก่อนหน้านี้");
+          navigation.goBack();
+        }
+      } catch (error) {
+        console.error("Error loading old PIN:", error);
+        Alert.alert("ข้อผิดพลาด", "ไม่สามารถโหลด PIN เก่าได้");
+        navigation.goBack();
+      }
+    };
+    loadOldPin();
+  }, [navigation]);
 
   // ฟังก์ชันกดตัวเลขใน Numpad
-  const handleNumberPress = useCallback((num: string) => {
-    if (pin.length < 6) {
-      const newPin = pin + num;
-      setPin(newPin);
-      setShowLast(true);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  const handleNumberPress = useCallback(
+    (num: string) => {
+      if (pin.length < 6) {
+        const newPin = pin + num;
+        setPin(newPin);
+        setShowLast(true);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-      // ตั้งเวลาซัก 300ms ให้ตัวเลขสุดท้ายกลายเป็น dot
-      timeoutRef.current = setTimeout(() => {
-        setShowLast(false);
-      }, 300);
-    }
-  }, [pin]);
+        // ตั้งเวลาซัก 300ms ให้ตัวเลขสุดท้ายกลายเป็น dot
+        timeoutRef.current = setTimeout(() => {
+          setShowLast(false);
+        }, 300);
+      }
+    },
+    [pin]
+  );
 
   // ฟังก์ชันกด Backspace
   const handleBackspace = useCallback(() => {
@@ -68,7 +94,7 @@ const OldPinVerifyScreen: React.FC = () => {
     }
   }, [pin]);
 
-  // ถ้าใส่ PIN ครบ 6 หลัก => ตรวจสอบ
+  // 4) เมื่อกรอก PIN ครบ 6 หลัก ให้ตรวจสอบ PIN เก่า
   useEffect(() => {
     if (pin.length === 6) {
       setTimeout(() => {
@@ -77,12 +103,24 @@ const OldPinVerifyScreen: React.FC = () => {
     }
   }, [pin]);
 
-  // ฟังก์ชันตรวจสอบรหัสเก่า
+  // 5) ฟังก์ชันตรวจสอบรหัสเก่า
   const verifyOldPin = () => {
+    // ถ้าไม่มี storedPin (โหลดไม่ได้) ให้แจ้งเตือนแล้วกลับ
+    if (!storedPin) {
+      Alert.alert("ไม่พบ PIN เก่า", "กรุณาลองใหม่ หรือยังไม่ได้ตั้ง PIN ไว้ก่อนหน้านี้");
+      setPin("");
+      navigation.goBack();
+      return;
+    }
+
+    // เทียบ pin ที่ผู้ใช้กรอก กับ storedPin ในเครื่อง
     if (pin === storedPin) {
       // ถ้าถูก ให้ไปหน้าถัดไป (เช่นหน้า ChangePinScreen)
-      // ตัวอย่าง: navigation.navigate("ChangePin") 
+      // ตัวอย่าง:
+     navigation.navigate("NewPinSetup"); 
+      // หรือจะใช้ replace ก็ได้ตามต้องการ
     } else {
+      // ถ้าผิด ให้แจ้งเตือน
       Alert.alert("รหัสไม่ถูกต้อง", "รหัส PIN ปัจจุบันไม่ถูกต้อง กรุณาลองใหม่");
       setPin("");
     }
@@ -94,10 +132,10 @@ const OldPinVerifyScreen: React.FC = () => {
   };
 
   if (!fontsLoaded) return null;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        
         {/* ปุ่มย้อนกลับ */}
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
@@ -111,8 +149,8 @@ const OldPinVerifyScreen: React.FC = () => {
           <Text style={styles.subtitle}>กรุณากรอกรหัส PIN ปัจจุบัน</Text>
 
           {/* แสดง PIN Dot */}
-            <PinDotRow pin={pin} maxLength={6} showLast={false} />
-          
+          <PinDotRow pin={pin} maxLength={6} showLast={false} />
+
           <Text style={styles.brandText}>Capital Link</Text>
           {/* Numpad */}
           <CustomNumpad

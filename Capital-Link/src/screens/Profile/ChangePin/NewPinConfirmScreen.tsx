@@ -1,18 +1,22 @@
+// NewPinConfirmScreen.tsx
 import React, { useEffect } from "react";
 import { Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
-import PinScreen from "../../components/common/PinScreen";
+import { RootStackParamList } from "../../../navigation/RootNavigator";
+import PinScreen from "../../../components/common/PinScreen";
 
-type PinConfirmNavProp = NativeStackNavigationProp<RootStackParamList, "PinConfirm">;
+type NewPinConfirmNavProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "NewPinConfirm"
+>;
 
-const PinConfirmScreen: React.FC = () => {
+const NewPinConfirmScreen: React.FC = () => {
   const route = useRoute();
-  const navigation = useNavigation<PinConfirmNavProp>();
+  const navigation = useNavigation<NewPinConfirmNavProp>();
 
-  // รับค่า firstPin (6 หลัก) มาจาก PinEntryScreen
+  // รับค่า firstPin (6 หลัก) มาจาก NewPinSetupScreen
   const firstPinFromRoute = route.params
     ? (route.params as { firstPin: string }).firstPin
     : "";
@@ -26,12 +30,21 @@ const PinConfirmScreen: React.FC = () => {
   }, [firstPinFromRoute, navigation]);
 
   const handlePinComplete = async (pin: string) => {
-    // ถ้าตรงกับ firstPin => เก็บใน SecureStore
+    // ตรวจสอบว่า PIN ตรงกับที่ตั้งไว้หรือไม่
     if (pin === firstPinFromRoute) {
       try {
+        // บันทึก PIN ใหม่
         await SecureStore.setItemAsync("userPin", pin);
-        // ไปหน้า Home หรือหน้าอื่นตามต้องการ
-        navigation.replace("Home");
+        Alert.alert(
+          "สำเร็จ", 
+          "เปลี่ยนรหัส PIN เรียบร้อยแล้ว", 
+          [
+            { 
+              text: "ตกลง", 
+              onPress: () => navigation.navigate("Home") 
+            }
+          ]
+        );
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการบันทึก PIN:", error);
         Alert.alert("ข้อผิดพลาด", "ไม่สามารถบันทึกรหัส PIN ได้ กรุณาลองใหม่");
@@ -43,13 +56,13 @@ const PinConfirmScreen: React.FC = () => {
 
   return (
     <PinScreen
-      title="ยืนยันรหัส PIN"
-      subtitle="กรุณากรอกรหัส PIN อีกครั้ง"
-      description="เพื่อยืนยันการตั้งรหัส PIN"
+      title="ยืนยันรหัส PIN ใหม่"
+      subtitle="กรุณากรอกรหัส PIN ใหม่อีกครั้ง"
+      description="เพื่อยืนยันการตั้งรหัส PIN ใหม่"
       onPinComplete={handlePinComplete}
       onBackPress={() => navigation.goBack()}
     />
   );
 };
 
-export default PinConfirmScreen;
+export default NewPinConfirmScreen;

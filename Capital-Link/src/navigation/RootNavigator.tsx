@@ -13,10 +13,12 @@ import Deposit from "../screens/accounts/DepositScreen";
 import Loan from "../screens/accounts/LoanScreen";
 import Notification from "../screens/notifications/NotificationScreen";
 import Profile from "../screens/Profile/ProfileScreen";
-import OldPin from "../screens/Profile/OldPinVerifyScreen";
+import OldPin from "../screens/Profile/ChangePin/OldPinVerifyScreen";
 import NameChange from "../screens/Profile/NameChangeRequestScreen";
 import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
 import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
+import NewPinSetup from "../screens/Profile/ChangePin/NewPinSetupScreen";
+import NewPinConfirm from "../screens/Profile/ChangePin/NewPinConfirmScreen";
 
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
@@ -38,6 +40,8 @@ export type RootStackParamList = {
   NameChange: undefined;
   PhoneChange: undefined;
   NotiSettings: undefined;
+  NewPinSetup: undefined;
+  NewPinConfirm: { firstPin: string };
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -48,8 +52,8 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-       //initialRouteName="PinSetup"
        initialRouteName="PinSetup"
+       //initialRouteName="PinSetup"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
@@ -70,6 +74,8 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="NameChange" component={NameChange} />
       <Stack.Screen name="PhoneChange" component={PhoneChange} />
       <Stack.Screen name="NotiSettings" component={NotiSettings} />
+      <Stack.Screen name="NewPinSetup" component={NewPinSetup} />
+      <Stack.Screen name="NewPinConfirm" component={NewPinConfirm} />
     </Stack.Navigator>
   );
 };
