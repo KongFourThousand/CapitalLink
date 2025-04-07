@@ -49,7 +49,7 @@ const RootNavigator: React.FC = () => {
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
        //initialRouteName="PinSetup"
-       initialRouteName="Profile"
+       initialRouteName="PinSetup"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}

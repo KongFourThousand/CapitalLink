@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "expo-secure-store"; // <-- ใช้ SecureStore
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useFonts } from "expo-font";
@@ -19,32 +19,27 @@ import PinDotsDisplay from "../../components/common/PinDotsDisplay";
 
 const { width } = Dimensions.get("window");
 
-type PinConfirmNavProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "PinConfirm"
->;
+type PinConfirmNavProp = NativeStackNavigationProp<RootStackParamList, "PinConfirm">;
 
 const PinConfirmScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation<PinConfirmNavProp>();
-  // รับค่า firstPin และแปลงเป็น string เพื่อให้แน่ใจว่าเป็นชนิดข้อมูลเดียวกัน
+
+  // รับค่า firstPin (6 หลัก) มาจาก PinEntryScreen
   const firstPinFromRoute = route.params
     ? (route.params as { firstPin: string }).firstPin
     : "";
-  const [firstPin, setFirstPin] = useState<string>(String(firstPinFromRoute));
 
   const [confirmPin, setConfirmPin] = useState("");
   const [showLast, setShowLast] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // โหลดฟอนต์ (ตัวอย่าง)
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
 
   useEffect(() => {
-    // ใส่ console.log ไว้ตรวจสอบค่า firstPin
-    console.log("firstPin จาก route:", firstPinFromRoute);
-    console.log("ประเภทข้อมูลของ firstPin:", typeof firstPinFromRoute);
-
     // ถ้าไม่มีค่า firstPin ให้ย้อนกลับ
     if (!firstPinFromRoute) {
       Alert.alert("ข้อผิดพลาด", "ไม่พบรหัส PIN ที่ตั้งไว้ กรุณาลองใหม่");
@@ -52,6 +47,7 @@ const PinConfirmScreen: React.FC = () => {
     }
   }, [firstPinFromRoute, navigation]);
 
+  // ฟังก์ชันเมื่อกดตัวเลข
   const handleNumberPress = (num: string) => {
     if (confirmPin.length < 6) {
       const newPin = confirmPin + num;
@@ -63,12 +59,14 @@ const PinConfirmScreen: React.FC = () => {
         setShowLast(false);
       }, 300);
 
-      // handleNumberPress:
+      // ถ้า PIN ครบ 6 หลัก → ตรวจสอบ
       if (newPin.length === 6) {
         setTimeout(() => handleConfirm(newPin), 300);
       }
     }
   };
+
+  // ฟังก์ชันลบตัวเลขล่าสุด
   const handleBackspace = () => {
     if (confirmPin.length > 0) {
       setConfirmPin(confirmPin.slice(0, -1));
@@ -77,30 +75,19 @@ const PinConfirmScreen: React.FC = () => {
     }
   };
 
+  // ฟังก์ชันตรวจสอบ PIN
   const handleConfirm = async (pinToCheck: string) => {
-    // เพิ่ม console.log เพื่อตรวจสอบค่าที่กำลังเปรียบเทียบ
-    console.log("pinToCheck:", pinToCheck, "ความยาว:", pinToCheck.length);
-    console.log("firstPin:", firstPin, "ความยาว:", firstPin.length);
-
-    // แปลง string เป็นค่าเดียวกันก่อนเปรียบเทียบ
-    const normalizedFirstPin = String(firstPin).trim();
-    const normalizedConfirmPin = String(pinToCheck).trim();
-
-    console.log("หลังจาก normalize - firstPin:", normalizedFirstPin);
-    console.log("หลังจาก normalize - confirmPin:", normalizedConfirmPin);
-
-    if (normalizedConfirmPin === normalizedFirstPin) {
+    // ถ้าตรงกับ firstPin => เก็บใน SecureStore
+    if (pinToCheck === firstPinFromRoute) {
       try {
-        // บันทึกค่า PIN เป็น string
-        await SecureStore.setItemAsync("userPin", normalizedConfirmPin);
-        // ไปหน้า Home
+        await SecureStore.setItemAsync("userPin", pinToCheck);
+        // ไปหน้า Home หรือหน้าอื่นตามต้องการ
         navigation.replace("Home");
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการบันทึก PIN:", error);
         Alert.alert("ข้อผิดพลาด", "ไม่สามารถบันทึกรหัส PIN ได้ กรุณาลองใหม่");
       }
     } else {
-      console.log("PIN ไม่ตรงกัน!");
       Alert.alert("แจ้งเตือน", "PIN ไม่ตรงกัน กรุณาลองใหม่");
       setConfirmPin("");
     }
@@ -126,9 +113,8 @@ const PinConfirmScreen: React.FC = () => {
           <Text style={styles.description}>เพื่อยืนยันการตั้งรหัส PIN</Text>
 
           <PinDotsDisplay pin={confirmPin} maxLength={6} showLast={showLast} />
-
           <Text style={styles.brandText}>Capital Link</Text>
-
+          {/* แป้นพิมพ์ตัวเลข */}
           <CustomNumpad
             onNumberPress={handleNumberPress}
             onBackspace={handleBackspace}
@@ -141,28 +127,14 @@ const PinConfirmScreen: React.FC = () => {
   );
 };
 
-type PinKeyProps = {
-  label: string;
-  onPress: () => void;
-};
-
-const PinKey: React.FC<PinKeyProps> = ({ label, onPress }) => (
-  <TouchableOpacity style={styles.keyButton} onPress={onPress}>
-    <Text style={styles.keyText}>{label}</Text>
-  </TouchableOpacity>
-);
-
 export default PinConfirmScreen;
-
-const circleSize = 80;
-const DOT_SIZE = 20;
-const DOT_FILLED_SIZE = 15;
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+  
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -202,86 +174,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 30,
   },
-  pinContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-    width: "100%",
-    padding: 10,
-    //backgroundColor: "#000000",
-  },
-  pinBox: {
-    width: 45,
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 6,
-    marginHorizontal: 5,
-    justifyContent: "center",
-    alignItems: "center",
-    // backgroundColor: "red",
-  },
-  pinBoxActive: {
-    borderColor: "#CFA459",
-    borderWidth: 1.5,
-  },
-  pinDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#333",
-  },
-  hiddenInput: {
-    position: "absolute",
-    opacity: 0,
-    width: 0,
-    height: 0,
-  },
-  keypadContainer: {
-    width: "90%",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 30,
-  },
-  keypadRow: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-around",
-    marginVertical: 5,
-  },
-  keyButton: {
-    width: circleSize,
-    height: circleSize,
-    borderRadius: circleSize / 2,
-    backgroundColor: "#f8f8f8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  keyText: {
-    fontSize: 35,
-    color: "#333",
-    fontWeight: "600",
-  },
-  forgotPinButton: {
-    width: circleSize,
-    height: circleSize,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  forgotPinText: {
-    fontSize: 10,
-    color: "#CFA459",
-    textDecorationLine: "underline",
-  },
   brandText: {
-    color: "#CFA459",
+    color: "#a2754c",
     fontSize: 16,
     marginVertical: 20,
     fontFamily: "TimesNewRoman",
   },
-  digitText: {
-    fontSize: 24,
-    color: "#333",
-    fontWeight: "600",
-  },
 });
+
