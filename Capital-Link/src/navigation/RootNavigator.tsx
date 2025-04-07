@@ -13,7 +13,7 @@ import Deposit from "../screens/accounts/DepositScreen";
 import Loan from "../screens/accounts/LoanScreen";
 import Notification from "../screens/notifications/NotificationScreen";
 import Profile from "../screens/Profile/ProfileScreen";
-import OldPin from "../screens/pin/OldPinVerifyScreen";
+import OldPin from "../screens/Profile/OldPinVerifyScreen";
 import NameChange from "../screens/Profile/NameChangeRequestScreen";
 import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
 import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
