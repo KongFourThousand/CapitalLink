@@ -20,13 +20,12 @@ import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
 import NewPinSetup from "../screens/Profile/ChangePin/NewPinSetupScreen";
 import NewPinConfirm from "../screens/Profile/ChangePin/NewPinConfirmScreen";
 
-
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
   InitialEntry: undefined;
   Login: undefined;
   Register: undefined;
-  OtpVerification: { from: "Login" | "Register" };
+  OtpVerification: { from: "Login" | "Register"; phoneNumber: string };
   PinSetup: undefined;
   PinConfirm: { firstPin: string };
   PinEntry: undefined;
@@ -34,8 +33,8 @@ export type RootStackParamList = {
   Account: undefined;
   Deposit: undefined;
   Loan: undefined;
-  Notification: undefined; 
-  Profile: undefined; 
+  Notification: undefined;
+  Profile: undefined;
   OldPin: undefined;
   NameChange: undefined;
   PhoneChange: undefined;
@@ -52,8 +51,8 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-       initialRouteName="Profile"
-       //initialRouteName="PinSetup"
+      initialRouteName="Register"
+      //initialRouteName="PinSetup"
       screenOptions={{ headerShown: false, animation: "none" }}
     >
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}

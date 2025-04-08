@@ -16,6 +16,21 @@ import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
+
+// ฟังก์ชัน formatPhoneNumber => เอาเฉพาะตัวเลข + แปลงเป็น xxx-xxx-xxxx ถ้าได้ 10 หลัก
+function formatPhoneNumber(rawPhone: string): string {
+  // เอาเฉพาะตัวเลข
+  const digits = rawPhone.replace(/\D/g, "");
+
+  // ถ้าได้ครบ 10 หลัก => xxx-xxx-xxxx
+  if (digits.length === 10) {
+    return digits.replace(/^(\d{3})(\d{3})(\d{4})$/, "$1-$2-$3");
+  }
+
+  // กรณีไม่ครบ 10 ก็คืนค่าตาม rawPhone เดิม หรือจะคืน digits เฉย ๆ ก็ได้
+  return rawPhone;
+}
+
 interface OtpVerificationComponentProps {
   phoneNumber: string;
   onVerify: (otpCode: string) => void;
@@ -102,12 +117,14 @@ const OtpVerificationComponent: React.FC<OtpVerificationComponentProps> = ({
     onVerify(otpCode);
   };
 
+  const formattedPhone = formatPhoneNumber(phoneNumber);
+
   return (
     <View style={styles.container}>
       {showPhoneNumberInfo && (
         <>
           <Text style={styles.text}>กรุณากรอกรหัส OTP ที่ส่งไปยังเบอร์</Text>
-          <Text style={styles.phoneNumber}>{phoneNumber}</Text>
+           <Text style={styles.phoneNumber}>{formattedPhone}</Text>
           <Text style={styles.subText}>รหัสนี้จะถูกยกเลิกภายใน 3 นาที</Text>
         </>
       )}
