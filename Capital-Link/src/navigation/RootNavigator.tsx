@@ -52,7 +52,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-       initialRouteName="OtpVerification"
+       initialRouteName="Profile"
        //initialRouteName="PinSetup"
       screenOptions={{ headerShown: false, animation: "none" }}
     >

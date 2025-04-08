@@ -274,7 +274,7 @@
 //     marginLeft: 5,
 //   },
 // });
-// OtpVerificationScreen.tsx
+
 // OtpVerificationScreen.tsx
 import React from "react";
 import {

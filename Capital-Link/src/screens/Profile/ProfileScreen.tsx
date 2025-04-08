@@ -30,11 +30,11 @@ const ProfileScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  // ฟังก์ชันสำหรับเมนูตั้งค่าต่าง ๆ 
+  // ฟังก์ชันสำหรับเมนูตั้งค่าต่าง ๆ
   const handleChangePin = () => {
     navigation.navigate("OldPin");
   };
-  const handleRequestNameChange = () => { 
+  const handleRequestNameChange = () => {
     navigation.navigate("NameChange");
   };
   const handleRequestPhoneChange = () => {
@@ -43,8 +43,8 @@ const ProfileScreen: React.FC = () => {
   const handleNotificationSettings = () => {
     navigation.navigate("NotiSettings");
   };
- // เมื่อกดออกจากระบบ ให้เปิด modal
- const handleLogoutPress = () => {
+  // เมื่อกดออกจากระบบ ให้เปิด modal
+  const handleLogoutPress = () => {
     setModalVisible(true);
   };
 
@@ -52,14 +52,13 @@ const ProfileScreen: React.FC = () => {
   const confirmLogout = () => {
     setModalVisible(false);
     // navigation.replace("InitialEntry");
-    navigation.navigate("PinEntry")
+    navigation.navigate("PinEntry");
   };
 
   // เมื่อยกเลิกออกจากระบบ
   const cancelLogout = () => {
     setModalVisible(false);
   };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -100,7 +99,7 @@ const ProfileScreen: React.FC = () => {
               <Ionicons name="key-outline" size={22} color="#CFA459" />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuText} >เปลี่ยนรหัส PIN</Text>
+              <Text style={styles.menuText}>เปลี่ยนรหัส PIN</Text>
               <Text style={styles.menuDescription}>
                 แก้ไขรหัส PIN สำหรับเข้าสู่ระบบ
               </Text>
@@ -223,12 +222,12 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#CFA459",
-    textAlign: "center",
-    marginTop: 50,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#a2754c",
+    marginTop: 35,
     marginBottom: 20,
+    textAlign: "center",
   },
   contentContainer: {
     paddingHorizontal: 16,
@@ -264,7 +263,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
- 
   },
   /* Menu Card */
   menuCard: {

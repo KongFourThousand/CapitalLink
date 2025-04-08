@@ -12,6 +12,7 @@ import {
   TextInputKeyPressEventData
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -97,7 +98,7 @@ const OtpVerificationComponent: React.FC<OtpVerificationComponentProps> = ({
 
   // ฟังก์ชันเมื่อกดปุ่มยืนยัน
   const handleConfirmOTP = () => {
-    const otpCode = otp.join("");
+      const otpCode = otp.join("");
     onVerify(otpCode);
   };
 

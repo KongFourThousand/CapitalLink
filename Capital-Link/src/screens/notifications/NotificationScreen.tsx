@@ -183,7 +183,11 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 16,
+    top: 40,
+    left: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 999,
   },
   headerTitle: {
     fontSize: 22,

@@ -137,7 +137,7 @@ const NameChangeRequestScreen: React.FC = () => {
 
         <ScrollView contentContainerStyle={styles.contentContainer}>
           {/* ฟอร์มชื่อ - นามสกุลใหม่ */}
-          <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text>
+          {/* <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text> */}
           <View style={styles.formContainer}>
             {/* กรอกชื่อใหม่ */}
             <View style={styles.inputGroup}>
@@ -272,12 +272,12 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#CFA459",
-    textAlign: "center",
-    marginTop: 50,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#a2754c",
+    marginTop: 35,
     marginBottom: 20,
+    textAlign: "center",
   },
   contentContainer: {
     paddingHorizontal: 16,
