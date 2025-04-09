@@ -26,7 +26,7 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import { formatPhoneNumber, formatThaiID } from "../../components/common/formatPhoneIAndID";
+import { formatPhoneNumber, formatThaiID } from "../../components/common/formatPhoneAndID";
 
 
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว

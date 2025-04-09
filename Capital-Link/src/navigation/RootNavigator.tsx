@@ -25,7 +25,7 @@ export type RootStackParamList = {
   InitialEntry: undefined;
   Login: undefined;
   Register: undefined;
-  OtpVerification: { from: "Login" | "Register"; phoneNumber: string };
+  OtpVerification: { from: "Login" | "Register"  | "PhoneChange"; phoneNumber: string };
   PinSetup: undefined;
   PinConfirm: { firstPin: string };
   PinEntry: undefined;

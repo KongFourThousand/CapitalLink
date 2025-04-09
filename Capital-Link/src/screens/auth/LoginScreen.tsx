@@ -19,7 +19,7 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import { formatPhoneNumber } from "../../components/common/formatPhoneIAndID";
+import { formatPhoneNumber } from "../../components/common/formatPhoneAndID";
 import { mockRequestOtp } from "../../services/mockApi";
 
 const { width } = Dimensions.get("window");
