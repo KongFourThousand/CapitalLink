@@ -8,14 +8,14 @@ import {
   FlatList,
   StyleSheet,
   Dimensions,
+  Platform, // เพิ่มการนำเข้า Platform
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
-// เปลี่ยนจาก 5 แถว เป็น 3 แถว
-const ITEM_HEIGHT = 70; // เพิ่มความสูงของแต่ละรายการ
-const VISIBLE_ITEMS = 3; // ลดจำนวนรายการที่มองเห็นจาก 5 เป็น 3
-const VISIBLE_OFFSET = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2); // ปรับ offset ให้เป็นกลางของ 3 รายการ
+const ITEM_HEIGHT = 70; // ความสูงของแต่ละรายการ
+const VISIBLE_ITEMS = 3; // จำนวนรายการที่มองเห็น
+const VISIBLE_OFFSET = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2); // offset ตรงกลาง
 
 interface ThaiDatePickerProps {
   visible: boolean;
@@ -27,6 +27,7 @@ interface ThaiDatePickerProps {
 
 const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange, onClose, onSave }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(date));
+  const [isInitialRender, setIsInitialRender] = useState(true);
   const dayRef = useRef<FlatList>(null);
   const monthRef = useRef<FlatList>(null);
   const yearRef = useRef<FlatList>(null);
@@ -36,32 +37,55 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
   ];
 
+  // สร้างรายการวันตามเดือนและปีที่เลือก
   const getDays = () => {
     const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
     return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   };
 
-  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() + 543 - i);
+  // สร้างรายการปี (พ.ศ.)
+  const getYears = () => {
+    return Array.from({ length: 100 }, (_, i) => new Date().getFullYear() + 543 - i);
+  };
 
+  const [days, setDays] = useState(getDays());
+  const [years] = useState(getYears());
+
+  // อัปเดตรายการวันเมื่อเดือนหรือปีเปลี่ยน
   useEffect(() => {
-    setSelectedDate(new Date(date));
-  }, [visible, date]);
+    setDays(getDays());
+  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
+  // เมื่อมีการเปิด modal หรือ props.date เปลี่ยน
   useEffect(() => {
     if (visible) {
-      // ให้เลื่อนไปยังวันที่ เดือน และปีที่เลือกเมื่อ modal แสดงขึ้น
-      scrollToSelected();
+      const newDate = new Date(date);
+      setSelectedDate(newDate);
+      setIsInitialRender(true);
     }
-  }, [visible, selectedDate]);
+  }, [visible, date]);
 
+  // เมื่อ modal แสดงและเป็นการเรนเดอร์ครั้งแรก ให้เลื่อนไปยังวันที่เลือก
+  useEffect(() => {
+    if (visible && isInitialRender && days.length > 0) {
+      setTimeout(() => {
+        scrollToSelected();
+        setIsInitialRender(false);
+      }, 100);
+    }
+  }, [visible, isInitialRender, days, selectedDate]);
+
+  // เลื่อนไปยังวันที่ เดือน และปีที่เลือก
   const scrollToSelected = () => {
     // เลื่อนไปยังวันที่เลือก
     if (dayRef.current) {
       const dayIndex = selectedDate.getDate() - 1;
-      dayRef.current.scrollToOffset({
-        offset: dayIndex * ITEM_HEIGHT,
-        animated: false
-      });
+      if (dayIndex >= 0 && dayIndex < days.length) {
+        dayRef.current.scrollToOffset({
+          offset: dayIndex * ITEM_HEIGHT,
+          animated: false
+        });
+      }
     }
     
     // เลื่อนไปยังเดือนที่เลือก
@@ -75,7 +99,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     
     // เลื่อนไปยังปีที่เลือก
     if (yearRef.current) {
-      const yearIndex = years.indexOf(selectedDate.getFullYear() + 543);
+      const yearIndex = years.findIndex(year => year === selectedDate.getFullYear() + 543);
       if (yearIndex >= 0) {
         yearRef.current.scrollToOffset({
           offset: yearIndex * ITEM_HEIGHT,
@@ -85,26 +109,56 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     }
   };
 
+  // อัปเดตวันที่เมื่อเลือกวัน เดือน หรือปี
   const updateDate = (type: "day" | "month" | "year", value: number) => {
     const newDate = new Date(selectedDate);
-    if (type === "day") newDate.setDate(value);
-    if (type === "month") newDate.setMonth(value);
-    if (type === "year") newDate.setFullYear(value - 543);
+    
+    if (type === "day") {
+      newDate.setDate(value);
+    } else if (type === "month") {
+      // เก็บวันที่ปัจจุบัน
+      const currentDay = newDate.getDate();
+      
+      // เปลี่ยนเดือน
+      newDate.setMonth(value);
+      
+      // ตรวจสอบวันที่ในเดือนใหม่
+      const lastDayOfMonth = new Date(newDate.getFullYear(), value + 1, 0).getDate();
+      if (currentDay > lastDayOfMonth) {
+        newDate.setDate(lastDayOfMonth);
+      }
+    } else if (type === "year") {
+      // เก็บวันที่และเดือนปัจจุบัน
+      const currentDay = newDate.getDate();
+      const currentMonth = newDate.getMonth();
+      
+      // เปลี่ยนปี
+      newDate.setFullYear(value - 543);
+      
+      // ตรวจสอบวันที่ 29 กุมภาพันธ์
+      if (currentMonth === 1 && currentDay === 29) {
+        const isLeapYear = new Date(value - 543, 1, 29).getDate() === 29;
+        if (!isLeapYear) {
+          newDate.setDate(28);
+        }
+      }
+    }
+    
     setSelectedDate(newDate);
   };
 
+  // เมื่อกดบันทึก
   const handleSave = () => {
     onChange(selectedDate);
     onSave();
   };
 
+  // แสดงรายการ (วัน, เดือน, ปี)
   const renderItem = (item: any, selected: boolean) => (
     <View style={[styles.item, selected && styles.itemSelected]}>
       <Text style={[styles.itemText, selected && styles.itemTextSelected]}>{item}</Text>
     </View>
   );
-
-  const days = getDays();
 
   return (
     <Modal transparent visible={visible} animationType="fade">
@@ -139,6 +193,10 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("day", days[index]);
                     }
                   }}
+                  initialNumToRender={7}
+                  maxToRenderPerBatch={7}
+                  windowSize={7}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
@@ -165,6 +223,10 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("month", index);
                     }
                   }}
+                  initialNumToRender={12}
+                  maxToRenderPerBatch={12}
+                  windowSize={12}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
@@ -191,6 +253,10 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("year", years[index]);
                     }
                   }}
+                  initialNumToRender={10}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
@@ -227,14 +293,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   container: {
-    width: "90%", // เพิ่มความกว้าง
+    width: "90%",
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 24, // เพิ่ม padding
+    padding: 24,
     alignItems: "center",
   },
   title: {
-    fontSize: 22, // เพิ่มขนาดตัวอักษร
+    fontSize: 22,
     fontWeight: "bold",
     color: "#a2754c",
     marginBottom: 16,
@@ -287,7 +353,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   itemText: {
-    fontSize: 18, // เพิ่มขนาดตัวอักษร
+    fontSize: 18,
     color: "#333",
     textAlign: "center",
   },
@@ -318,7 +384,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: 14, // เพิ่มความสูงของปุ่ม
+    paddingVertical: 14,
     marginRight: 10,
     borderRadius: 12,
     backgroundColor: "#eee",
@@ -335,7 +401,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   confirmButton: {
-    paddingVertical: 14, // เพิ่มความสูงของปุ่ม
+    paddingVertical: 14,
     alignItems: "center",
   },
   confirmText: {
