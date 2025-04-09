@@ -20,7 +20,7 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-
+import { formatPhoneNumber } from "../../components/common/formatPhoneNumber";
 // mockRequestOtp คือฟังก์ชันที่ mock การขอ OTP
 import { mockRequestOtp } from "../../services/mockApi";
 

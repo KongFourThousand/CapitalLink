@@ -15,7 +15,6 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Ionicons,
@@ -32,6 +31,9 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 
 const { width } = Dimensions.get("window");
+
+// กำหนด default date เป็น 1 มกราคมของปีปัจจุบัน
+const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 
 const RegisterScreen: React.FC = () => {
   const navigation =
@@ -50,8 +52,8 @@ const RegisterScreen: React.FC = () => {
   const [companyRegisterNumber, setCompanyRegisterNumber] = useState("");
   const [contactPerson, setContactPerson] = useState("");
 
-  // State สำหรับ Date Picker
-  const [date, setDate] = useState<Date>(new Date());
+  // State สำหรับ Date Picker – ตั้งค่าเริ่มต้นเป็น defaultDate
+  const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -64,6 +66,7 @@ const RegisterScreen: React.FC = () => {
     );
   }
 
+  // กรองเบอร์โทรเฉพาะตัวเลข สูงสุด 10 หลัก
   const handlePhoneChange = (input: string) => {
     let digitsOnly = input.replace(/\D/g, "");
     if (digitsOnly.length > 10) {
@@ -79,8 +82,8 @@ const RegisterScreen: React.FC = () => {
     }
     try {
       setLoading(true);
-      // mock ขอ OTP
-      await /* mockRequestOtp */ Promise.resolve();
+      // ใช้ Promise.resolve() จำลองการขอ OTP ในที่นี้
+      await Promise.resolve();
       navigation.navigate("OtpVerification", {
         from: "Register",
         phoneNumber: phoneNumber,
@@ -93,34 +96,29 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // ฟังก์ชันเมื่อเลือกวันที่ จาก ThaiDatePicker
+  // เมื่อ ThaiDatePicker เลือกวันที่แล้ว ให้ update state ทั้ง date และ birthDate (เป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {
     setDate(selectedDate);
-    
-    // แปลงวันที่เป็นรูปแบบ DD/MM/พ.ศ.
     const day = selectedDate.getDate().toString().padStart(2, "0");
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
     const year = selectedDate.getFullYear() + 543;
     setBirthDate(`${day}/${month}/${year}`);
   };
 
-  // เปิด DatePicker
   const showDatepicker = () => {
     setShowCustomDatePicker(true);
   };
 
-  // ปิด DatePicker
   const handleCloseDatePicker = () => {
     setShowCustomDatePicker(false);
   };
 
-  // บันทึกวันที่และปิด DatePicker
+  // เมื่อกด "ตกลง" ใน ThaiDatePicker เราจะ update value ใน state แล้วปิด popup
   const handleSaveDate = () => {
-    handleDateChange(date);
+    // handleDateChange ได้ทำการอัปเดทแล้ว เราเพียงปิด popup
     setShowCustomDatePicker(false);
   };
 
-  // ฟอร์มสำหรับบุคคลธรรมดา
   const renderPersonalForm = () => (
     <>
       <Text style={styles.inputLabel}>เลขบัตรประชาชน</Text>
@@ -138,7 +136,6 @@ const RegisterScreen: React.FC = () => {
           maxLength={13}
         />
       </View>
-
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
@@ -157,7 +154,6 @@ const RegisterScreen: React.FC = () => {
       {phoneNumber.length < 10 && phoneNumber.length > 0 && (
         <Text style={styles.hintText}>กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678</Text>
       )}
-
       <Text style={styles.inputLabel}>วันเดือนปีเกิด (พ.ศ.)</Text>
       <TouchableOpacity activeOpacity={0.7} onPress={showDatepicker}>
         <View style={styles.inputContainer}>
@@ -166,7 +162,7 @@ const RegisterScreen: React.FC = () => {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="DD/MM/YYYY"
+            placeholder="วว/ดด/ปป" // รูปแบบ placeholder แบบไทย
             placeholderTextColor="#AAAAAA"
             value={birthDate}
             editable={false}
@@ -177,29 +173,23 @@ const RegisterScreen: React.FC = () => {
           </View>
         </View>
       </TouchableOpacity>
-
-      {/* ใช้ ThaiDatePicker สำหรับทั้ง iOS และ Android */}
+      {/* แสดง ThaiDatePicker popup */}
       <ThaiDatePicker
         visible={showCustomDatePicker}
         date={date}
-        onChange={(newDate) => setDate(newDate)}
+        onChange={handleDateChange}
         onClose={handleCloseDatePicker}
         onSave={handleSaveDate}
       />
     </>
   );
 
-  // ฟอร์มสำหรับนิติบุคคล
   const renderCorporateForm = () => (
     <>
       <Text style={styles.inputLabel}>เลขทะเบียนนิติบุคคล</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name="office-building-outline"
-            size={20}
-            color="#999999"
-          />
+          <MaterialCommunityIcons name="office-building-outline" size={20} color="#999999" />
         </View>
         <TextInput
           style={styles.input}
@@ -210,7 +200,6 @@ const RegisterScreen: React.FC = () => {
           keyboardType="number-pad"
         />
       </View>
-
       <Text style={styles.inputLabel}>ผู้ติดต่อ</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
@@ -229,57 +218,26 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.replace("InitialEntry")}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.replace("InitialEntry")}>
             <Ionicons name="chevron-back" size={24} color="#CFA459" />
           </TouchableOpacity>
           <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../assets/CLlogo+NoBG.png")}
-              style={styles.logo}
-            />
+            <Image source={require("../../../assets/CLlogo+NoBG.png")} style={styles.logo} />
           </View>
           <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, userType === "บุคคลธรรมดา" && styles.tabActive]}
-              onPress={() => setUserType("บุคคลธรรมดา")}
-            >
-              <Text style={[styles.tabText, userType === "บุคคลธรรมดา" && styles.tabTextActive]}>
-                บุคคลธรรมดา
-              </Text>
+            <TouchableOpacity style={[styles.tab, userType === "บุคคลธรรมดา" && styles.tabActive]} onPress={() => setUserType("บุคคลธรรมดา")}>
+              <Text style={[styles.tabText, userType === "บุคคลธรรมดา" && styles.tabTextActive]}>บุคคลธรรมดา</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, userType === "นิติบุคคล" && styles.tabActive]}
-              onPress={() => setUserType("นิติบุคคล")}
-            >
-              <Text style={[styles.tabText, userType === "นิติบุคคล" && styles.tabTextActive]}>
-                นิติบุคคล
-              </Text>
+            <TouchableOpacity style={[styles.tab, userType === "นิติบุคคล" && styles.tabActive]} onPress={() => setUserType("นิติบุคคล")}>
+              <Text style={[styles.tabText, userType === "นิติบุคคล" && styles.tabTextActive]}>นิติบุคคล</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.formContainer}>
             {userType === "บุคคลธรรมดา" ? renderPersonalForm() : renderCorporateForm()}
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={handleRequestOtp}
-              disabled={phoneNumber.length < 10 || loading}
-            >
-              <LinearGradient
-                colors={["#e6c170", "#d4af71", "#c19346"]}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-                style={[
-                  styles.otpButton,
-                  (phoneNumber.length < 10 || loading) && { opacity: 0.6 },
-                ]}
-              >
+            <TouchableOpacity activeOpacity={0.9} onPress={handleRequestOtp} disabled={phoneNumber.length < 10 || loading}>
+              <LinearGradient colors={["#e6c170", "#d4af71", "#c19346"]} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={[styles.otpButton, (phoneNumber.length < 10 || loading) && { opacity: 0.6 }]}>
                 {loading ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
@@ -290,10 +248,7 @@ const RegisterScreen: React.FC = () => {
                 )}
               </LinearGradient>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.pinLoginContainer}
-              onPress={() => navigation.navigate("Login")}
-            >
+            <TouchableOpacity style={styles.pinLoginContainer} onPress={() => navigation.navigate("Login")}>
               <Text style={styles.pinLoginText}>เข้าสู่ระบบ</Text>
             </TouchableOpacity>
           </View>
