@@ -38,10 +38,11 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
   const dayListRef = useRef<FlatList<number>>(null);
   const monthListRef = useRef<FlatList<string>>(null);
   const yearListRef = useRef<FlatList<number>>(null);
-
+  
   // Local state สำหรับ selectedDate; เริ่มต้นจาก props.date
   const [selectedDate, setSelectedDate] = useState(new Date(date));
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  const [shouldUpdateFlatLists, setShouldUpdateFlatLists] = useState(false);
+  const [isUpdatingDate, setIsUpdatingDate] = useState(false);
 
   // รายการเดือนภาษาไทย
   const thaiMonths = [
@@ -59,65 +60,78 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     "ธันวาคม",
   ];
 
-  // Memoized data เพื่อลดการคำนวณซ้ำ
-  const useMemoizedData = (generator: Function, deps: any[]) => {
-    const [data, setData] = useState<any[]>([]);
-    
-    useEffect(() => {
-      setData(generator());
-    }, deps);
-    
-    return data;
+  // สร้างรายการวันตามเดือนและปีที่เลือก
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
   };
 
-  // ฟังก์ชันสร้างรายการวันตามเดือนและปีที่เลือก
+  // สร้างรายการวัน
   const generateDays = () => {
-    const lastDay = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth() + 1,
-      0
-    ).getDate();
+    const lastDay = getDaysInMonth(selectedDate.getFullYear(), selectedDate.getMonth());
     return Array.from({ length: lastDay }, (_, i) => i + 1);
   };
-
-  // ฟังก์ชันสร้างรายการปี (แสดงเป็น พ.ศ.)
+  
+  // สร้างรายการปี (พ.ศ.)
   const generateYears = () => {
     const currentYear = new Date().getFullYear() + 543;
     return Array.from({ length: 100 }, (_, i) => currentYear - i);
   };
 
-  const days = useMemoizedData(generateDays, [selectedDate.getMonth(), selectedDate.getFullYear()]);
-  const years = useMemoizedData(generateYears, []);
+  const [days, setDays] = useState<number[]>([]);
+  const [years, setYears] = useState<number[]>([]);
 
-  // เมื่อ modal เปิดขึ้นหรือ props.date เปลี่ยน ให้รีเซ็ต selectedDate และเลื่อน FlatList ไปที่ตัวเลือกที่ถูกเลือก
+  // เมื่อโหลด component ครั้งแรกและเมื่อ modal เปิด
+  useEffect(() => {
+    setYears(generateYears());
+  }, []);
+
+  // เมื่อเดือนหรือปีเปลี่ยน ให้ปรับรายการวันใหม่
+  useEffect(() => {
+    const newDays = generateDays();
+    setDays(newDays);
+    
+    // ตรวจสอบว่าวันที่ของเดือนใหม่ถูกต้องหรือไม่
+    const maxDayInMonth = getDaysInMonth(selectedDate.getFullYear(), selectedDate.getMonth());
+    if (selectedDate.getDate() > maxDayInMonth) {
+      const newDate = new Date(selectedDate);
+      newDate.setDate(maxDayInMonth);
+      setSelectedDate(newDate);
+    }
+  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
+
+  // เมื่อ modal เปิดขึ้นหรือ props.date เปลี่ยน
   useEffect(() => {
     if (visible) {
-      setSelectedDate(new Date(date));
-      setIsFirstRender(true);
+      const newDate = new Date(date);
+      setSelectedDate(newDate);
+      setShouldUpdateFlatLists(true);
     }
   }, [visible, date]);
 
-  // เมื่อข้อมูลพร้อม ให้เลื่อนไปที่ตำแหน่งที่เลือก
+  // เมื่อต้องการอัพเดตตำแหน่ง FlatList
   useEffect(() => {
-    if (visible && isFirstRender && days.length > 0 && years.length > 0) {
+    if (shouldUpdateFlatLists && days.length > 0) {
       setTimeout(() => {
         scrollToSelected();
-        setIsFirstRender(false);
+        setShouldUpdateFlatLists(false);
       }, 300);
     }
-  }, [visible, isFirstRender, days.length, years.length]);
+  }, [shouldUpdateFlatLists, days, selectedDate]);
 
-  // ฟังก์ชันเลื่อน FlatList ให้อยู่ในตำแหน่งที่เลือก (ปรับ offset ด้วย EXTRA_OFFSET_ROWS)
+  // ฟังก์ชันเลื่อน FlatList ให้อยู่ในตำแหน่งที่เลือก
   const scrollToSelected = () => {
     try {
       // สำหรับวัน
       if (dayListRef.current) {
         const dayIndex = selectedDate.getDate() - 1;
-        dayListRef.current.scrollToOffset({
-          offset: dayIndex * ITEM_HEIGHT - VISIBLE_OFFSET - (EXTRA_OFFSET_ROWS * ITEM_HEIGHT),
-          animated: false,
-        });
+        if (dayIndex >= 0 && dayIndex < days.length) {
+          dayListRef.current.scrollToOffset({
+            offset: dayIndex * ITEM_HEIGHT - VISIBLE_OFFSET - (EXTRA_OFFSET_ROWS * ITEM_HEIGHT),
+            animated: false,
+          });
+        }
       }
+      
       // สำหรับเดือน
       if (monthListRef.current) {
         const monthIndex = selectedDate.getMonth();
@@ -126,6 +140,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
           animated: false,
         });
       }
+      
       // สำหรับปี (แสดงเป็น พ.ศ.)
       if (yearListRef.current) {
         const yearIndex = years.findIndex(
@@ -145,29 +160,89 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
 
   // ฟังก์ชันอัปเดทวันที่เมื่อมีการเลือกจาก FlatList
   const updateDate = (type: "day" | "month" | "year", value: number) => {
+    // ป้องกันการอัพเดทซ้ำซ้อน
+    if (isUpdatingDate) return;
+    
+    setIsUpdatingDate(true);
+    
     const newDate = new Date(selectedDate);
+    let needRerender = false;
+    
     if (type === "day") {
+      // ถ้าวันที่เท่าเดิม ไม่ต้องทำอะไร
+      if (newDate.getDate() === value) {
+        setIsUpdatingDate(false);
+        return;
+      }
       newDate.setDate(value);
     } else if (type === "month") {
+      // ถ้าเดือนเท่าเดิม ไม่ต้องทำอะไร
+      if (newDate.getMonth() === value) {
+        setIsUpdatingDate(false);
+        return;
+      }
+      
+      // บันทึกวันที่เดิมก่อนเปลี่ยนเดือน
+      const currentDay = newDate.getDate();
+      
+      // เปลี่ยนเดือน
       newDate.setMonth(value);
-      const lastDay = new Date(newDate.getFullYear(), value + 1, 0).getDate();
-      if (newDate.getDate() > lastDay) {
-        newDate.setDate(lastDay);
+      
+      // ตรวจสอบวันสุดท้ายของเดือนใหม่
+      const lastDayOfMonth = getDaysInMonth(newDate.getFullYear(), value);
+      
+      // ถ้าวันที่เดิมมากกว่าวันสุดท้ายของเดือนใหม่ ให้กำหนดวันที่เป็นวันสุดท้ายแทน
+      if (currentDay > lastDayOfMonth) {
+        newDate.setDate(lastDayOfMonth);
       }
+      
+      needRerender = true;
     } else if (type === "year") {
-      newDate.setFullYear(value - 543);
-      const lastDay = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0).getDate();
-      if (newDate.getDate() > lastDay) {
-        newDate.setDate(lastDay);
+      // ถ้าปีเท่าเดิม ไม่ต้องทำอะไร
+      if (newDate.getFullYear() + 543 === value) {
+        setIsUpdatingDate(false);
+        return;
       }
+      
+      // บันทึกวันและเดือนเดิมก่อนเปลี่ยนปี
+      const currentDay = newDate.getDate();
+      const currentMonth = newDate.getMonth();
+      
+      // เปลี่ยนปี
+      newDate.setFullYear(value - 543);
+      
+      // ตรวจสอบวันที่ 29/02 ในกรณีปีอธิกสุรทิน
+      if (currentMonth === 1 && currentDay === 29) {
+        const isLeapYear = getDaysInMonth(value - 543, 1) === 29;
+        if (!isLeapYear) {
+          newDate.setDate(28);
+        }
+      }
+      
+      needRerender = true;
     }
+    
     setSelectedDate(newDate);
+    
+    // ถ้าเปลี่ยนเดือนหรือปี ให้รีเรนเดอร์ FlatList
+    if (needRerender) {
+      setTimeout(() => {
+        setShouldUpdateFlatLists(true);
+        setIsUpdatingDate(false);
+      }, 50);
+    } else {
+      setIsUpdatingDate(false);
+    }
   };
 
-  // จับ event เมื่อเลื่อน FlatList - ใช้ debounced สำหรับการเลื่อนเพื่อลดการเรียกใช้งานมากเกินไป
+  // จับ event เมื่อเลื่อน FlatList
   const handleScroll = (event: any, type: "day" | "month" | "year") => {
+    // ป้องกันการอัพเดทระหว่างที่กำลังอัพเดทอยู่แล้ว
+    if (isUpdatingDate || shouldUpdateFlatLists) return;
+    
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / ITEM_HEIGHT);
+    
     if (type === "day" && index >= 0 && index < days.length) {
       updateDate("day", days[index]);
     } else if (type === "month" && index >= 0 && index < thaiMonths.length) {
@@ -207,7 +282,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     );
   };
 
-  // Render item สำหรับปี (แสดงเป็น พ.ศ.)
+  // Render item สำหรับปี
   const renderYearItem = ({ item }: { item: number }) => {
     const isSelected = selectedDate.getFullYear() + 543 === item;
     return (
@@ -238,11 +313,13 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
               <Text style={styles.confirmText}>ตกลง</Text>
             </TouchableOpacity>
           </View>
+          
           <View style={styles.currentDateContainer}>
             <Text style={styles.currentDateText}>
               {`${selectedDate.getDate()} ${thaiMonths[selectedDate.getMonth()]} ${selectedDate.getFullYear() + 543}`}
             </Text>
           </View>
+          
           <View style={styles.spinnerContainer}>
             {/* คอลัมน์สำหรับวัน */}
             <View style={styles.spinnerColumnContainer}>
@@ -259,14 +336,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   getItemLayout={getItemLayout}
                   contentContainerStyle={styles.flatListContent}
                   onMomentumScrollEnd={(e) => handleScroll(e, "day")}
-                  initialNumToRender={10} // ลดจำนวนการ render ครั้งแรก
-                  maxToRenderPerBatch={5} // ลดจำนวนการ render ต่อรอบ
-                  windowSize={5} // ลดขนาดหน้าต่างการ render
-                  removeClippedSubviews={true} // ลบ component ที่ไม่อยู่ในหน้าจอ
+                  initialNumToRender={10}
+                  maxToRenderPerBatch={5}
+                  windowSize={5}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 <View style={styles.selectionIndicator} />
               </View>
             </View>
+            
             {/* คอลัมน์สำหรับเดือน */}
             <View style={[styles.spinnerColumnContainer, styles.monthColumn]}>
               <Text style={styles.spinnerLabel}>เดือน</Text>
@@ -282,15 +360,16 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   getItemLayout={getItemLayout}
                   contentContainerStyle={styles.flatListContent}
                   onMomentumScrollEnd={(e) => handleScroll(e, "month")}
-                  initialNumToRender={5}
+                  initialNumToRender={12}
                   maxToRenderPerBatch={4}
                   windowSize={5}
-                  removeClippedSubviews={true}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 <View style={styles.selectionIndicator} />
               </View>
             </View>
-            {/* คอลัมน์สำหรับปี (พ.ศ.) */}
+            
+            {/* คอลัมน์สำหรับปี */}
             <View style={styles.spinnerColumnContainer}>
               <Text style={styles.spinnerLabel}>ปี (พ.ศ.)</Text>
               <View style={styles.spinnerWrapper}>
@@ -308,7 +387,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   initialNumToRender={10}
                   maxToRenderPerBatch={5}
                   windowSize={5}
-                  removeClippedSubviews={true}
+                  removeClippedSubviews={Platform.OS === 'android'}
                 />
                 <View style={styles.selectionIndicator} />
               </View>
@@ -388,14 +467,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   monthColumn: {
-    flex: 2, // เพิ่มขนาดคอลัมน์เดือนให้กว้างขึ้น
+    flex: 2, // ช่องเดือนกว้างกว่า
   },
   spinnerLabel: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
     marginBottom: 8,
-    textAlign: "center",
+    textAlign: "center", 
   },
   spinnerWrapper: {
     height: ITEM_HEIGHT * VISIBLE_ITEMS,
@@ -404,11 +483,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     overflow: "hidden",
     position: "relative",
-    elevation: 2,
+    // เพิ่มเงาให้ชัดเจนขึ้น
+    elevation: 3,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   flatListContent: {
     paddingVertical: VISIBLE_OFFSET,
@@ -434,7 +514,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#CFA459",
   },
   pickerItemText: {
-    fontSize: 18, // ลดขนาดตัวอักษรลงเล็กน้อยเพื่อให้เข้ากับพื้นที่
+    fontSize: 18, 
     color: "#333",
     fontWeight: "500",
     textAlign: "center", // จัดข้อความให้อยู่ตรงกลางเสมอ
@@ -451,7 +531,7 @@ const styles = StyleSheet.create({
     top: VISIBLE_OFFSET, // จะอยู่ตรงกลาง (แถวที่ 3)
     borderTopWidth: 2,
     borderBottomWidth: 2,
-    borderColor: "#CFA459",
+    borderColor: "#CFA459", 
     backgroundColor: "rgba(207, 164, 89, 0.1)",
     pointerEvents: "none",
   },
