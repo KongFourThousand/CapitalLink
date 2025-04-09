@@ -27,17 +27,16 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 
-// นำเข้าคอมโพเนนต์ ThaiDatePicker
+// นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 
 const { width } = Dimensions.get("window");
 
-// กำหนด default date เป็น 1 มกราคมของปีปัจจุบัน
+// ตั้งค่า default date เป็น 1 มกราคมของปีปัจจุบัน
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 
 const RegisterScreen: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
@@ -52,7 +51,7 @@ const RegisterScreen: React.FC = () => {
   const [companyRegisterNumber, setCompanyRegisterNumber] = useState("");
   const [contactPerson, setContactPerson] = useState("");
 
-  // State สำหรับ Date Picker – ตั้งค่าเริ่มต้นเป็น defaultDate
+  // State สำหรับ Date Picker – เริ่ม default เป็น 1 มกราคมของปีปัจจุบัน
   const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
 
@@ -81,7 +80,7 @@ const RegisterScreen: React.FC = () => {
     }
     try {
       setLoading(true);
-      // จำลองการขอ OTP (แทนที่ด้วย mockRequestOtp เมื่อใช้งานจริง)
+      // จำลองการขอ OTP (แทนที่ด้วย mockRequestOtp ในงานจริง)
       await Promise.resolve();
       navigation.navigate("OtpVerification", {
         from: "Register",
@@ -95,7 +94,7 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  // เมื่อได้รับวันที่เลือกจาก ThaiDatePicker ให้ update ทั้ง state date และ birthDate (แปลงเป็น พ.ศ.)
+  // เมื่อได้รับวันที่จาก ThaiDatePicker ให้ update state date และ birthDate (แปลงเป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {
     setDate(selectedDate);
     const day = selectedDate.getDate().toString().padStart(2, "0");
@@ -112,7 +111,7 @@ const RegisterScreen: React.FC = () => {
     setShowCustomDatePicker(false);
   };
 
-  // เมื่อกดตกลงใน popup เราจะปิด popup (ค่าที่เลือกได้ถูกอัปเดทผ่าน onChange จาก ThaiDatePicker)
+  // เมื่อกดตกลงใน popup ให้ปิด popup (ThaiDatePicker จะ update ผ่าน onChange)
   const handleSaveDate = () => {
     setShowCustomDatePicker(false);
   };
@@ -229,13 +228,17 @@ const RegisterScreen: React.FC = () => {
               style={[styles.tab, userType === "บุคคลธรรมดา" && styles.tabActive]}
               onPress={() => setUserType("บุคคลธรรมดา")}
             >
-              <Text style={[styles.tabText, userType === "บุคคลธรรมดา" && styles.tabTextActive]}>บุคคลธรรมดา</Text>
+              <Text style={[styles.tabText, userType === "บุคคลธรรมดา" && styles.tabTextActive]}>
+                บุคคลธรรมดา
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, userType === "นิติบุคคล" && styles.tabActive]}
               onPress={() => setUserType("นิติบุคคล")}
             >
-              <Text style={[styles.tabText, userType === "นิติบุคคล" && styles.tabTextActive]}>นิติบุคคล</Text>
+              <Text style={[styles.tabText, userType === "นิติบุคคล" && styles.tabTextActive]}>
+                นิติบุคคล
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.formContainer}>

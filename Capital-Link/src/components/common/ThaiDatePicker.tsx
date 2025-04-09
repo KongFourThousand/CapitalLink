@@ -9,13 +9,12 @@ import {
   Dimensions,
   StyleSheet,
   FlatList,
-  TouchableWithoutFeedback,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 const ITEM_HEIGHT = 60;
 const VISIBLE_ITEMS = 5;
-const VISIBLE_OFFSET = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
+const CENTER_ITEM_INDEX = Math.floor(VISIBLE_ITEMS / 2); // หาตำแหน่งกลาง (2 สำหรับ VISIBLE_ITEMS = 5)
 
 interface ThaiDatePickerProps {
   visible: boolean;
@@ -37,9 +36,10 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
   const monthListRef = useRef<FlatList<string>>(null);
   const yearListRef = useRef<FlatList<number>>(null);
 
-  // Local state สำหรับ selectedDate; กำหนดค่าเริ่มต้นจาก props.date
+  // ใช้ local state สำหรับ selectedDate; เริ่มจาก props.date
   const [selectedDate, setSelectedDate] = useState(new Date(date));
-
+  const [hasInitialScroll, setHasInitialScroll] = useState(false);
+  
   // รายการเดือนภาษาไทย
   const thaiMonths = [
     "มกราคม",
@@ -56,157 +56,191 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     "ธันวาคม",
   ];
 
-  // สร้างรายการวันตามเดือนและปี
-  const generateDays = (year: number, month: number) => {
-    const lastDay = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: lastDay }, (_, i) => i + 1);
-  };
+  // สร้างรายการวันตามเดือนและปีที่เลือก
+  const [days, setDays] = useState<number[]>([]);
+  // สร้างรายการปี (พ.ศ.)
+  const [years, setYears] = useState<number[]>([]);
 
-  // สร้างรายการปี (แสดงเป็น พ.ศ.)
-  const generateYears = (startYear: number, count: number) => {
-    return Array.from({ length: count }, (_, i) => startYear - i);
-  };
+  // สร้างรายการวันเมื่อเดือนหรือปีเปลี่ยน
+  useEffect(() => {
+    const lastDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
+    const newDays = Array.from({ length: lastDay }, (_, i) => i + 1);
+    setDays(newDays);
+  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
-  const [days, setDays] = useState(() =>
-    generateDays(selectedDate.getFullYear(), selectedDate.getMonth())
-  );
-  const [years] = useState(() =>
-    generateYears(new Date().getFullYear() + 543, 100)
-  );
+  // สร้างรายการปี (พ.ศ.) เมื่อ component โหลด
+  useEffect(() => {
+    const currentYear = new Date().getFullYear() + 543;
+    const newYears = Array.from({ length: 100 }, (_, i) => currentYear - i);
+    setYears(newYears);
+  }, []);
 
-  // เมื่อ modal เปิดขึ้น หรือ prop.date เปลี่ยน ให้รีเซ็ต selectedDate และเลื่อน FlatList ไปที่ตัวเลือกที่ถูกเลือก
+  // เมื่อ modal เปิดขึ้น อัพเดท selectedDate และเลื่อนไปที่วันนั้น
   useEffect(() => {
     if (visible) {
       setSelectedDate(new Date(date));
-      setTimeout(() => {
-        scrollToCurrentDate();
-      }, 300);
+      setHasInitialScroll(false);
     }
   }, [visible, date]);
 
-  // เมื่อเดือนหรือปีเปลี่ยน ให้ปรับรายการวันใหม่
+  // เมื่อ modal เปิดอยู่และยังไม่ได้เลื่อนตำแหน่ง ให้เลื่อนไปที่ตำแหน่งที่เลือก
   useEffect(() => {
-    setDays(generateDays(selectedDate.getFullYear(), selectedDate.getMonth()));
-  }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
+    if (visible && !hasInitialScroll && days.length > 0 && years.length > 0) {
+      // รอให้ FlatList พร้อมก่อนเลื่อน
+      setTimeout(() => {
+        scrollToSelected();
+        setHasInitialScroll(true);
+      }, 300);
+    }
+  }, [visible, hasInitialScroll, days, years]);
 
-  const scrollToCurrentDate = () => {
-    dayListRef.current?.scrollToIndex({
-      index: selectedDate.getDate() - 1,
-      animated: false,
-      viewPosition: 0.5,
-    });
-    monthListRef.current?.scrollToIndex({
-      index: selectedDate.getMonth(),
-      animated: false,
-      viewPosition: 0.5,
-    });
-    const yearIndex = years.findIndex(
-      (year) => year === selectedDate.getFullYear() + 543
-    );
-    if (yearIndex >= 0) {
-      yearListRef.current?.scrollToIndex({
-        index: yearIndex,
-        animated: false,
-        viewPosition: 0.5,
-      });
+  // เลื่อน FlatList ไปที่วันที่เลือก เพื่อให้อยู่ตรงกลาง
+  const scrollToSelected = () => {
+    try {
+      // เลื่อนไปที่วัน
+      if (dayListRef.current) {
+        dayListRef.current.scrollToOffset({
+          offset: (selectedDate.getDate() - 1 - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: false,
+        });
+      }
+      
+      // เลื่อนไปที่เดือน
+      if (monthListRef.current) {
+        monthListRef.current.scrollToOffset({
+          offset: (selectedDate.getMonth() - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: false,
+        });
+      }
+      
+      // เลื่อนไปที่ปี (พ.ศ.)
+      const yearIndex = years.findIndex(year => year === selectedDate.getFullYear() + 543);
+      if (yearIndex >= 0 && yearListRef.current) {
+        yearListRef.current.scrollToOffset({
+          offset: (yearIndex - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: false,
+        });
+      }
+    } catch (error) {
+      console.log("Error scrolling to selected date", error);
     }
   };
 
-  const handleDayChange = (day: number) => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(day);
-    setSelectedDate(newDate);
-  };
+  // แนบตัวจัดการกับการ scroll เสร็จสิ้น
+  const handleScroll = (event: any, type: 'day' | 'month' | 'year') => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const indexFloat = offsetY / ITEM_HEIGHT;
+    const index = Math.round(indexFloat) + CENTER_ITEM_INDEX;
 
-  const handleMonthChange = (monthIndex: number) => {
-    const newDate = new Date(selectedDate);
-    newDate.setMonth(monthIndex);
-    const lastDay = new Date(newDate.getFullYear(), monthIndex + 1, 0).getDate();
-    if (newDate.getDate() > lastDay) {
-      newDate.setDate(lastDay);
+    if (type === 'day' && index >= 0 && index < days.length) {
+      updateDate('day', days[index]);
+    } else if (type === 'month' && index >= 0 && index < 12) {
+      updateDate('month', index);
+    } else if (type === 'year' && index >= 0 && index < years.length) {
+      updateDate('year', years[index]);
     }
-    setSelectedDate(newDate);
   };
 
-  const handleYearChange = (yearTH: number) => {
+  // อัพเดทวันที่เมื่อมีการเลือกวัน เดือน หรือปี
+  const updateDate = (type: 'day' | 'month' | 'year', value: number) => {
     const newDate = new Date(selectedDate);
-    newDate.setFullYear(yearTH - 543);
-    const lastDay = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0).getDate();
-    if (newDate.getDate() > lastDay) {
-      newDate.setDate(lastDay);
+    
+    if (type === 'day') {
+      newDate.setDate(value);
+    } else if (type === 'month') {
+      newDate.setMonth(value);
+      
+      // ตรวจสอบว่าวันที่ยังถูกต้องหลังจากเปลี่ยนเดือน
+      const lastDayOfNewMonth = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0).getDate();
+      if (newDate.getDate() > lastDayOfNewMonth) {
+        newDate.setDate(lastDayOfNewMonth);
+      }
+    } else if (type === 'year') {
+      // แปลงจาก พ.ศ. เป็น ค.ศ.
+      newDate.setFullYear(value - 543);
+      
+      // ตรวจสอบวันที่ในกรณีปีอธิกสุรทิน
+      const lastDayOfNewMonth = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0).getDate();
+      if (newDate.getDate() > lastDayOfNewMonth) {
+        newDate.setDate(lastDayOfNewMonth);
+      }
     }
+    
     setSelectedDate(newDate);
   };
 
-  // เมื่อกดตกลง ส่งค่าที่เลือกกลับไปยัง parent component
+  // บันทึกการเปลี่ยนแปลงและปิด modal
   const handleSave = () => {
     onChange(selectedDate);
     onSave();
   };
 
-  const getItemLayout = (_: any, index: number) => ({
-    length: ITEM_HEIGHT,
-    offset: ITEM_HEIGHT * index,
-    index,
-  });
-
-  const handleDayScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-    if (index >= 0 && index < days.length) {
-      handleDayChange(days[index]);
+  // เลื่อนไปที่วันที่ตรงกลาง
+  const scrollToMiddle = (type: 'day' | 'month' | 'year') => {
+    if (type === 'day') {
+      const index = days.findIndex(day => day === selectedDate.getDate());
+      if (index >= 0 && dayListRef.current) {
+        dayListRef.current.scrollToOffset({
+          offset: (index - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: true,
+        });
+      }
+    } else if (type === 'month') {
+      if (monthListRef.current) {
+        monthListRef.current.scrollToOffset({
+          offset: (selectedDate.getMonth() - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: true,
+        });
+      }
+    } else if (type === 'year') {
+      const yearIndex = years.findIndex(year => year === selectedDate.getFullYear() + 543);
+      if (yearIndex >= 0 && yearListRef.current) {
+        yearListRef.current.scrollToOffset({
+          offset: (yearIndex - CENTER_ITEM_INDEX) * ITEM_HEIGHT,
+          animated: true,
+        });
+      }
     }
   };
 
-  const handleMonthScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-    if (index >= 0 && index < thaiMonths.length) {
-      handleMonthChange(index);
-    }
-  };
-
-  const handleYearScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-    if (index >= 0 && index < years.length) {
-      handleYearChange(years[index]);
-    }
-  };
-
-  // เพิ่ม style สำหรับรายการที่กว้างขึ้น (วันและเดือน)
+  // รูปแบบรายการวัน
   const renderDayItem = ({ item }: { item: number }) => {
     const isSelected = selectedDate.getDate() === item;
     return (
-      <TouchableWithoutFeedback onPress={() => handleDayChange(item)}>
-        <View style={[styles.pickerItem, styles.pickerItemWide, isSelected && styles.selectedPickerItem]}>
-          <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>{item}</Text>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={[styles.pickerItem, isSelected && styles.selectedPickerItem]}>
+        <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>
+          {item}
+        </Text>
+      </View>
     );
   };
 
+  // รูปแบบรายการเดือน
   const renderMonthItem = ({ item, index }: { item: string; index: number }) => {
     const isSelected = selectedDate.getMonth() === index;
     return (
-      <TouchableWithoutFeedback onPress={() => handleMonthChange(index)}>
-        <View style={[styles.pickerItem, styles.pickerItemWide, isSelected && styles.selectedPickerItem]}>
-          <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>{item}</Text>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={[styles.pickerItem, styles.monthItem, isSelected && styles.selectedPickerItem]}>
+        <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>
+          {item}
+        </Text>
+      </View>
     );
   };
 
+  // รูปแบบรายการปี
   const renderYearItem = ({ item }: { item: number }) => {
     const isSelected = selectedDate.getFullYear() + 543 === item;
     return (
-      <TouchableWithoutFeedback onPress={() => handleYearChange(item)}>
-        <View style={[styles.pickerItem, isSelected && styles.selectedPickerItem]}>
-          <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>{item}</Text>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={[styles.pickerItem, isSelected && styles.selectedPickerItem]}>
+        <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>
+          {item}
+        </Text>
+      </View>
     );
   };
+
+  // สร้างรายการเพิ่มเติมด้านบนและด้านล่างเพื่อให้สามารถเลื่อนได้
+  const extraItems = Array(CENTER_ITEM_INDEX).fill(null);
 
   return (
     <Modal visible={visible} transparent animationType="slide">
@@ -221,12 +255,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
               <Text style={styles.confirmText}>ตกลง</Text>
             </TouchableOpacity>
           </View>
+          
           <View style={styles.currentDateContainer}>
             <Text style={styles.currentDateText}>
               {`${selectedDate.getDate()} ${thaiMonths[selectedDate.getMonth()]} ${selectedDate.getFullYear() + 543}`}
             </Text>
           </View>
+          
           <View style={styles.spinnerContainer}>
+            {/* คอลัมน์วันที่ */}
             <View style={styles.spinnerColumnContainer}>
               <Text style={styles.spinnerLabel}>วันที่</Text>
               <View style={styles.spinnerWrapper}>
@@ -238,14 +275,27 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
                   decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
-                  onMomentumScrollEnd={handleDayScroll}
+                  contentContainerStyle={styles.flatListContent}
+                  onMomentumScrollEnd={(e) => handleScroll(e, 'day')}
+                  initialNumToRender={31}
+                  ListHeaderComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
+                  ListFooterComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
                 />
+                
+                {/* แถบเลือกตรงกลาง */}
                 <View style={styles.selectionIndicator} />
+                
+                {/* ปุ่มเลือกกดตรง highlight */}
+                <TouchableOpacity 
+                  style={styles.centeredTouchable}
+                  activeOpacity={0.6}
+                  onPress={() => scrollToMiddle('day')}
+                />
               </View>
             </View>
-            <View style={styles.spinnerColumnContainer}>
+            
+            {/* คอลัมน์เดือน */}
+            <View style={[styles.spinnerColumnContainer, styles.monthColumn]}>
               <Text style={styles.spinnerLabel}>เดือน</Text>
               <View style={styles.spinnerWrapper}>
                 <FlatList
@@ -256,13 +306,26 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
                   decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
-                  onMomentumScrollEnd={handleMonthScroll}
+                  contentContainerStyle={styles.flatListContent}
+                  onMomentumScrollEnd={(e) => handleScroll(e, 'month')}
+                  initialNumToRender={12}
+                  ListHeaderComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
+                  ListFooterComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
                 />
+                
+                {/* แถบเลือกตรงกลาง */}
                 <View style={styles.selectionIndicator} />
+                
+                {/* ปุ่มเลือกกดตรง highlight */}
+                <TouchableOpacity
+                  style={styles.centeredTouchable}
+                  activeOpacity={0.6}
+                  onPress={() => scrollToMiddle('month')}
+                />
               </View>
             </View>
+            
+            {/* คอลัมน์ปี */}
             <View style={styles.spinnerColumnContainer}>
               <Text style={styles.spinnerLabel}>ปี (พ.ศ.)</Text>
               <View style={styles.spinnerWrapper}>
@@ -274,11 +337,22 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
                   showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
                   decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
-                  onMomentumScrollEnd={handleYearScroll}
+                  contentContainerStyle={styles.flatListContent}
+                  onMomentumScrollEnd={(e) => handleScroll(e, 'year')}
+                  initialNumToRender={20}
+                  ListHeaderComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
+                  ListFooterComponent={<View style={{ height: CENTER_ITEM_INDEX * ITEM_HEIGHT }} />}
                 />
+                
+                {/* แถบเลือกตรงกลาง */}
                 <View style={styles.selectionIndicator} />
+                
+                {/* ปุ่มเลือกกดตรง highlight */}
+                <TouchableOpacity
+                  style={styles.centeredTouchable}
+                  activeOpacity={0.6}
+                  onPress={() => scrollToMiddle('year')}
+                />
               </View>
             </View>
           </View>
@@ -352,8 +426,12 @@ const styles = StyleSheet.create({
   },
   spinnerColumnContainer: {
     flex: 1,
-    marginHorizontal: 6,
+    marginHorizontal: 4,
     alignItems: "center",
+  },
+  // เพิ่มความกว้างให้คอลัมน์เดือน
+  monthColumn: {
+    flex: 1.6, // ให้คอลัมน์เดือนกว้างกว่าวันที่และปี
   },
   spinnerLabel: {
     fontSize: 16,
@@ -364,6 +442,7 @@ const styles = StyleSheet.create({
   },
   spinnerWrapper: {
     height: ITEM_HEIGHT * VISIBLE_ITEMS,
+    width: '100%',
     borderRadius: 12,
     backgroundColor: "#f5f5f5",
     overflow: "hidden",
@@ -375,17 +454,18 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   flatListContent: {
-    paddingVertical: VISIBLE_OFFSET,
+    // ไม่ต้องใส่ padding เพราะเราใช้ ListHeaderComponent และ ListFooterComponent แทน
   },
-  // ปรับเพิ่มความกว้างของรายการ (สำหรับ วัน และ เดือน)
   pickerItem: {
     height: ITEM_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
     paddingHorizontal: 4,
   },
-  pickerItemWide: {
-    minWidth: 90,
+  // ปรับช่องเดือนให้กว้างพอสำหรับแสดงทุกตัวอักษร
+  monthItem: {
+    paddingHorizontal: 0, // ลด padding เพื่อให้มีพื้นที่มากขึ้น
   },
   selectedPickerItem: {
     backgroundColor: "#CFA459",
@@ -404,12 +484,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: ITEM_HEIGHT,
-    top: VISIBLE_OFFSET,
+    top: ITEM_HEIGHT * CENTER_ITEM_INDEX,
     borderTopWidth: 2,
     borderBottomWidth: 2,
-    borderColor: "#CFA459",
+    borderColor: "#CFA459", 
     backgroundColor: "rgba(207, 164, 89, 0.1)",
     pointerEvents: "none",
+  },
+  // ปุ่มที่ซ่อนไว้สำหรับการกดเลือกตรง highlight
+  centeredTouchable: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    top: ITEM_HEIGHT * CENTER_ITEM_INDEX,
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
 });
 
