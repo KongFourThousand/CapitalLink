@@ -13,23 +13,24 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { formatPhoneNumber } from "./formatPhoneNumber"; 
 
 const { width } = Dimensions.get("window");
 
 
-// ฟังก์ชัน formatPhoneNumber => เอาเฉพาะตัวเลข + แปลงเป็น xxx-xxx-xxxx ถ้าได้ 10 หลัก
-function formatPhoneNumber(rawPhone: string): string {
-  // เอาเฉพาะตัวเลข
-  const digits = rawPhone.replace(/\D/g, "");
+// // ฟังก์ชัน formatPhoneNumber => เอาเฉพาะตัวเลข + แปลงเป็น xxx-xxx-xxxx ถ้าได้ 10 หลัก
+// function formatPhoneNumber(rawPhone: string): string {
+//   // เอาเฉพาะตัวเลข
+//   const digits = rawPhone.replace(/\D/g, "");
 
-  // ถ้าได้ครบ 10 หลัก => xxx-xxx-xxxx
-  if (digits.length === 10) {
-    return digits.replace(/^(\d{3})(\d{3})(\d{4})$/, "$1-$2-$3");
-  }
+//   // ถ้าได้ครบ 10 หลัก => xxx-xxx-xxxx
+//   if (digits.length === 10) {
+//     return digits.replace(/^(\d{3})(\d{3})(\d{4})$/, "$1-$2-$3");
+//   }
 
-  // กรณีไม่ครบ 10 ก็คืนค่าตาม rawPhone เดิม หรือจะคืน digits เฉย ๆ ก็ได้
-  return rawPhone;
-}
+//   // กรณีไม่ครบ 10 ก็คืนค่าตาม rawPhone เดิม หรือจะคืน digits เฉย ๆ ก็ได้
+//   return rawPhone;
+// }
 
 interface OtpVerificationComponentProps {
   phoneNumber: string;
@@ -52,6 +53,7 @@ const OtpVerificationComponent: React.FC<OtpVerificationComponentProps> = ({
   const [timer, setTimer] = useState(initialTimerSeconds);
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
 
   useEffect(() => {
     if (timer > 0) {
