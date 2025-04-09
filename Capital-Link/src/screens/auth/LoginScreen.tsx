@@ -1,4 +1,3 @@
-// LoginScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -20,8 +19,7 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import { formatPhoneNumber } from "../../components/common/formatPhoneNumber";
-// mockRequestOtp คือฟังก์ชันที่ mock การขอ OTP
+import { formatPhoneNumber } from "../../components/common/formatPhoneIAndID";
 import { mockRequestOtp } from "../../services/mockApi";
 
 const { width } = Dimensions.get("window");
@@ -29,28 +27,19 @@ const { width } = Dimensions.get("window");
 const LoginScreen: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  if (!fontsLoaded) return null;
-
-  // ฟังก์ชันที่ใช้กรองเฉพาะตัวเลขและจำกัด 10 หลัก
+  // รับเฉพาะตัวเลข 10 หลัก
   const handlePhoneChange = (input: string) => {
-    // ตัดอักขระที่ไม่ใช่ตัวเลข
-    let digitsOnly = input.replace(/\D/g, "");
-    // จำกัดไม่เกิน 10 ตัว
-    if (digitsOnly.length > 10) {
-      digitsOnly = digitsOnly.substring(0, 10);
-    }
+    const digitsOnly = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digitsOnly);
   };
 
-  // ฟังก์ชันขอ OTP
+  // ขอ OTP
   const handleRequestOtp = async () => {
-    // เช็คก่อนว่า 10 หลักหรือยัง
     if (phoneNumber.length < 10) {
       Alert.alert("หมายเลขไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
       return;
@@ -58,10 +47,7 @@ const LoginScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      // เรียก mockRequestOtp
       await mockRequestOtp(phoneNumber);
-
-      // ถ้าสำเร็จ -> ไปหน้า OtpVerification
       navigation.navigate("OtpVerification", {
         from: "Login",
         phoneNumber: phoneNumber,
@@ -74,13 +60,15 @@ const LoginScreen: React.FC = () => {
     }
   };
 
+  if (!fontsLoaded) return null;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* ปุ่มย้อนกลับ */}
+        {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.replace("InitialEntry")}
@@ -107,37 +95,32 @@ const LoginScreen: React.FC = () => {
             placeholder="0XX-XXX-XXXX"
             placeholderTextColor="#AAAAAA"
             keyboardType="phone-pad"
-            // สำคัญ: maxLength ที่ TextInput ช่วยกันผู้ใช้พิมพ์เกิน
-            // แต่หาก copy+paste เกิน ก็ handle เพิ่มใน handlePhoneChange
-            maxLength={10}
-            // ตอนเปลี่ยนข้อความ -> เรียก handlePhoneChange
-            value={phoneNumber}
+            maxLength={12} // 10 ตัวเลข + 2 ขีด
+            value={formatPhoneNumber(phoneNumber)}
             onChangeText={handlePhoneChange}
           />
         </View>
 
-        {/* ข้อความแนะนำเล็ก ๆ (Hint) */}
-        {phoneNumber.length < 10 && (
+        {/* Hint */}
+        {phoneNumber.length < 10 && phoneNumber.length > 0 && (
           <Text style={styles.hintText}>
             กรุณากรอกเฉพาะตัวเลข 10 หลัก เช่น 0812345678
           </Text>
         )}
 
-        {/* Login Button */}
+        {/* OTP Button */}
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={handleRequestOtp}
-          // disable ถ้ายังไม่ครบ 10 หลัก
           disabled={phoneNumber.length < 10 || loading}
         >
           <LinearGradient
             colors={["#e6c170", "#d4af71", "#c19346"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
-            // ถ้า disabled -> style ปุ่มให้จางลง
             style={[
               styles.button,
-              (phoneNumber.length < 10 || loading) && { opacity: 0.6 }
+              (phoneNumber.length < 10 || loading) && { opacity: 0.6 },
             ]}
           >
             {loading ? (
@@ -155,7 +138,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.divider} />
         </View>
 
-        {/* Register Button */}
+        {/* Register */}
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => navigation.navigate("Register")}

@@ -26,6 +26,8 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
+import { formatPhoneNumber, formatThaiID } from "../../components/common/formatPhoneIAndID";
+
 
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
@@ -66,11 +68,13 @@ const RegisterScreen: React.FC = () => {
   }
 
   const handlePhoneChange = (input: string) => {
-    let digitsOnly = input.replace(/\D/g, "");
-    if (digitsOnly.length > 10) {
-      digitsOnly = digitsOnly.substring(0, 10);
-    }
-    setPhoneNumber(digitsOnly);
+    const digits = input.replace(/\D/g, "").substring(0, 10);
+    setPhoneNumber(digits);
+  };
+  
+  const handleIdCardChange = (input: string) => {
+    const digits = input.replace(/\D/g, "").substring(0, 13);
+    setIdCard(digits);
   };
 
   const handleRequestOtp = async () => {
@@ -127,10 +131,10 @@ const RegisterScreen: React.FC = () => {
           style={styles.input}
           placeholder="X-XXXX-XXXXX-XX-X"
           placeholderTextColor="#AAAAAA"
-          value={idCard}
-          onChangeText={setIdCard}
           keyboardType="number-pad"
-          maxLength={13}
+          value={formatThaiID(idCard)}
+          onChangeText={handleIdCardChange}
+          maxLength={17}
         />
       </View>
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
@@ -142,10 +146,10 @@ const RegisterScreen: React.FC = () => {
           style={styles.input}
           placeholder="0XX-XXX-XXXX"
           placeholderTextColor="#AAAAAA"
-          value={phoneNumber}
+          value={formatPhoneNumber(phoneNumber)}
           onChangeText={handlePhoneChange}
           keyboardType="phone-pad"
-          maxLength={10}
+          maxLength={12}
         />
       </View>
       {phoneNumber.length < 10 && phoneNumber.length > 0 && (
