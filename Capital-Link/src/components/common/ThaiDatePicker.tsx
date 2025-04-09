@@ -32,13 +32,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
   onClose,
   onSave,
 }) => {
+  // refs สำหรับ FlatList ของวัน, เดือน, ปี
   const dayListRef = useRef<FlatList<number>>(null);
   const monthListRef = useRef<FlatList<string>>(null);
   const yearListRef = useRef<FlatList<number>>(null);
 
-  // Local state สำหรับ selectedDate; เราให้ค่าเริ่มต้นเป็น date จาก props
+  // Local state สำหรับ selectedDate; กำหนดค่าเริ่มต้นจาก props.date
   const [selectedDate, setSelectedDate] = useState(new Date(date));
 
+  // รายการเดือนภาษาไทย
   const thaiMonths = [
     "มกราคม",
     "กุมภาพันธ์",
@@ -54,11 +56,13 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     "ธันวาคม",
   ];
 
+  // สร้างรายการวันตามเดือนและปี
   const generateDays = (year: number, month: number) => {
     const lastDay = new Date(year, month + 1, 0).getDate();
     return Array.from({ length: lastDay }, (_, i) => i + 1);
   };
 
+  // สร้างรายการปี (แสดงเป็น พ.ศ.)
   const generateYears = (startYear: number, count: number) => {
     return Array.from({ length: count }, (_, i) => startYear - i);
   };
@@ -70,7 +74,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     generateYears(new Date().getFullYear() + 543, 100)
   );
 
-  // เมื่อ modal เปิด เราจะรีเซ็ต selectedDate ให้ตรงกับ props.date
+  // เมื่อ modal เปิดขึ้น หรือ prop.date เปลี่ยน ให้รีเซ็ต selectedDate และเลื่อน FlatList ไปที่ตัวเลือกที่ถูกเลือก
   useEffect(() => {
     if (visible) {
       setSelectedDate(new Date(date));
@@ -78,9 +82,9 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
         scrollToCurrentDate();
       }, 300);
     }
-  }, [visible]);
+  }, [visible, date]);
 
-  // เมื่อเดือนหรือปีเปลี่ยนให้ปรับรายการวันใหม่
+  // เมื่อเดือนหรือปีเปลี่ยน ให้ปรับรายการวันใหม่
   useEffect(() => {
     setDays(generateDays(selectedDate.getFullYear(), selectedDate.getMonth()));
   }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
@@ -134,6 +138,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     setSelectedDate(newDate);
   };
 
+  // เมื่อกดตกลง ส่งค่าที่เลือกกลับไปยัง parent component
   const handleSave = () => {
     onChange(selectedDate);
     onSave();
@@ -169,11 +174,12 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     }
   };
 
+  // เพิ่ม style สำหรับรายการที่กว้างขึ้น (วันและเดือน)
   const renderDayItem = ({ item }: { item: number }) => {
     const isSelected = selectedDate.getDate() === item;
     return (
       <TouchableWithoutFeedback onPress={() => handleDayChange(item)}>
-        <View style={[styles.pickerItem, isSelected && styles.selectedPickerItem]}>
+        <View style={[styles.pickerItem, styles.pickerItemWide, isSelected && styles.selectedPickerItem]}>
           <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>{item}</Text>
         </View>
       </TouchableWithoutFeedback>
@@ -184,7 +190,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({
     const isSelected = selectedDate.getMonth() === index;
     return (
       <TouchableWithoutFeedback onPress={() => handleMonthChange(index)}>
-        <View style={[styles.pickerItem, isSelected && styles.selectedPickerItem]}>
+        <View style={[styles.pickerItem, styles.pickerItemWide, isSelected && styles.selectedPickerItem]}>
           <Text style={[styles.pickerItemText, isSelected && styles.selectedPickerItemText]}>{item}</Text>
         </View>
       </TouchableWithoutFeedback>
@@ -371,12 +377,15 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingVertical: VISIBLE_OFFSET,
   },
+  // ปรับเพิ่มความกว้างของรายการ (สำหรับ วัน และ เดือน)
   pickerItem: {
     height: ITEM_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
     paddingHorizontal: 4,
+  },
+  pickerItemWide: {
+    minWidth: 90,
   },
   selectedPickerItem: {
     backgroundColor: "#CFA459",
