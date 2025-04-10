@@ -194,7 +194,7 @@ const RegisterScreen: React.FC = () => {
         </View>
         <TextInput
           style={styles.input}
-          placeholder="XXXXXXXXXXXX"
+          placeholder=" x-xx-x-xxx-xxxxx-x"
           placeholderTextColor="#AAAAAA"
           value={companyRegisterNumber}
           onChangeText={setCompanyRegisterNumber}
