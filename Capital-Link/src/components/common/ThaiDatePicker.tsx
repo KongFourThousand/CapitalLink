@@ -1,4 +1,3 @@
-// components/common/ThaiDatePicker.tsx
 import React, { useRef, useState, useEffect } from "react";
 import {
   Modal,
@@ -8,14 +7,14 @@ import {
   FlatList,
   StyleSheet,
   Dimensions,
-  Platform, // เพิ่มการนำเข้า Platform
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-const { width, height } = Dimensions.get("window");
-const ITEM_HEIGHT = 70; // ความสูงของแต่ละรายการ
-const VISIBLE_ITEMS = 3; // จำนวนรายการที่มองเห็น
-const VISIBLE_OFFSET = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2); // offset ตรงกลาง
+const { width } = Dimensions.get("window");
+const ITEM_HEIGHT = 70;
+const VISIBLE_ITEMS = 3;
+const VISIBLE_OFFSET = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 
 interface ThaiDatePickerProps {
   visible: boolean;
@@ -37,13 +36,11 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
   ];
 
-  // สร้างรายการวันตามเดือนและปีที่เลือก
   const getDays = () => {
     const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
     return Array.from({ length: daysInMonth }, (_, i) => i + 1);
   };
 
-  // สร้างรายการปี (พ.ศ.)
   const getYears = () => {
     return Array.from({ length: 100 }, (_, i) => new Date().getFullYear() + 543 - i);
   };
@@ -51,12 +48,10 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
   const [days, setDays] = useState(getDays());
   const [years] = useState(getYears());
 
-  // อัปเดตรายการวันเมื่อเดือนหรือปีเปลี่ยน
   useEffect(() => {
     setDays(getDays());
   }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
-  // เมื่อมีการเปิด modal หรือ props.date เปลี่ยน
   useEffect(() => {
     if (visible) {
       const newDate = new Date(date);
@@ -65,7 +60,6 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     }
   }, [visible, date]);
 
-  // เมื่อ modal แสดงและเป็นการเรนเดอร์ครั้งแรก ให้เลื่อนไปยังวันที่เลือก
   useEffect(() => {
     if (visible && isInitialRender && days.length > 0) {
       setTimeout(() => {
@@ -75,85 +69,69 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
     }
   }, [visible, isInitialRender, days, selectedDate]);
 
-  // เลื่อนไปยังวันที่ เดือน และปีที่เลือก
   const scrollToSelected = () => {
-    // เลื่อนไปยังวันที่เลือก
     if (dayRef.current) {
       const dayIndex = selectedDate.getDate() - 1;
       if (dayIndex >= 0 && dayIndex < days.length) {
-        dayRef.current.scrollToOffset({
-          offset: dayIndex * ITEM_HEIGHT,
-          animated: false
-        });
+        dayRef.current.scrollToOffset({ offset: dayIndex * ITEM_HEIGHT, animated: false });
       }
     }
-    
-    // เลื่อนไปยังเดือนที่เลือก
     if (monthRef.current) {
       const monthIndex = selectedDate.getMonth();
-      monthRef.current.scrollToOffset({
-        offset: monthIndex * ITEM_HEIGHT,
-        animated: false
-      });
+      monthRef.current.scrollToOffset({ offset: monthIndex * ITEM_HEIGHT, animated: false });
     }
-    
-    // เลื่อนไปยังปีที่เลือก
     if (yearRef.current) {
       const yearIndex = years.findIndex(year => year === selectedDate.getFullYear() + 543);
       if (yearIndex >= 0) {
-        yearRef.current.scrollToOffset({
-          offset: yearIndex * ITEM_HEIGHT,
-          animated: false
-        });
+        yearRef.current.scrollToOffset({ offset: yearIndex * ITEM_HEIGHT, animated: false });
       }
     }
   };
 
-  // อัปเดตวันที่เมื่อเลือกวัน เดือน หรือปี
+  const resetToDefaultDate = () => {
+    const newDefault = new Date(new Date().getFullYear(), 0, 1);
+    setSelectedDate(newDefault);
+    setTimeout(() => {
+      dayRef.current?.scrollToOffset({ offset: 0, animated: true });
+      monthRef.current?.scrollToOffset({ offset: 0, animated: true });
+      yearRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }, 150);
+  };
+
   const updateDate = (type: "day" | "month" | "year", value: number) => {
     const newDate = new Date(selectedDate);
-    
+
     if (type === "day") {
       newDate.setDate(value);
     } else if (type === "month") {
-      // เก็บวันที่ปัจจุบัน
       const currentDay = newDate.getDate();
-      
-      // เปลี่ยนเดือน
       newDate.setMonth(value);
-      
-      // ตรวจสอบวันที่ในเดือนใหม่
-      const lastDayOfMonth = new Date(newDate.getFullYear(), value + 1, 0).getDate();
-      if (currentDay > lastDayOfMonth) {
-        newDate.setDate(lastDayOfMonth);
+      const lastDay = new Date(newDate.getFullYear(), value + 1, 0).getDate();
+      if (currentDay > lastDay) {
+        resetToDefaultDate();
+        return;
       }
     } else if (type === "year") {
-      // เก็บวันที่และเดือนปัจจุบัน
       const currentDay = newDate.getDate();
       const currentMonth = newDate.getMonth();
-      
-      // เปลี่ยนปี
       newDate.setFullYear(value - 543);
-      
-      // ตรวจสอบวันที่ 29 กุมภาพันธ์
       if (currentMonth === 1 && currentDay === 29) {
-        const isLeapYear = new Date(value - 543, 1, 29).getDate() === 29;
-        if (!isLeapYear) {
-          newDate.setDate(28);
+        const isLeap = new Date(value - 543, 1, 29).getDate() === 29;
+        if (!isLeap) {
+          resetToDefaultDate();
+          return;
         }
       }
     }
-    
+
     setSelectedDate(newDate);
   };
 
-  // เมื่อกดบันทึก
   const handleSave = () => {
     onChange(selectedDate);
     onSave();
   };
 
-  // แสดงรายการ (วัน, เดือน, ปี)
   const renderItem = (item: any, selected: boolean) => (
     <View style={[styles.item, selected && styles.itemSelected]}>
       <Text style={[styles.itemText, selected && styles.itemTextSelected]}>{item}</Text>
@@ -165,15 +143,14 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
       <View style={styles.overlay}>
         <View style={styles.container}>
           <Text style={styles.title}>เลือกวันเกิด</Text>
-          
           <View style={styles.datePreview}>
             <Text style={styles.previewText}>
               {`${selectedDate.getDate()} ${thaiMonths[selectedDate.getMonth()]} ${selectedDate.getFullYear() + 543}`}
             </Text>
           </View>
-          
+
           <View style={styles.pickerRow}>
-            {/* คอลัมน์วันที่ */}
+            {/* Day Picker */}
             <View style={styles.pickerContainer}>
               <Text style={styles.pickerLabel}>วันที่</Text>
               <View style={styles.picker}>
@@ -182,9 +159,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                   data={days}
                   keyExtractor={(item) => `day-${item}`}
                   renderItem={({ item }) => renderItem(item, item === selectedDate.getDate())}
-                  showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
-                  decelerationRate="fast"
                   getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
                   contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
                   onMomentumScrollEnd={(e) => {
@@ -193,17 +168,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("day", days[index]);
                     }
                   }}
-                  initialNumToRender={7}
-                  maxToRenderPerBatch={7}
-                  windowSize={7}
+                  showsVerticalScrollIndicator={false}
+                  decelerationRate="fast"
                   removeClippedSubviews={Platform.OS === 'android'}
                 />
-                {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
               </View>
             </View>
-            
-            {/* คอลัมน์เดือน */}
+
+            {/* Month Picker */}
             <View style={[styles.pickerContainer, styles.monthContainer]}>
               <Text style={styles.pickerLabel}>เดือน</Text>
               <View style={styles.picker}>
@@ -212,9 +185,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                   data={thaiMonths}
                   keyExtractor={(item) => `month-${item}`}
                   renderItem={({ item, index }) => renderItem(item, index === selectedDate.getMonth())}
-                  showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
-                  decelerationRate="fast"
                   getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
                   contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
                   onMomentumScrollEnd={(e) => {
@@ -223,17 +194,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("month", index);
                     }
                   }}
-                  initialNumToRender={12}
-                  maxToRenderPerBatch={12}
-                  windowSize={12}
+                  showsVerticalScrollIndicator={false}
+                  decelerationRate="fast"
                   removeClippedSubviews={Platform.OS === 'android'}
                 />
-                {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
               </View>
             </View>
-            
-            {/* คอลัมน์ปี */}
+
+            {/* Year Picker */}
             <View style={styles.pickerContainer}>
               <Text style={styles.pickerLabel}>ปี (พ.ศ.)</Text>
               <View style={styles.picker}>
@@ -242,9 +211,7 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                   data={years}
                   keyExtractor={(item) => `year-${item}`}
                   renderItem={({ item }) => renderItem(item, item === selectedDate.getFullYear() + 543)}
-                  showsVerticalScrollIndicator={false}
                   snapToInterval={ITEM_HEIGHT}
-                  decelerationRate="fast"
                   getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
                   contentContainerStyle={{ paddingVertical: VISIBLE_OFFSET }}
                   onMomentumScrollEnd={(e) => {
@@ -253,17 +220,15 @@ const ThaiDatePicker: React.FC<ThaiDatePickerProps> = ({ visible, date, onChange
                       updateDate("year", years[index]);
                     }
                   }}
-                  initialNumToRender={10}
-                  maxToRenderPerBatch={10}
-                  windowSize={10}
+                  showsVerticalScrollIndicator={false}
+                  decelerationRate="fast"
                   removeClippedSubviews={Platform.OS === 'android'}
                 />
-                {/* ตัวไฮไลท์ */}
                 <View style={styles.selectionIndicator} />
               </View>
             </View>
           </View>
-          
+
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelText}>ยกเลิก</Text>
@@ -299,12 +264,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#a2754c",
-    marginBottom: 16,
-  },
+  title: { fontSize: 22, fontWeight: "bold", color: "#a2754c", marginBottom: 16 },
   datePreview: {
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -314,56 +274,23 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  previewText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  pickerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
-    width: "100%",
-  },
-  pickerContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  monthContainer: {
-    flex: 1.5, // ให้ส่วนของเดือนกว้างกว่า
-  },
-  pickerLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 8,
-  },
+  previewText: { fontSize: 18, fontWeight: "600", color: "#333" },
+  pickerRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 24, width: "100%" },
+  pickerContainer: { flex: 1, alignItems: "center" },
+  monthContainer: { flex: 1.5 },
+  pickerLabel: { fontSize: 16, fontWeight: "bold", color: "#333", marginBottom: 8 },
   picker: {
     width: "95%",
     height: ITEM_HEIGHT * VISIBLE_ITEMS,
     backgroundColor: "#f5f5f5",
     borderRadius: 12,
     overflow: "hidden",
-    position: "relative", // สำหรับวาง selectionIndicator
+    position: "relative",
   },
-  item: {
-    height: ITEM_HEIGHT,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 4,
-  },
-  itemText: {
-    fontSize: 18,
-    color: "#333",
-    textAlign: "center",
-  },
-  itemSelected: {
-    backgroundColor: "#CFA459",
-  },
-  itemTextSelected: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  item: { height: ITEM_HEIGHT, justifyContent: "center", alignItems: "center", paddingHorizontal: 4 },
+  itemText: { fontSize: 18, color: "rgba(0, 0, 0, 0.43)", textAlign: "center" },
+  itemSelected: { backgroundColor: "rgba(225, 182, 103, 0.43)"},
+  itemTextSelected: { color: "rgb(110, 53, 6)", fontWeight: "bold" },
   selectionIndicator: {
     position: "absolute",
     top: ITEM_HEIGHT,
@@ -390,25 +317,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     alignItems: "center",
   },
-  cancelText: {
-    fontSize: 16,
-    color: "#666",
-    fontWeight: "600",
-  },
-  confirmGradient: {
-    flex: 1,
-    borderRadius: 12,
-    marginLeft: 10,
-  },
-  confirmButton: {
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  confirmText: {
-    fontSize: 16,
-    color: "#FFF",
-    fontWeight: "600",
-  },
+  cancelText: { fontSize: 16, color: "#666", fontWeight: "600" },
+  confirmGradient: { flex: 1, borderRadius: 12, marginLeft: 10 },
+  confirmButton: { paddingVertical: 14, alignItems: "center" },
+  confirmText: { fontSize: 16, color: "#FFF", fontWeight: "600" },
 });
 
 export default ThaiDatePicker;
