@@ -45,7 +45,7 @@ const OtpVerificationScreen: React.FC = () => {
       } else if (from === "Register") {
         navigation.replace("PinSetup");
       } else if (from === "Login") {
-        navigation.replace("PinConfirm", { firstPin: "000000" }); // หรือใส่ค่าจริง
+        navigation.replace("PinSetup"); // หรือใส่ค่าจริง
       }
     } else {
       Alert.alert("OTP ไม่ถูกต้อง", "กรุณากรอกใหม่อีกครั้ง");

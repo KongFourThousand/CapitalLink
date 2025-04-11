@@ -167,14 +167,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
+    marginTop: 35,
   },
+
   backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 40,
+    position: "absolute",
+    top: 20,
+    left: 18,
+    zIndex: 99,
   },
+  
   logoContainer: {
     alignItems: "center",
+    marginTop: 20,
     marginBottom: 10,
   },
   logo: {

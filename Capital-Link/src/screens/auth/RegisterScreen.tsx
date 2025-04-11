@@ -26,8 +26,10 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import { formatPhoneNumber, formatThaiID } from "../../components/common/formatPhoneAndID";
-
+import {
+  formatPhoneNumber,
+  formatThaiID,
+} from "../../components/common/formatPhoneAndID";
 
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
@@ -38,12 +40,15 @@ const { width } = Dimensions.get("window");
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 
 const RegisterScreen: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
 
-  const [userType, setUserType] = useState<"บุคคลธรรมดา" | "นิติบุคคล">("บุคคลธรรมดา");
+  const [userType, setUserType] = useState<"บุคคลธรรมดา" | "นิติบุคคล">(
+    "บุคคลธรรมดา"
+  );
 
   // State สำหรับข้อมูลฟอร์ม
   const [idCard, setIdCard] = useState("");
@@ -71,7 +76,7 @@ const RegisterScreen: React.FC = () => {
     const digits = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digits);
   };
-  
+
   const handleIdCardChange = (input: string) => {
     const digits = input.replace(/\D/g, "").substring(0, 13);
     setIdCard(digits);
@@ -153,7 +158,9 @@ const RegisterScreen: React.FC = () => {
         />
       </View>
       {phoneNumber.length < 10 && phoneNumber.length > 0 && (
-        <Text style={styles.hintText}>กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678</Text>
+        <Text style={styles.hintText}>
+          กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678
+        </Text>
       )}
       <Text style={styles.inputLabel}>วันเดือนปีเกิด (พ.ศ.)</Text>
       <TouchableOpacity activeOpacity={0.7} onPress={showDatepicker}>
@@ -190,7 +197,11 @@ const RegisterScreen: React.FC = () => {
       <Text style={styles.inputLabel}>เลขทะเบียนนิติบุคคล</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="office-building-outline" size={20} color="#999999" />
+          <MaterialCommunityIcons
+            name="office-building-outline"
+            size={20}
+            color="#999999"
+          />
         </View>
         <TextInput
           style={styles.input}
@@ -219,20 +230,37 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
         <ScrollView showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.replace("InitialEntry")}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.replace("InitialEntry")}
+          >
             <Ionicons name="chevron-back" size={24} color="#CFA459" />
           </TouchableOpacity>
           <View style={styles.logoContainer}>
-            <Image source={require("../../../assets/CLlogo+NoBG.png")} style={styles.logo} />
+            <Image
+              source={require("../../../assets/CLlogo+NoBG.png")}
+              style={styles.logo}
+            />
           </View>
           <View style={styles.tabContainer}>
             <TouchableOpacity
-              style={[styles.tab, userType === "บุคคลธรรมดา" && styles.tabActive]}
+              style={[
+                styles.tab,
+                userType === "บุคคลธรรมดา" && styles.tabActive,
+              ]}
               onPress={() => setUserType("บุคคลธรรมดา")}
             >
-              <Text style={[styles.tabText, userType === "บุคคลธรรมดา" && styles.tabTextActive]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  userType === "บุคคลธรรมดา" && styles.tabTextActive,
+                ]}
+              >
                 บุคคลธรรมดา
               </Text>
             </TouchableOpacity>
@@ -240,31 +268,52 @@ const RegisterScreen: React.FC = () => {
               style={[styles.tab, userType === "นิติบุคคล" && styles.tabActive]}
               onPress={() => setUserType("นิติบุคคล")}
             >
-              <Text style={[styles.tabText, userType === "นิติบุคคล" && styles.tabTextActive]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  userType === "นิติบุคคล" && styles.tabTextActive,
+                ]}
+              >
                 นิติบุคคล
               </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.formContainer}>
-            {userType === "บุคคลธรรมดา" ? renderPersonalForm() : renderCorporateForm()}
-            <TouchableOpacity activeOpacity={0.9} onPress={handleRequestOtp} disabled={phoneNumber.length < 10 || loading}>
+            {userType === "บุคคลธรรมดา"
+              ? renderPersonalForm()
+              : renderCorporateForm()}
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={handleRequestOtp}
+              disabled={phoneNumber.length < 10 || loading}
+            >
               <LinearGradient
                 colors={["#e6c170", "#d4af71", "#c19346"]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
-                style={[styles.otpButton, (phoneNumber.length < 10 || loading) && { opacity: 0.6 }]}
+                style={[
+                  styles.otpButton,
+                  (phoneNumber.length < 10 || loading) && { opacity: 0.6 },
+                ]}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
                   <>
                     <Text style={styles.otpButtonText}>ขอรหัส OTP</Text>
-                    <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#FFFFFF"
+                    />
                   </>
                 )}
               </LinearGradient>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.pinLoginContainer} onPress={() => navigation.navigate("Login")}>
+            <TouchableOpacity
+              style={styles.pinLoginContainer}
+              onPress={() => navigation.navigate("Login")}
+            >
               <Text style={styles.pinLoginText}>เข้าสู่ระบบ</Text>
             </TouchableOpacity>
           </View>
@@ -280,22 +329,70 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#FFFFFF" },
   container: { flex: 1, paddingHorizontal: 20 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  backButton: { flexDirection: "row", alignItems: "center", marginTop: 40 },
-  logoContainer: { alignItems: "center" },
-  logo: { width: width * 0.9, height: width * 0.5, resizeMode: "contain", marginBottom: 5 },
-  tabContainer: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#E5E5E5" },
+  backButton: {
+    position: "absolute",
+    top: 55,
+    zIndex: 99,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginTop: 70,
+  },
+
+  logo: {
+    width: width * 0.9,
+    height: width * 0.5,
+    resizeMode: "contain",
+    marginBottom: 5,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+  },
   tab: { flex: 1, paddingVertical: 12, alignItems: "center" },
   tabActive: { borderBottomWidth: 2, borderBottomColor: "#CFA459" },
   tabText: { fontSize: 16, color: "#AAAAAA" },
   tabTextActive: { color: "#CFA459", fontWeight: "700" },
   formContainer: { marginTop: 20, paddingBottom: 30 },
-  inputLabel: { fontSize: 16, color: "#333333", marginBottom: 5, fontWeight: "600" },
-  inputContainer: { flexDirection: "row", alignItems: "center", marginBottom: 15, borderWidth: 1, borderColor: "#E5E5E5", borderRadius: 8, height: 48 },
+  inputLabel: {
+    fontSize: 16,
+    color: "#333333",
+    marginBottom: 5,
+    fontWeight: "600",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    borderRadius: 8,
+    height: 48,
+  },
   iconContainer: { width: 45, alignItems: "center", justifyContent: "center" },
-  input: { flex: 1, height: "100%", paddingRight: 15, color: "#333333", fontSize: 16 },
+  input: {
+    flex: 1,
+    height: "100%",
+    paddingRight: 15,
+    color: "#333333",
+    fontSize: 16,
+  },
   hintText: { fontSize: 12, color: "#999", marginBottom: 12 },
-  otpButton: { borderRadius: 8, height: 50, flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 15 },
-  otpButtonText: { color: "#FFFFFF", fontWeight: "600", fontSize: 18, marginRight: 8 },
+  otpButton: {
+    borderRadius: 8,
+    height: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 15,
+  },
+  otpButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 18,
+    marginRight: 8,
+  },
   pinLoginContainer: { alignItems: "center", marginTop: 15 },
   pinLoginText: { color: "#CFA459", fontSize: 16, fontWeight: "600" },
 });

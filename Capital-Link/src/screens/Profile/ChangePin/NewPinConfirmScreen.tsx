@@ -41,7 +41,7 @@ const NewPinConfirmScreen: React.FC = () => {
           [
             { 
               text: "ตกลง", 
-              onPress: () => navigation.navigate("Home") 
+              onPress: () => navigation.navigate("Profile") 
             }
           ]
         );
