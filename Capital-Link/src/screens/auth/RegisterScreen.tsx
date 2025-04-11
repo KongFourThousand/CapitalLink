@@ -212,7 +212,7 @@ const RegisterScreen: React.FC = () => {
           keyboardType="number-pad"
         />
       </View>
-      <Text style={styles.inputLabel}>ผู้ติดต่อ</Text>
+      {/* <Text style={styles.inputLabel}>ผู้ติดต่อ</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
           <Ionicons name="people-outline" size={20} color="#999999" />
@@ -224,7 +224,42 @@ const RegisterScreen: React.FC = () => {
           value={contactPerson}
           onChangeText={setContactPerson}
         />
+      </View> */}
+      <Text style={styles.inputLabel}>เลขบัตรประชาชน</Text>
+      <View style={styles.inputContainer}>
+        <View style={styles.iconContainer}>
+          <Ionicons name="person-outline" size={20} color="#999999" />
+        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="X-XXXX-XXXXX-XX-X"
+          placeholderTextColor="#AAAAAA"
+          keyboardType="number-pad"
+          value={formatThaiID(idCard)}
+          onChangeText={handleIdCardChange}
+          maxLength={17}
+        />
       </View>
+      <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
+      <View style={styles.inputContainer}>
+        <View style={styles.iconContainer}>
+          <FontAwesome name="phone" size={20} color="#999999" />
+        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="0XX-XXX-XXXX"
+          placeholderTextColor="#AAAAAA"
+          value={formatPhoneNumber(phoneNumber)}
+          onChangeText={handlePhoneChange}
+          keyboardType="phone-pad"
+          maxLength={12}
+        />
+      </View>
+      {phoneNumber.length < 10 && phoneNumber.length > 0 && (
+        <Text style={styles.hintText}>
+          กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678
+        </Text>
+      )}
     </>
   );
 
