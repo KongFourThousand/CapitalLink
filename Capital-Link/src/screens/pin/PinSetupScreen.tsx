@@ -21,6 +21,7 @@ const PinSetupScreen: React.FC = () => {
     const result = validatePin(pin);
 
     if (!result.valid) {
+      console.log(result.valid);
       setErrorMessage(result.message);
       setModalVisible(true);
       setPinInputKey((prev) => prev + 1);
