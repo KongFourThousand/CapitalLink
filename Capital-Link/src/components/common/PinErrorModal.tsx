@@ -32,16 +32,23 @@ const PinErrorModal: React.FC<PinErrorModalProps> = ({
               <View style={styles.iconContainer}>
                 <Ionicons name="alert-circle" size={50} color="#a2754c" />
               </View>
-              
+
               <Text style={styles.modalTitle}>ขออภัย</Text>
-              
+
               {/* แบบที่ 2: ใช้ property ของ Text component */}
-              <Text 
+              {/* <Text 
                 style={styles.modalMessage}
                 allowFontScaling={false}
                 numberOfLines={2} // กำหนดจำนวนบรรทัดสูงสุด
               >
                 {'PIN รหัสผ่านไม่ถูกต้อง\nกรุณาลองใหม่อีกครั้ง'}
+              </Text> */}
+              
+              <Text style={styles.modalMessage}
+                allowFontScaling={false}
+                numberOfLines={2} // กำหนดจำนวนบรรทัดสูงสุด
+                >
+                {message || "PIN รหัสผ่านไม่ถูกต้อง\nกรุณาลองใหม่อีกครั้ง"}
               </Text>
 
               <LinearGradient
