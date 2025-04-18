@@ -39,7 +39,7 @@ export type RootStackParamList = {
   NameChange: undefined;
   PhoneChange: undefined;
   NotiSettings: undefined;
-  NewPinSetup: undefined;
+  NewPinSetup:  { oldPin?: string };
   NewPinConfirm: { firstPin: string };
 };
 
@@ -51,7 +51,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="InitialEntry"
+      initialRouteName="Home"
       //initialRouteName=""
       screenOptions={{ headerShown: false, animation: "none" }}
     >

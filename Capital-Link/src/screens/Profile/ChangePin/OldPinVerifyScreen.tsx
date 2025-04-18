@@ -105,7 +105,7 @@ const OldPinVerifyScreen: React.FC = () => {
     }
 
     if (pin === storedPin) {
-      navigation.replace("NewPinSetup");
+      navigation.replace("NewPinSetup", { oldPin: storedPin });
     } else {
       setErrorMessage("PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       setPin("");
