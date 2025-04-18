@@ -1,4 +1,4 @@
-// Updated PinEntryKeyboardScreen.tsx
+//PinEntryKeyboardScreen.tsx
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
@@ -21,13 +21,16 @@ import PinErrorModal from "../../components/common/PinErrorModal";
 
 const { width } = Dimensions.get("window");
 
-type PinKeyboardNavProp = NativeStackNavigationProp<RootStackParamList, "PinEntry">;
+type PinKeyboardNavProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "PinEntry"
+>;
 
 const PinEntryKeyboardScreen: React.FC = () => {
   const navigation = useNavigation<PinKeyboardNavProp>();
   const [pin, setPin] = useState("");
+  const [failCount, setFailCount] = useState(0);
   const [storedPin, setStoredPin] = useState<string | null>(null);
-  
   // สร้าง state สำหรับ modal แทนการใช้ errorMessage
   const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -41,8 +44,10 @@ const PinEntryKeyboardScreen: React.FC = () => {
     const loadStoredPin = async () => {
       try {
         const pinFromDevice = await SecureStore.getItemAsync("userPin");
+        const failCountFromStore = await SecureStore.getItemAsync("failCount");
         if (pinFromDevice) {
           setStoredPin(pinFromDevice);
+          if (failCountFromStore) setFailCount(Number(failCountFromStore));
         } else {
           console.log("ยังไม่มี PIN เก็บไว้ (userPin is null)");
         }
@@ -51,6 +56,17 @@ const PinEntryKeyboardScreen: React.FC = () => {
       }
     };
     loadStoredPin();
+  }, []);
+
+
+  useEffect(() => {
+    const checkLocked = async () => {
+      const failCountFromStore = await SecureStore.getItemAsync("failCount");
+      if (failCountFromStore && Number(failCountFromStore) >= 5) {
+        navigation.replace("PinLocked");
+      }
+    };
+    checkLocked();
   }, []);
 
   // เมื่อกดตัวเลข
@@ -80,27 +96,35 @@ const PinEntryKeyboardScreen: React.FC = () => {
   }, []);
 
   // ตรวจสอบ PIN เมื่อกรอกครบ 6 ตัว
-  useEffect(() => {
-    if (!fontsLoaded) return;
+ useEffect(() => {
+    if (!fontsLoaded || pin.length !== 6) return;
 
-    if (pin.length === 6) {
-      // ถ้าไม่มี storedPin -> สมมติยังไม่เคยตั้ง
+    const validatePin = async () => {
       if (storedPin === null) {
         setErrorMessage("ยังไม่เคยตั้ง PIN ไว้ในเครื่อง");
         setIsErrorModalVisible(true);
         return;
       }
 
-      // ถ้ามี storedPin -> เทียบค่า
       if (pin === storedPin) {
-        // เข้าระบบได้
+        await SecureStore.deleteItemAsync("failCount");
         navigation.replace("Home");
       } else {
-        // ถ้าผิด -> แสดง error modal
+        const newFailCount = failCount + 1;
+        setFailCount(newFailCount);
+        await SecureStore.setItemAsync("failCount", String(newFailCount));
+
+        if (newFailCount >= 5) {
+          navigation.replace("PinLocked");
+          return;
+        }
+
         setErrorMessage("PIN รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
         setIsErrorModalVisible(true);
       }
-    }
+    };
+
+    validatePin();
   }, [pin, storedPin, navigation, fontsLoaded]);
 
   if (!fontsLoaded) {
@@ -140,12 +164,15 @@ const PinEntryKeyboardScreen: React.FC = () => {
         />
 
         {/* ลืมรหัส PIN? */}
-        <TouchableOpacity onPress={handleForgotPin} style={styles.forgotPinContainer}>
+        <TouchableOpacity
+          onPress={handleForgotPin}
+          style={styles.forgotPinContainer}
+        >
           <Text style={styles.forgotPinTextLarge}>ลืมรหัส PIN?</Text>
         </TouchableOpacity>
 
         {/* Error Modal */}
-        <PinErrorModal 
+        <PinErrorModal
           visible={isErrorModalVisible}
           onDismiss={handleDismissError}
           message={errorMessage}

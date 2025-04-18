@@ -19,13 +19,17 @@ import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
 import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
 import NewPinSetup from "../screens/Profile/ChangePin/NewPinSetupScreen";
 import NewPinConfirm from "../screens/Profile/ChangePin/NewPinConfirmScreen";
+import PinLocked from "../screens/pin/PinLockedScreen";
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
   InitialEntry: undefined;
   Login: undefined;
   Register: undefined;
-  OtpVerification: { from: "Login" | "Register"  | "PhoneChange"; phoneNumber: string };
+  OtpVerification: {
+    from: "Login" | "Register" | "PhoneChange";
+    phoneNumber: string;
+  };
   PinSetup: undefined;
   PinConfirm: { firstPin: string };
   PinEntry: undefined;
@@ -39,8 +43,9 @@ export type RootStackParamList = {
   NameChange: undefined;
   PhoneChange: undefined;
   NotiSettings: undefined;
-  NewPinSetup:  { oldPin?: string };
+  NewPinSetup: { oldPin?: string };
   NewPinConfirm: { firstPin: string };
+  PinLocked: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -51,7 +56,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="Home"
+      initialRouteName="PinLocked"
       //initialRouteName=""
       screenOptions={{ headerShown: false, animation: "none" }}
     >
@@ -75,6 +80,14 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="NotiSettings" component={NotiSettings} />
       <Stack.Screen name="NewPinSetup" component={NewPinSetup} />
       <Stack.Screen name="NewPinConfirm" component={NewPinConfirm} />
+      <Stack.Screen
+        name="PinLocked"
+        component={PinLocked}
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // ป้องกันการย้อนกลับ
+        }}
+      />
     </Stack.Navigator>
   );
 };
