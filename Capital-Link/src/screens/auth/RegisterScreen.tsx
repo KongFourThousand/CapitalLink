@@ -29,7 +29,8 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import {
   formatPhoneNumber,
   formatThaiID,
-} from "../../components/common/formatPhoneAndID";
+} from "../../utils/formatPhoneAndID";
+import { isValidThaiID } from "../../utils/isValidThaiID";
 
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";

@@ -468,7 +468,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
-import { formatPhoneNumber } from "../../components/common/formatPhoneAndID";
+import { formatPhoneNumber } from "../../utils/formatPhoneAndID";
 
 type PhoneChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
