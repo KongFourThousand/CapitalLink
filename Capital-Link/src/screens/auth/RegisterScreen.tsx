@@ -12,7 +12,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,9 +30,10 @@ import {
   formatThaiID,
 } from "../../utils/formatPhoneAndID";
 import { isValidThaiID } from "../../utils/isValidThaiID";
-
+import CustomAlertModal from "../../components/common/CustomAlertModal";
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
+import MaskInput from "react-native-mask-input";
 
 const { width } = Dimensions.get("window");
 
@@ -55,15 +55,13 @@ const RegisterScreen: React.FC = () => {
   const [idCard, setIdCard] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [taxId, setTaxId] = useState("");
   const [companyRegisterNumber, setCompanyRegisterNumber] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
 
   // State สำหรับ Date Picker – เริ่ม default เป็น 1 มกราคมของปีปัจจุบัน
   const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
-
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{ visible: boolean; message: string }>({ visible: false, message: "" });
 
   if (!fontsLoaded) {
     return (
@@ -73,19 +71,40 @@ const RegisterScreen: React.FC = () => {
     );
   }
 
+  const showAlert = (message: string) => {
+    setAlert({ visible: true, message });
+  };
+
   const handlePhoneChange = (input: string) => {
     const digits = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digits);
   };
 
-  const handleIdCardChange = (input: string) => {
-    const digits = input.replace(/\D/g, "").substring(0, 13);
-    setIdCard(digits);
-  };
+  // const handleIdCardChange = (input: string) => {
+  //   const digits = input.replace(/\D/g, "").substring(0, 13);
+  //   setIdCard(digits);
+  // };
 
+
+  const handleIdCardChange = (input: string) => {
+    // รับ raw input แล้วลบตัว non-digit ออก
+    const digits = input.replace(/\D/g, "");
+  
+    // จำกัดความยาวที่ state (raw)
+    if (digits.length <= 13) {
+      setIdCard(digits);
+    }
+  };
+  
   const handleRequestOtp = async () => {
+    const rawIdCard = idCard.replace(/\D/g, "");
+    if (!isValidThaiID(rawIdCard)) {
+      showAlert("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
+      return;
+    }
+
     if (phoneNumber.length < 10) {
-      Alert.alert("หมายเลขไม่ถูกต้อง", "กรุณากรอกเบอร์โทร 10 หลัก");
+      showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
       return;
     }
     try {
@@ -98,7 +117,7 @@ const RegisterScreen: React.FC = () => {
       });
     } catch (error) {
       console.log("ขอ OTP ไม่สำเร็จ:", error);
-      Alert.alert("ข้อผิดพลาด", "ไม่สามารถขอ OTP ได้");
+      showAlert("ไม่สามารถขอ OTP ได้");
     } finally {
       setLoading(false);
     }
@@ -133,14 +152,17 @@ const RegisterScreen: React.FC = () => {
         <View style={styles.iconContainer}>
           <Ionicons name="person-outline" size={20} color="#999999" />
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="X-XXXX-XXXXX-XX-X"
-          placeholderTextColor="#AAAAAA"
-          keyboardType="number-pad"
-          value={formatThaiID(idCard)}
-          onChangeText={handleIdCardChange}
-          maxLength={17}
+        <MaskInput
+        style={styles.input}
+        placeholder="X-XXXX-XXXXX-XX-X"
+        placeholderTextColor="#AAAAAA"
+        keyboardType="number-pad"
+        value={idCard}
+        onChangeText={(masked, unmasked) => setIdCard(unmasked)}
+        mask={[
+        /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
+        /\d/, /\d/, /\d/, /\d/, /\d/, "-",
+        /\d/, /\d/, "-", /\d/ ]}
         />
       </View>
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
@@ -213,32 +235,22 @@ const RegisterScreen: React.FC = () => {
           keyboardType="number-pad"
         />
       </View>
-      {/* <Text style={styles.inputLabel}>ผู้ติดต่อ</Text>
-      <View style={styles.inputContainer}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="people-outline" size={20} color="#999999" />
-        </View>
-        <TextInput
-          style={styles.input}
-          placeholder="ชื่อผู้ติดต่อ"
-          placeholderTextColor="#AAAAAA"
-          value={contactPerson}
-          onChangeText={setContactPerson}
-        />
-      </View> */}
       <Text style={styles.inputLabel}>เลขบัตรประชาชน</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
           <Ionicons name="person-outline" size={20} color="#999999" />
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder="X-XXXX-XXXXX-XX-X"
-          placeholderTextColor="#AAAAAA"
-          keyboardType="number-pad"
-          value={formatThaiID(idCard)}
-          onChangeText={handleIdCardChange}
-          maxLength={17}
+        <MaskInput
+        style={styles.input}
+        placeholder="X-XXXX-XXXXX-XX-X"
+        placeholderTextColor="#AAAAAA"
+        keyboardType="number-pad"
+        value={idCard}
+        onChangeText={(masked, unmasked) => setIdCard(unmasked)}
+        mask={[
+        /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
+        /\d/, /\d/, /\d/, /\d/, /\d/, "-",
+        /\d/, /\d/, "-", /\d/ ]}
         />
       </View>
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>

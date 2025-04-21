@@ -56,7 +56,7 @@ const RootNavigator: React.FC = () => {
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="PinLocked"
+      initialRouteName="Register"
       //initialRouteName=""
       screenOptions={{ headerShown: false, animation: "none" }}
     >
