@@ -52,7 +52,6 @@ const RegisterScreen: React.FC = () => {
   );
 
   // State สำหรับข้อมูลฟอร์ม
-  const [idCard, setIdCard] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [companyRegisterNumber, setCompanyRegisterNumber] = useState("");
@@ -62,7 +61,9 @@ const RegisterScreen: React.FC = () => {
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{ visible: boolean; message: string }>({ visible: false, message: "" });
-
+  const [personalIdCard, setPersonalIdCard] = useState("");
+  const [contactIdCard, setContactIdCard] = useState("");
+  
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -80,48 +81,75 @@ const RegisterScreen: React.FC = () => {
     setPhoneNumber(digits);
   };
 
-  // const handleIdCardChange = (input: string) => {
-  //   const digits = input.replace(/\D/g, "").substring(0, 13);
-  //   setIdCard(digits);
-  // };
-
-
-  const handleIdCardChange = (input: string) => {
-    // รับ raw input แล้วลบตัว non-digit ออก
-    const digits = input.replace(/\D/g, "");
   
-    // จำกัดความยาวที่ state (raw)
-    if (digits.length <= 13) {
-      setIdCard(digits);
-    }
-  };
   
-  const handleRequestOtp = async () => {
-    const rawIdCard = idCard.replace(/\D/g, "");
-    if (!isValidThaiID(rawIdCard)) {
-      showAlert("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
-      return;
-    }
 
-    if (phoneNumber.length < 10) {
-      showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
-      return;
-    }
-    try {
-      setLoading(true);
-      // จำลองการขอ OTP (แทนที่ด้วย mockRequestOtp ในงานจริง)
-      await Promise.resolve();
-      navigation.navigate("OtpVerification", {
-        from: "Register",
-        phoneNumber: phoneNumber,
-      });
-    } catch (error) {
-      console.log("ขอ OTP ไม่สำเร็จ:", error);
-      showAlert("ไม่สามารถขอ OTP ได้");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleRequestOtp = async () => {
+      const rawPersonalIdCard = personalIdCard.replace(/\D/g, "");
+      const rawContactIdCard = contactIdCard.replace(/\D/g, "");
+    
+      if (userType === "บุคคลธรรมดา") {
+        if (rawPersonalIdCard.length < 13) {
+          showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
+          return;
+        }
+    
+        if (!isValidThaiID(rawPersonalIdCard)) {
+          showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
+          return;
+        }
+    
+        if (!birthDate) {
+          showAlert("กรุณากรอกวันเดือนปีเกิด");
+          return;
+        }
+      }
+    
+      if (userType === "นิติบุคคล") {
+
+        if (!companyRegisterNumber) {
+          showAlert("กรุณากรอกเลขทะเบียนนิติบุคคล");
+          return;
+        }
+        const digits = companyRegisterNumber.replace(/\D/g, "");
+        if (digits.length !== 13) {
+          showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
+          return;
+        }
+        
+        if (rawContactIdCard.length < 13) {
+          showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
+          return;
+        }
+    
+        if (!isValidThaiID(rawContactIdCard)) {
+          showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
+          return;
+        }
+    
+        
+      }
+     
+      if (phoneNumber.length < 10) {
+        showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
+        return;
+      }
+    
+      try {
+        setLoading(true);
+        await Promise.resolve();
+        navigation.navigate("OtpVerification", {
+          from: "Register",
+          phoneNumber,
+        });
+      } catch (error) {
+        console.log("ขอ OTP ไม่สำเร็จ:", error);
+        showAlert("ไม่สามารถขอ OTP ได้");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
 
   // เมื่อได้รับวันที่จาก ThaiDatePicker ให้ update state date และ birthDate (แปลงเป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {
@@ -157,8 +185,8 @@ const RegisterScreen: React.FC = () => {
         placeholder="X-XXXX-XXXXX-XX-X"
         placeholderTextColor="#AAAAAA"
         keyboardType="number-pad"
-        value={idCard}
-        onChangeText={(masked, unmasked) => setIdCard(unmasked)}
+        value={personalIdCard}
+        onChangeText={(masked, unmasked) => setPersonalIdCard(unmasked)}
         mask={[
         /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
         /\d/, /\d/, /\d/, /\d/, /\d/, "-",
@@ -245,8 +273,8 @@ const RegisterScreen: React.FC = () => {
         placeholder="X-XXXX-XXXXX-XX-X"
         placeholderTextColor="#AAAAAA"
         keyboardType="number-pad"
-        value={idCard}
-        onChangeText={(masked, unmasked) => setIdCard(unmasked)}
+        value={contactIdCard}
+        onChangeText={(masked, unmasked) => setContactIdCard(unmasked)}
         mask={[
         /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
         /\d/, /\d/, /\d/, /\d/, /\d/, "-",
