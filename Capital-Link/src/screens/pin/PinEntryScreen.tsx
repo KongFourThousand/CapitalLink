@@ -58,7 +58,6 @@ const PinEntryKeyboardScreen: React.FC = () => {
     loadStoredPin();
   }, []);
 
-
   useEffect(() => {
     const checkLocked = async () => {
       const failCountFromStore = await SecureStore.getItemAsync("failCount");
@@ -96,7 +95,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
   }, []);
 
   // ตรวจสอบ PIN เมื่อกรอกครบ 6 ตัว
- useEffect(() => {
+  useEffect(() => {
     if (!fontsLoaded || pin.length !== 6) return;
 
     const validatePin = async () => {

@@ -25,15 +25,13 @@ import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-import {
-  formatPhoneNumber,
-  formatThaiID,
-} from "../../utils/formatPhoneAndID";
+import { formatPhoneNumber, formatThaiID } from "../../utils/formatPhoneAndID";
 import { isValidThaiID } from "../../utils/isValidThaiID";
 import CustomAlertModal from "../../components/common/CustomAlertModal";
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 import MaskInput from "react-native-mask-input";
+import { mockRequestOtp } from "../../services/mockApi";
 
 const { width } = Dimensions.get("window");
 
@@ -60,10 +58,13 @@ const RegisterScreen: React.FC = () => {
   const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<{ visible: boolean; message: string }>({ visible: false, message: "" });
+  const [alert, setAlert] = useState<{ visible: boolean; message: string }>({
+    visible: false,
+    message: "",
+  });
   const [personalIdCard, setPersonalIdCard] = useState("");
   const [contactIdCard, setContactIdCard] = useState("");
-  
+
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -81,75 +82,65 @@ const RegisterScreen: React.FC = () => {
     setPhoneNumber(digits);
   };
 
-  
-  
-
-    const handleRequestOtp = async () => {
-      const rawPersonalIdCard = personalIdCard.replace(/\D/g, "");
-      const rawContactIdCard = contactIdCard.replace(/\D/g, "");
-    
-      if (userType === "บุคคลธรรมดา") {
+  const handleRequestOtp = async () => {
+    // ดึงตัวเลขเฉพาะมา
+    const rawPersonalIdCard = personalIdCard.replace(/\D/g, "");
+    const rawContactIdCard = contactIdCard.replace(/\D/g, "");
+    const digits = companyRegisterNumber.replace(/\D/g, "");
+    console.log("Fail at:", {
+      userType,
+      rawPersonalIdCard,
+      birthDate,
+      phoneNumber,
+    });
+    switch (userType) {
+      case "บุคคลธรรมดา":
         if (rawPersonalIdCard.length < 13) {
-          showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
-          return;
+          return showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
         }
-    
         if (!isValidThaiID(rawPersonalIdCard)) {
-          showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
-          return;
+          return showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
         }
-    
         if (!birthDate) {
-          showAlert("กรุณากรอกวันเดือนปีเกิด");
-          return;
+          return showAlert("กรุณากรอกวันเดือนปีเกิด");
         }
-      }
-    
-      if (userType === "นิติบุคคล") {
+        break;
 
-        if (!companyRegisterNumber) {
-          showAlert("กรุณากรอกเลขทะเบียนนิติบุคคล");
-          return;
-        }
-        const digits = companyRegisterNumber.replace(/\D/g, "");
+      case "นิติบุคคล":
         if (digits.length !== 13) {
-          showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
-          return;
+          return showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
         }
-        
         if (rawContactIdCard.length < 13) {
-          showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
-          return;
+          return showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
         }
-    
         if (!isValidThaiID(rawContactIdCard)) {
-          showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
-          return;
+          return showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
         }
-    
-        
-      }
-     
-      if (phoneNumber.length < 10) {
-        showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
-        return;
-      }
-    
-      try {
-        setLoading(true);
-        await Promise.resolve();
-        navigation.navigate("OtpVerification", {
-          from: "Register",
-          phoneNumber,
-        });
-      } catch (error) {
-        console.log("ขอ OTP ไม่สำเร็จ:", error);
-        showAlert("ไม่สามารถขอ OTP ได้");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
+        break;
+
+      default:
+        return showAlert("กรุณาเลือกประเภทผู้ใช้งาน");
+    }
+
+    if (phoneNumber.length < 10) {
+      return showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
+    }
+
+    // ถ้าผ่านหมดแล้วค่อยขอ OTP
+    try {
+      setLoading(true);
+      await mockRequestOtp(phoneNumber);
+      navigation.navigate("OtpVerification", {
+        from: "Register",
+        phoneNumber,
+      });
+    } catch (err) {
+      console.log("ขอ OTP ไม่สำเร็จ:", err);
+      showAlert("ไม่สามารถขอ OTP ได้");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // เมื่อได้รับวันที่จาก ThaiDatePicker ให้ update state date และ birthDate (แปลงเป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {
@@ -181,16 +172,31 @@ const RegisterScreen: React.FC = () => {
           <Ionicons name="person-outline" size={20} color="#999999" />
         </View>
         <MaskInput
-        style={styles.input}
-        placeholder="X-XXXX-XXXXX-XX-X"
-        placeholderTextColor="#AAAAAA"
-        keyboardType="number-pad"
-        value={personalIdCard}
-        onChangeText={(masked, unmasked) => setPersonalIdCard(unmasked)}
-        mask={[
-        /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
-        /\d/, /\d/, /\d/, /\d/, /\d/, "-",
-        /\d/, /\d/, "-", /\d/ ]}
+          style={styles.input}
+          placeholder="X-XXXX-XXXXX-XX-X"
+          placeholderTextColor="#AAAAAA"
+          keyboardType="number-pad"
+          value={personalIdCard}
+          onChangeText={(masked, unmasked) => setPersonalIdCard(unmasked)}
+          mask={[
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+          ]}
         />
       </View>
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
@@ -269,16 +275,31 @@ const RegisterScreen: React.FC = () => {
           <Ionicons name="person-outline" size={20} color="#999999" />
         </View>
         <MaskInput
-        style={styles.input}
-        placeholder="X-XXXX-XXXXX-XX-X"
-        placeholderTextColor="#AAAAAA"
-        keyboardType="number-pad"
-        value={contactIdCard}
-        onChangeText={(masked, unmasked) => setContactIdCard(unmasked)}
-        mask={[
-        /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-",
-        /\d/, /\d/, /\d/, /\d/, /\d/, "-",
-        /\d/, /\d/, "-", /\d/ ]}
+          style={styles.input}
+          placeholder="X-XXXX-XXXXX-XX-X"
+          placeholderTextColor="#AAAAAA"
+          keyboardType="number-pad"
+          value={contactIdCard}
+          onChangeText={(masked, unmasked) => setContactIdCard(unmasked)}
+          mask={[
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+            /\d/,
+            "-",
+            /\d/,
+          ]}
         />
       </View>
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
@@ -394,6 +415,13 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <CustomAlertModal
+          visible={alert.visible}
+          message={alert.message}
+          onlyConfirm={true}
+          onConfirm={() => setAlert({ visible: false, message: "" })}
+          onCancel={() => setAlert({ visible: false, message: "" })}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

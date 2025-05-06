@@ -9,6 +9,7 @@ import {
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
@@ -49,10 +50,12 @@ const ProfileScreen: React.FC = () => {
   };
 
   // เมื่อยืนยันออกจากระบบ
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
     setModalVisible(false);
-    // navigation.replace("InitialEntry");
-    navigation.navigate("PinEntry");
+    await SecureStore.deleteItemAsync("authToken");
+    await SecureStore.deleteItemAsync("userPin");
+    navigation.replace("InitialEntry");
+    // navigation.navigate("PinEntry");
   };
 
   // เมื่อยกเลิกออกจากระบบ
@@ -65,9 +68,9 @@ const ProfileScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* ปุ่ม Back */}
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+      {/* <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Ionicons name="chevron-back" size={26} color="#CFA459" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Header Title */}
       <Text style={styles.headerTitle}>โปรไฟล์</Text>

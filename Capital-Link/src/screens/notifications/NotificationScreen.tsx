@@ -14,60 +14,19 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import CustomTabBar from "../../components/common/CustomTabBar";
+import { mockNotifications, Notification } from "../../Data/NotiData";
 
 type NotificationScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "Notification"
 >;
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  date: string;
-  read: boolean;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "โปรโมชั่นใหม่",
-    message:
-      "รับส่วนลดพิเศษ 20% สำหรับการใช้บริการเงินฝากวันนี้เท่านั้น!",
-    date: "21/03/2024",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "แจ้งเตือนการชำระเงิน",
-    message:
-      "คุณมีการชำระเงินที่ค้างอยู่ กรุณาตรวจสอบรายละเอียดในแอป",
-    date: "20/03/2024",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "อัปเดตระบบ",
-    message:
-      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
-    date: "19/03/2024",
-    read: false,
-  },
-  {
-    id: "4",
-    title: "อัปเดตระบบ",
-    message:
-      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
-    date: "19/03/2024",
-    read: false,
-  },
-];
-
 const READ_NOTIFICATIONS_KEY = "readNotifications";
 
 const NotificationScreen: React.FC = () => {
   const navigation = useNavigation<NotificationScreenNavigationProp>();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] =
+    useState<Notification[]>(mockNotifications);
 
   // โหลดรายการ ID ที่อ่านแล้วจาก AsyncStorage เมื่อ component mount
   useEffect(() => {
@@ -98,7 +57,10 @@ const NotificationScreen: React.FC = () => {
     // ดึงรายการที่อ่านแล้วจาก state
     const readIds = updated.filter((n) => n.read).map((n) => n.id);
     try {
-      await AsyncStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(readIds));
+      await AsyncStorage.setItem(
+        READ_NOTIFICATIONS_KEY,
+        JSON.stringify(readIds)
+      );
     } catch (error) {
       console.error("Error saving read notifications", error);
     }
@@ -195,7 +157,6 @@ const styles = StyleSheet.create({
     color: "#a2754c",
     marginTop: 20,
     marginBottom: 20,
-   
   },
   listContainer: {
     padding: 16,

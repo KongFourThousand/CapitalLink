@@ -10,7 +10,6 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
@@ -18,131 +17,129 @@ import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-
-
-
+import { externalLinks } from "../../Data/bannerLink";
+import BannerAdmin from "../../components/Home/Banner/BannerAdmin";
 const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
+  const GreetingText = () => {
+    const getGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour < 12) {
+        return "สวัสดีตอนเช้า";
+      } else if (hour < 18) {
+        return "สวัสดีตอนบ่าย";
+      } else {
+        return "สวัสดีตอนเย็น";
+      }
+    };
 
-  // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
-  const handleDepositPress = () => {
-    navigation.navigate("Deposit");
-
+    return <Text style={styles.welcomeText}>{getGreeting()}</Text>;
   };
 
-  // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
-  const handleLoanPress = () => {
-    navigation.navigate("Loan");
+  const Header = () => {
+    return (
+      <LinearGradient
+        colors={["#E9D9B5", "#D4B976"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.profileSection}
+      >
+        <View style={styles.avatarContainer}>
+          <FontAwesome5 name="user-circle" size={36} color="#000" />
+        </View>
+        <View style={styles.userInfo}>
+          <GreetingText />
+          <Text style={styles.userName}>ผู้ใช้งาน</Text>
+        </View>
+      </LinearGradient>
+    );
   };
+  const CapitalMenu = () => {
+    // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
+    const handleDepositPress = () => {
+      navigation.navigate("Deposit");
+    };
 
-  // ตัวอย่าง URLs
-  const externalLinks = [
-    {
-      id: "1",
-      title: "กลุ่มธุรกิจทางการเงิน แคปปิตอล ลิงค์ Capital Link Financial Group",
-      image: require("../../../assets/banner1.png"),
-      url: "https://www.capitallink.co.th/",
-    },
-    {
-      id: "2",
-      title: "ทรัพย์สินรอการขาย",
-      image: require("../../../assets/banner2.png"),
-      url: "https://www.capitallink.co.th/clamc",
-    },
-    {
-      id: "3",
-      title: "ข่าวสารต่าง ๆ",
-      image: require("../../../assets/banner3.png"),
-      url: "https://www.capitallink.co.th/clfg-2/clfg-news",
-    },
-    {
-      id: "4",
-      title: "เปิดบัญชีใหม่",
-      image: require("../../../assets/banner4.png"),
-      url: "https://www.capitallink.co.th/clc",
-    },
-  ];
-  // ฟังก์ชันกดเปิดเว็บ
-  const handleOpenLink = (linkUrl: string) => {
-    // ใช้ Linking เพื่อเปิดเว็บภายนอก
-    Linking.openURL(linkUrl);
+    // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
+    const handleLoanPress = () => {
+      navigation.navigate("Loan");
+    };
+    return (
+      <View style={styles.menuRow}>
+        <TouchableOpacity style={styles.menuBox} onPress={handleDepositPress}>
+          <Ionicons
+            name="wallet-outline"
+            size={28}
+            color="#CFA459"
+            style={styles.menuIcon}
+          />
+          <Text style={styles.menuBoxTitle}>เงินฝาก</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuBox} onPress={handleLoanPress}>
+          <Ionicons
+            name="card-outline"
+            size={28}
+            color="#4F7FE3"
+            style={styles.menuIcon}
+          />
+          <Text style={styles.menuBoxTitle}>สินเชื่อ</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
-
-
+  const BannerLink = () => {
+    // ตัวอย่าง URLs
+    // ฟังก์ชันกดเปิดเว็บ
+    const handleOpenLink = (linkUrl: string) => {
+      // ใช้ Linking เพื่อเปิดเว็บภายนอก
+      Linking.openURL(linkUrl);
+    };
+    return (
+      <View style={styles.bannerContainer}>
+        {externalLinks.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.bannerCard}
+            activeOpacity={0.9}
+            onPress={() => handleOpenLink(item.url)}
+          >
+            <Image
+              source={item.image}
+              style={styles.bannerImage}
+              resizeMode="cover"
+            />
+            <View style={styles.bannerOverlay}>
+              <Text style={styles.bannerTitle}>{item.title}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
         {/* ส่วนบน: โปรไฟล์ผู้ใช้ ไล่สีทอง */}
-        <LinearGradient
-          colors={['#E9D9B5', '#D4B976']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.profileSection}
-        >
-          <View style={styles.avatarContainer}>
-            <FontAwesome5 name="user-circle" size={36} color="#000" />
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.welcomeText}>สวัสดีตอนเย็น</Text>
-            <Text style={styles.userName}>MININ</Text>
-          </View>
-        </LinearGradient>
-     
-
+        <Header />
         <View style={styles.container}>
           {/* เพิ่มปุ่มสี่เหลี่ยม: เงินฝาก, สินเชื่อ ตรงนี้ */}
-          <View style={styles.menuRow}>
-            <TouchableOpacity
-              style={styles.menuBox}
-              onPress={handleDepositPress}
-            >
-              <Ionicons name="wallet-outline" size={28} color="#CFA459" style={styles.menuIcon} />
-              <Text style={styles.menuBoxTitle}>เงินฝาก</Text>
-              
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuBox}
-              onPress={handleLoanPress}
-            >
-              <Ionicons name="card-outline" size={28} color="#4F7FE3" style={styles.menuIcon} />
-              <Text style={styles.menuBoxTitle}>สินเชื่อ</Text>
-            </TouchableOpacity>
-          </View>
-
+          <CapitalMenu />
           {/* แบนเนอร์ 4 อัน (กดแล้วไปเว็บนอก) */}
-          <View style={styles.bannerContainer}>
-            
-            {externalLinks.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.bannerCard}
-                activeOpacity={0.9}
-                onPress={() => handleOpenLink(item.url)}
-              >
-                <Image
-                  source={item.image}
-                  style={styles.bannerImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.bannerOverlay}>
-                  <Text style={styles.bannerTitle}>{item.title}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
+          <BannerAdmin />
+          <BannerLink />
           {/* เว้นระยะด้านล่าง */}
           <View style={styles.bottomSpacer} />
         </View>
       </ScrollView>
-      
+
       {/* ใช้ CustomTabBar ที่แยกออกมา */}
       <CustomTabBar activeTab="home" />
     </SafeAreaView>

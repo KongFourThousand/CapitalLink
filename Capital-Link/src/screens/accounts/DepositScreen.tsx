@@ -19,16 +19,32 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 const { width } = Dimensions.get("window");
 
 const DepositScreen: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
-  
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
+
   // กดปุ่ม Back → กลับหน้า "บัญชี" (หรือ goBack())
   const handleBack = () => {
     // ถ้าต้องการไปหน้าบัญชีโดยเฉพาะ: navigation.navigate("Account");
     // หรือถ้าจะกลับหน้าเดิม:
-    // navigation.goBack();
-    navigation.navigate("Account");
+    navigation.goBack();
+    // navigation.navigate("Account");
   };
-
+  const DetailRow = ({ detail, title }) => {
+    return (
+      <View style={styles.dateRow}>
+        <Text style={styles.dateLabel}>{title}:</Text>
+        <Text style={styles.dateValue}>{detail}</Text>
+      </View>
+    );
+  };
+  const HistoryDeposit = () => {
+    return (
+      <View style={styles.dateCard}>
+        <Text style={styles.accountName}>ประวัติการฝากเงิน</Text>
+        <DetailRow title={"ฝากเงิน"} detail={"500,000"} />
+      </View>
+    );
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -91,23 +107,24 @@ const DepositScreen: React.FC = () => {
             <Text style={styles.dateValue}>21/03/2025</Text>
           </View>
 
-          {/* ปุ่มกดดูรายละเอียดเพิ่มเติม */}
-          <LinearGradient
-            colors={["#c49a45", "#d4af71", "#e0c080"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.moreButton}
-          >
-            <TouchableOpacity
-              style={styles.moreButtonContainer}
-              activeOpacity={0.9}
-            >
-              <Text style={styles.moreButtonText}>
-                กดเพื่อดูรายละเอียดเพิ่มเติม
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {/* ปุ่มกดดูรายละเอียดเพิ่มเติม
+          // <LinearGradient
+          //   colors={["#c49a45", "#d4af71", "#e0c080"]}
+          //   start={{ x: 0, y: 0 }}
+          //   end={{ x: 1, y: 0 }}
+          //   style={styles.moreButton}
+          // >
+          //   <TouchableOpacity
+          //     style={styles.moreButtonContainer}
+          //     activeOpacity={0.9}
+          //   >
+          //     <Text style={styles.moreButtonText}>
+          //       กดเพื่อดูรายละเอียดเพิ่มเติม
+          //     </Text>
+          //   </TouchableOpacity>
+          // </LinearGradient> */}
         </View>
+        <HistoryDeposit />
       </ScrollView>
       <CustomTabBar activeTab="account" />
     </SafeAreaView>
@@ -171,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   accountInfo: {
-    alignItems: "flex-start", 
+    alignItems: "flex-start",
   },
   accountName: {
     fontSize: 16,

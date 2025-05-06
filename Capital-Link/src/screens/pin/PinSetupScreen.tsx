@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import PinScreen from "../../components/common/PinScreen";
 import { validatePin } from "../../components/common/PinValidator";
 import PinErrorModal from "../../components/common/PinErrorModal";
+import CustomAlertModal from "../../components/common/CustomAlertModal";
 
 type PinSetupScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -16,6 +18,22 @@ const PinSetupScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [pinInputKey, setPinInputKey] = useState(0);
+  const [alert, setAlert] = useState<{ visible: boolean; message: string }>({
+    visible: false,
+    message: "",
+  });
+  useEffect(() => {
+    const checkPinSetup = async () => {
+      const pinDone = await SecureStore.getItemAsync("userPin");
+      if (!pinDone) {
+        setAlert({
+          visible: true,
+          message: "คุณไม่ได้ตั้งค่า PIN กรุณาตั้งค่า PIN",
+        });
+      }
+    };
+    checkPinSetup();
+  }, []);
 
   const handlePinComplete = (pin: string) => {
     const result = validatePin(pin);
@@ -46,6 +64,13 @@ const PinSetupScreen: React.FC = () => {
         visible={modalVisible}
         message={errorMessage}
         onDismiss={() => setModalVisible(false)}
+      />
+      <CustomAlertModal
+        visible={alert.visible}
+        message={alert.message}
+        onlyConfirm={true}
+        onConfirm={() => setAlert({ visible: false, message: "" })}
+        onCancel={() => setAlert({ visible: false, message: "" })}
       />
     </>
   );

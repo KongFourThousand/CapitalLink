@@ -1,0 +1,39 @@
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+}
+export const mockNotifications: Notification[] = [
+  {
+    id: "1",
+    title: "โปรโมชั่นใหม่",
+    message: "รับส่วนลดพิเศษ 20% สำหรับการใช้บริการเงินฝากวันนี้เท่านั้น!",
+    date: "21/03/2024",
+    read: false,
+  },
+  {
+    id: "2",
+    title: "แจ้งเตือนการชำระเงิน",
+    message: "คุณมีการชำระเงินที่ค้างอยู่ กรุณาตรวจสอบรายละเอียดในแอป",
+    date: "20/03/2024",
+    read: false,
+  },
+  {
+    id: "3",
+    title: "อัปเดตระบบ",
+    message:
+      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
+    date: "19/03/2024",
+    read: false,
+  },
+  {
+    id: "4",
+    title: "อัปเดตระบบ",
+    message:
+      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
+    date: "19/03/2024",
+    read: false,
+  },
+];

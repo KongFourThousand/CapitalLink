@@ -16,11 +16,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import OtpVerification from "../../components/common/OtpVerification";
-
-type OtpRouteProp = RouteProp<
-  RootStackParamList,
-  "OtpVerification"
->;
+import * as SecureStore from "expo-secure-store";
+type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 
 const { width } = Dimensions.get("window");
 
@@ -36,15 +33,17 @@ const OtpVerificationScreen: React.FC = () => {
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
-  const handleVerifyOtp = (otpCode: string) => {
+  const handleVerifyOtp = async (otpCode: string) => {
     if (otpCode === "123456") {
       if (from === "PhoneChange") {
         Alert.alert("เปลี่ยนเบอร์สำเร็จ", `เบอร์ของคุณคือ ${phoneNumber}`, [
           { text: "ตกลง", onPress: () => navigation.navigate("Profile") },
         ]);
       } else if (from === "Register") {
+        await SecureStore.setItemAsync("authToken", "true");
         navigation.replace("PinSetup");
       } else if (from === "Login") {
+        await SecureStore.setItemAsync("authToken", "true");
         navigation.replace("PinSetup"); // หรือใส่ค่าจริง
       }
     } else {

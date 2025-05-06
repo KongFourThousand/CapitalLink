@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as SecureStore from "expo-secure-store";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import OtpVerificationScreen from "../screens/auth/OtpVerificationScreen";
@@ -52,11 +53,41 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator: React.FC = () => {
+  const [initialRoute, setInitialRoute] = useState<
+    keyof RootStackParamList | null
+  >(null);
+  useEffect(() => {
+    const determineInitialRoute = async () => {
+      // อ่าน auth token และ flag PIN จาก SecureStore
+      const token = await SecureStore.getItemAsync("authToken");
+      const pinDone = await SecureStore.getItemAsync("userPin");
+
+      if (!token) {
+        // ยังไม่ล็อกอิน/สมัคร
+        setInitialRoute("InitialEntry");
+      } else if (!pinDone) {
+        // ล็อกอินแล้ว แต่ยังไม่ได้ตั้ง PIN
+        setInitialRoute("PinSetup");
+      } else {
+        // ล็อกอินและตั้ง PIN แล้ว
+        setInitialRoute("PinEntry");
+      }
+    };
+
+    determineInitialRoute();
+  }, []);
+
+  if (!initialRoute) {
+    // รอโหลดค่าสถานะ (อาจแสดง Splash)
+    return null;
+  }
   return (
     <Stack.Navigator
       // 🔧 ป้องกัน TypeScript error โดยระบุ id ให้ชัดเจน
       id={undefined}
-      initialRouteName="Register"
+      // initialRouteName="Register"
+      // initialRouteName="InitialEntry"
+      initialRouteName={initialRoute}
       //initialRouteName=""
       screenOptions={{ headerShown: false, animation: "none" }}
     >
