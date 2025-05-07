@@ -15,12 +15,16 @@ import Loan from "../screens/accounts/LoanScreen";
 import Notification from "../screens/notifications/NotificationScreen";
 import Profile from "../screens/Profile/ProfileScreen";
 import OldPin from "../screens/Profile/ChangePin/OldPinVerifyScreen";
-import NameChange from "../screens/Profile/NameChangeRequestScreen";
-import PhoneChange from "../screens/Profile/PhoneChangeRequestScreen";
+import NameChange from "../../src/screens/Profile/ChangeData/NameChangeRequestScreen";
+import PhoneChange from "../screens/Profile/ChangeData/PhoneChangeRequestScreen";
 import NotiSettings from "../screens/Profile/NotificationSettingsScreen";
 import NewPinSetup from "../screens/Profile/ChangePin/NewPinSetupScreen";
 import NewPinConfirm from "../screens/Profile/ChangePin/NewPinConfirmScreen";
 import PinLocked from "../screens/pin/PinLockedScreen";
+import ChangeDataUser from "../screens/Profile/ChangeData/ChangeDataUser";
+import EmailChangeRequest from "../screens/Profile/ChangeData/EmailChangeRequest";
+import AddressChangeRequest from "../screens/Profile/ChangeData/AddressChangeRequest";
+import VerifyPinLock from "../screens/VerifyAccount/VerifyPinLock";
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -47,6 +51,10 @@ export type RootStackParamList = {
   NewPinSetup: { oldPin?: string };
   NewPinConfirm: { firstPin: string };
   PinLocked: undefined;
+  ChangeData: undefined;
+  EmailChange: undefined;
+  AddressChange: undefined;
+  VerifyPinLock: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -59,7 +67,7 @@ const RootNavigator: React.FC = () => {
   useEffect(() => {
     const determineInitialRoute = async () => {
       // อ่าน auth token และ flag PIN จาก SecureStore
-      const token = await SecureStore.getItemAsync("authToken");
+      const token = await SecureStore.getItemAsync("userData");
       const pinDone = await SecureStore.getItemAsync("userPin");
 
       if (!token) {
@@ -111,6 +119,10 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="NotiSettings" component={NotiSettings} />
       <Stack.Screen name="NewPinSetup" component={NewPinSetup} />
       <Stack.Screen name="NewPinConfirm" component={NewPinConfirm} />
+      <Stack.Screen name="ChangeData" component={ChangeDataUser} />
+      <Stack.Screen name="EmailChange" component={EmailChangeRequest} />
+      <Stack.Screen name="AddressChange" component={AddressChangeRequest} />
+      <Stack.Screen name="VerifyPinLock" component={VerifyPinLock} />
       <Stack.Screen
         name="PinLocked"
         component={PinLocked}

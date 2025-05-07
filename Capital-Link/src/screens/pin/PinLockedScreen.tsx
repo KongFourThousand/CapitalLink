@@ -13,8 +13,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { RootStackParamList } from "../../navigation/RootNavigator";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 
@@ -26,8 +27,9 @@ type PinLockedNavProp = NativeStackNavigationProp<
 const PinLockedScreen: React.FC = () => {
   const navigation = useNavigation<PinLockedNavProp>();
 
-  const handleUnlockPin = () => {
+  const handleUnlockPin = async () => {
     // For now, we'll navigate to Login screen as per requirements
+    await SecureStore.deleteItemAsync("failCount");
     navigation.replace("Login");
   };
 
@@ -37,9 +39,11 @@ const PinLockedScreen: React.FC = () => {
         {/* Alert Icon */}
         <View style={styles.iconContainer}>
           {/* <Ionicons name="alert-circle" size={70} color="#a2754c" /> */}
-          <MaterialCommunityIcons name="shield-lock" size={72} color="#D9534F" />
-
-
+          <MaterialCommunityIcons
+            name="shield-lock"
+            size={72}
+            color="#D9534F"
+          />
         </View>
 
         {/* Title */}
@@ -48,10 +52,11 @@ const PinLockedScreen: React.FC = () => {
         {/* Message */}
         <View style={styles.messageContainer}>
           <Text style={styles.message}>
-            รหัส PIN ของคุณถูกล็อกการใช้งานชั่วคราว เนื่องจากคุณกรอกรหัส PIN เกินจำนวนครั้งที่ระบบกำหนด เพื่อความปลอดภัยของบัญชี
+            รหัส PIN ของคุณถูกล็อกการใช้งานชั่วคราว เนื่องจากคุณกรอกรหัส PIN
+            เกินจำนวนครั้งที่ระบบกำหนด เพื่อความปลอดภัยของบัญชี
           </Text>
           <Text style={styles.message}>
-             คุณจะไม่สามารถเข้าใช้งานได้
+            คุณจะไม่สามารถเข้าใช้งานได้
             จนกว่าจะดำเนินการยืนยันตัวตนเพื่อปลดล็อกและตั้งรหัส PIN ใหม่
           </Text>
         </View>

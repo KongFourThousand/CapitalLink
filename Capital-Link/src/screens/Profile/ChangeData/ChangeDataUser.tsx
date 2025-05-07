@@ -12,18 +12,18 @@ import { Ionicons } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
-import CustomTabBar from "../../components/common/CustomTabBar";
-import LogoutConfirmationModal from "../../components/LogoutConfirmationModa";
-import { formatPhoneNumberText } from "../../utils/formatPhoneAndID";
+import { Dimensions } from "react-native";
+import { RootStackParamList } from "../../../navigation/RootNavigator";
+import LogoutConfirmationModal from "../../../components/LogoutConfirmationModa";
+const { width } = Dimensions.get("window");
+
 type ProfileScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
   "Profile"
 >;
 
-const ProfileScreen: React.FC = () => {
-  const { UserData } = useData();
+const ChangeDataUser: React.FC = () => {
   const navigation = useNavigation<ProfileScreenNavProp>();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -37,12 +37,16 @@ const ProfileScreen: React.FC = () => {
     navigation.navigate("OldPin");
   };
   const handleRequestNameChange = () => {
-    // navigation.navigate("NameChange");
-    navigation.navigate("ChangeData");
+    navigation.navigate("NameChange");
   };
-
-  const handleNotificationSettings = () => {
-    navigation.navigate("NotiSettings");
+  const handleRequestPhoneChange = () => {
+    navigation.navigate("PhoneChange");
+  };
+  const handleRequestEmailChange = () => {
+    navigation.navigate("EmailChange");
+  };
+  const handleRequestAddressChange = () => {
+    navigation.navigate("AddressChange");
   };
   // เมื่อกดออกจากระบบ ให้เปิด modal
   const handleLogoutPress = () => {
@@ -81,76 +85,59 @@ const ProfileScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* ปุ่ม Back */}
-      {/* <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Ionicons name="chevron-back" size={26} color="#CFA459" />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
 
       {/* Header Title */}
-      <Text style={styles.headerTitle}>โปรไฟล์</Text>
+      <Text style={styles.headerTitle}>บัญชีผู้ใช้</Text>
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* ข้อมูลส่วนตัว */}
-        <LinearGradient
+        {/* <LinearGradient
           colors={["#E9D9B5", "#D4B976"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.profileHeader}
         >
-          {/* ตัด icon รูปโปรไฟล์ออก */}
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>ผู้ใช้งาน</Text>
-            <Text style={styles.profilePhone}>
-              เบอร์{" "}
-              {UserData.phone
-                ? formatPhoneNumberText(UserData.phone)
-                : "XXX-XXX-XXXX"}
-            </Text>
+            <Text style={styles.profilePhone}>XXX-XXX-XXXX</Text>
           </View>
-        </LinearGradient>
+        </LinearGradient> */}
 
         {/* เมนูตั้งค่า */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>ตั้งค่าทั่วไป</Text>
+          <Text style={styles.sectionTitle}>การเปลี่ยนแปลงข้อมูล</Text>
         </View>
 
         <View style={styles.menuCard}>
-          {/* เปลี่ยนรหัส PIN */}
+          {/* แก้ไข E-mail */}
           <SettingRow
-            handle={handleChangePin}
-            header={"เปลี่ยนรหัส PIN"}
-            detail={"แก้ไขรหัส PIN สำหรับเข้าสู่ระบบ"}
+            handle={handleRequestEmailChange}
+            header={"แก้ไขอีเมลล์"}
+            detail={"ยื่นคำขอแก้ไขอีเมลล์ของผู้ใช้งาน"}
             iconName={"key-outline"}
           />
           {/* ขอเปลี่ยนชื่อ-นามสกุล */}
           <SettingRow
             handle={handleRequestNameChange}
-            header={"ขอเปลี่ยนแปลงข้อมูล"}
+            header={"ขอเปลี่ยนชื่อหรือนามสกุล"}
             detail={"ยื่นคำขอเปลี่ยนแปลงข้อมูลต่างๆ"}
             iconName={"person-outline"}
           />
-
           {/* ขอเปลี่ยนเบอร์โทรศัพท์ */}
-          {/* <TouchableOpacity
-            style={styles.menuItem}
-            onPress={handleRequestPhoneChange}
-          >
-            <View style={styles.menuIconContainer}>
-              <Ionicons name="call-outline" size={22} color="#CFA459" />
-            </View>
-            <View style={styles.menuTextContainer}>
-              <Text style={styles.menuText}>ขอเปลี่ยนเบอร์โทรศัพท์</Text>
-              <Text style={styles.menuDescription}>
-                แก้ไขเบอร์โทรศัพท์ที่ใช้ในการติดต่อ
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#CFA459" />
-          </TouchableOpacity> */}
-
+          <SettingRow
+            handle={handleRequestPhoneChange}
+            header={"ขอเปลี่ยนเบอร์โทรศัพท์"}
+            detail={"แก้ไขเบอร์โทรศัพท์ที่ใช้ในการติดต่อ"}
+            iconName={"call-outline"}
+          />
           {/* ตั้งค่าการแจ้งเตือน */}
           <SettingRow
-            handle={handleNotificationSettings}
-            header={"ตั้งค่าการแจ้งเตือน"}
-            detail={"กำหนดการแจ้งเตือนและอีเมล"}
+            handle={handleRequestAddressChange}
+            header={"แก้ไขที่อยู่"}
+            detail={"แก้ไขที่อยู่ของผู้ใช้งาน"}
             iconName={"notifications-outline"}
           />
         </View>
@@ -181,9 +168,6 @@ const ProfileScreen: React.FC = () => {
         <View style={{ height: 80 }} />
       </ScrollView>
 
-      {/* ใช้ CustomTabBar */}
-      <CustomTabBar activeTab="profile" />
-
       {/* Logout Confirmation Modal */}
       <LogoutConfirmationModal
         visible={modalVisible}
@@ -194,12 +178,9 @@ const ProfileScreen: React.FC = () => {
   );
 };
 
-export default ProfileScreen;
+export default ChangeDataUser;
 
 /** --- Styles --- */
-import { Dimensions } from "react-native";
-import { useData } from "../../Provide/Auth/UserDataProvide";
-const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   safeArea: {

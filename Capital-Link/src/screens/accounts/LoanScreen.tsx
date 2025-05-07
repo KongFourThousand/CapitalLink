@@ -28,11 +28,106 @@ const LoanScreen: React.FC = () => {
   };
 
   // ตัวอย่างปุ่ม "ชำระเงิน"
-  const handlePay = () => { 
+  const handlePay = () => {
     // ใส่ logic การชำระเงินตามที่ต้องการ
     console.log("ชำระเงิน");
   };
+  const LoanAccount = () => {
+    return (
+      <View style={styles.infoCard}>
+        <View style={styles.sideBar} />
+        <View style={styles.cardContent}>
+          {/* แถวบน: ข้อมูลบัญชี vs ยอดเงิน */}
+          <View style={styles.headerRow}>
+            <View style={styles.accountInfo}>
+              <Text style={styles.accountName}>บัญชีสินเชื่อ</Text>
+              <Text style={styles.accountNumber}>580-4-xxx571</Text>
+              <Text style={styles.accountOwner}>นาย ก</Text>
+            </View>
+            <View style={styles.balanceContainer}>
+              <Text style={styles.accountBalance}>1,000,000.00</Text>
+              <Text style={styles.currency}>THB</Text>
+            </View>
+          </View>
 
+          {/* เส้นแบ่ง */}
+          <View style={styles.divider} />
+
+          {/* รายละเอียดอื่น ๆ */}
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
+            <Text style={styles.value}>8.25%</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>วันโอนค่าทำสัญญา:</Text>
+            <Text style={styles.value}>30/01/2025</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>ยอดคงเหลือ:</Text>
+            <Text style={styles.value}>15,600 บาท</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+  const StatusLoan = () => {
+    return (
+      <View style={styles.statusCard}>
+        <View style={styles.cardContent}>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>สถานะการชำระ:</Text>
+            <Text style={[styles.value, { color: "#4CAF50" }]}>ปกติ</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>คงเหลือค่าชำระ:</Text>
+            <Text style={styles.value}>0.00 บาท</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>จำนวนวันคงเหลือ:</Text>
+            <Text style={styles.value}>15 วัน</Text>
+          </View>
+
+          {/* ปุ่ม "ชำระเงิน" */}
+          <LinearGradient
+            colors={["#c49a45", "#d4af71", "#e0c080"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.payButton}
+          >
+            <TouchableOpacity
+              style={styles.payButtonContainer}
+              onPress={handlePay}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.payButtonText}>ชำระเงิน</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      </View>
+    );
+  };
+  const HistoryLoan = () => {
+    return (
+      <View style={styles.scheduleCard}>
+        <View style={styles.cardContent}>
+          <Text style={styles.scheduleTitle}>ประวัติการผ่อนชำระ</Text>
+
+          <View style={styles.dateRow}>
+            <Text style={styles.dateLabel}>28/02/2025</Text>
+            <Text style={styles.dateValue}>15,500 บาท</Text>
+          </View>
+          <View style={styles.dateRow}>
+            <Text style={styles.dateLabel}>16/03/2025</Text>
+            <Text style={styles.dateValue}>16,500 บาท</Text>
+          </View>
+          <View style={styles.dateRow}>
+            <Text style={styles.dateLabel}>17/04/2025</Text>
+            <Text style={styles.dateValue}>16,500 บาท</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -47,94 +142,12 @@ const LoanScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* ====== Card 1: ข้อมูลบัญชีสินเชื่อ ====== */}
-        <View style={styles.infoCard}>
-          <View style={styles.sideBar} />
-          <View style={styles.cardContent}>
-            {/* แถวบน: ข้อมูลบัญชี vs ยอดเงิน */}
-            <View style={styles.headerRow}>
-              <View style={styles.accountInfo}>
-                <Text style={styles.accountName}>บัญชีสินเชื่อ</Text>
-                <Text style={styles.accountNumber}>580-4-xxx571</Text>
-                <Text style={styles.accountOwner}>นาย ก</Text>
-              </View>
-              <View style={styles.balanceContainer}>
-                <Text style={styles.accountBalance}>1,000,000.00</Text>
-                <Text style={styles.currency}>THB</Text>
-              </View>
-            </View>
-
-            {/* เส้นแบ่ง */}
-            <View style={styles.divider} />
-
-            {/* รายละเอียดอื่น ๆ */}
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
-              <Text style={styles.value}>8.25%</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>วันโอนค่าทำสัญญา:</Text>
-              <Text style={styles.value}>30/01/2025</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>ยอดคงเหลือ:</Text>
-              <Text style={styles.value}>15,600 บาท</Text>
-            </View>
-          </View>
-        </View>
-
+        <LoanAccount />
         {/* ====== Card 2: สถานะการชำระ ====== */}
-        <View style={styles.statusCard}>
-          <View style={styles.cardContent}>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>สถานะการชำระ:</Text>
-              <Text style={[styles.value, { color: "#4CAF50" }]}>ปกติ</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>คงเหลือค่าชำระ:</Text>
-              <Text style={styles.value}>0.00 บาท</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>จำนวนวันคงเหลือ:</Text>
-              <Text style={styles.value}>15 วัน</Text>
-            </View>
-
-            {/* ปุ่ม "ชำระเงิน" */}
-            <LinearGradient
-              colors={["#c49a45", "#d4af71", "#e0c080"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.payButton}
-            >
-              <TouchableOpacity
-                style={styles.payButtonContainer}
-                onPress={handlePay}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.payButtonText}>ชำระเงิน</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-          </View>
-        </View>
+        <StatusLoan />
 
         {/* ====== Card 3: ตารางกำหนดการ / ประวัติการผ่อนชำระ ====== */}
-        <View style={styles.scheduleCard}>
-          <View style={styles.cardContent}>
-            <Text style={styles.scheduleTitle}>ประวัติการผ่อนชำระ</Text>
-
-            <View style={styles.dateRow}>
-              <Text style={styles.dateLabel}>28/02/2025</Text>
-              <Text style={styles.dateValue}>15,500 บาท</Text>
-            </View>
-            <View style={styles.dateRow}>
-              <Text style={styles.dateLabel}>16/03/2025</Text>
-              <Text style={styles.dateValue}>16,500 บาท</Text>
-            </View>
-            <View style={styles.dateRow}>
-              <Text style={styles.dateLabel}>17/04/2025</Text>
-              <Text style={styles.dateValue}>16,500 บาท</Text>
-            </View>
-          </View>
-        </View>
+        <HistoryLoan />
       </ScrollView>
 
       {/* แท็บบาร์ (ถ้ามีการใช้งาน) */}

@@ -19,9 +19,11 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
 import { externalLinks } from "../../Data/bannerLink";
 import BannerAdmin from "../../components/Home/Banner/BannerAdmin";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
+  const { UserData } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
   const GreetingText = () => {
@@ -52,7 +54,9 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.userInfo}>
           <GreetingText />
-          <Text style={styles.userName}>ผู้ใช้งาน</Text>
+          <Text style={styles.userName}>
+            คุณ {UserData.phone ? UserData.phone : "ผู้ใช้งาน"}
+          </Text>
         </View>
       </LinearGradient>
     );

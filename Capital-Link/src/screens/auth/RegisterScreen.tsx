@@ -32,28 +32,28 @@ import CustomAlertModal from "../../components/common/CustomAlertModal";
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 import MaskInput from "react-native-mask-input";
 import { mockRequestOtp } from "../../services/mockApi";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 
 const { width } = Dimensions.get("window");
 
 // ตั้งค่า default date เป็น 1 มกราคมของปีปัจจุบัน
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
-
+type UserType = "บุคคลธรรมดา" | "นิติบุคคล";
 const RegisterScreen: React.FC = () => {
+  const { setUserData } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman bold.ttf"),
   });
 
-  const [userType, setUserType] = useState<"บุคคลธรรมดา" | "นิติบุคคล">(
-    "บุคคลธรรมดา"
-  );
-
+  const [userType, setUserType] = useState<UserType>("บุคคลธรรมดา");
   // State สำหรับข้อมูลฟอร์ม
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [companyRegisterNumber, setCompanyRegisterNumber] = useState("");
-
+  const [personalIdCard, setPersonalIdCard] = useState("");
+  const [contactIdCard, setContactIdCard] = useState("");
   // State สำหรับ Date Picker – เริ่ม default เป็น 1 มกราคมของปีปัจจุบัน
   const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
@@ -62,8 +62,6 @@ const RegisterScreen: React.FC = () => {
     visible: false,
     message: "",
   });
-  const [personalIdCard, setPersonalIdCard] = useState("");
-  const [contactIdCard, setContactIdCard] = useState("");
 
   if (!fontsLoaded) {
     return (
@@ -83,60 +81,56 @@ const RegisterScreen: React.FC = () => {
   };
 
   const handleRequestOtp = async () => {
-    // ดึงตัวเลขเฉพาะมา
-    const rawPersonalIdCard = personalIdCard.replace(/\D/g, "");
-    const rawContactIdCard = contactIdCard.replace(/\D/g, "");
-    const digits = companyRegisterNumber.replace(/\D/g, "");
-    console.log("Fail at:", {
-      userType,
-      rawPersonalIdCard,
-      birthDate,
-      phoneNumber,
-    });
-    switch (userType) {
-      case "บุคคลธรรมดา":
-        if (rawPersonalIdCard.length < 13) {
-          return showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
-        }
-        if (!isValidThaiID(rawPersonalIdCard)) {
-          return showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
-        }
-        if (!birthDate) {
-          return showAlert("กรุณากรอกวันเดือนปีเกิด");
-        }
-        break;
+    const rawPersonalId = personalIdCard.replace(/\D/g, "");
+    const rawCompanyReg = companyRegisterNumber.replace(/\D/g, "");
+    const rawContactId = contactIdCard.replace(/\D/g, "");
 
-      case "นิติบุคคล":
-        if (digits.length !== 13) {
-          return showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
-        }
-        if (rawContactIdCard.length < 13) {
-          return showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
-        }
-        if (!isValidThaiID(rawContactIdCard)) {
-          return showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
-        }
-        break;
-
-      default:
-        return showAlert("กรุณาเลือกประเภทผู้ใช้งาน");
+    if (userType === "บุคคลธรรมดา") {
+      if (rawPersonalId.length !== 13) {
+        return showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
+      }
+      if (!isValidThaiID(rawPersonalId)) {
+        return showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
+      }
+      if (!birthDate) {
+        return showAlert("กรุณาเลือกวันเกิด");
+      }
+    } else {
+      if (rawCompanyReg.length !== 13) {
+        return showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
+      }
+      if (rawContactId.length !== 13) {
+        return showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
+      }
+      if (!isValidThaiID(rawContactId)) {
+        return showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
+      }
     }
 
-    if (phoneNumber.length < 10) {
-      return showAlert("กรุณากรอกเบอร์โทร 10 หลัก");
+    if (phoneNumber.length !== 10) {
+      return showAlert("กรุณากรอกเบอร์โทรให้ครบ 10 หลัก");
     }
 
-    // ถ้าผ่านหมดแล้วค่อยขอ OTP
     try {
       setLoading(true);
       await mockRequestOtp(phoneNumber);
-      navigation.navigate("OtpVerification", {
-        from: "Register",
-        phoneNumber,
-      });
+
+      // บันทึกข้อมูลผู้ใช้ลง Context
+      setUserData((prev) => ({
+        ...prev,
+        userType,
+        personalIdCard: userType === "บุคคลธรรมดา" ? rawPersonalId : undefined,
+        birthDate: userType === "บุคคลธรรมดา" ? birthDate : undefined,
+        companyRegisterNumber:
+          userType === "นิติบุคคล" ? rawCompanyReg : undefined,
+        contactIdCard: userType === "นิติบุคคล" ? rawContactId : undefined,
+        phone: phoneNumber,
+      }));
+
+      navigation.navigate("OtpVerification", { from: "Register", phoneNumber });
     } catch (err) {
-      console.log("ขอ OTP ไม่สำเร็จ:", err);
-      showAlert("ไม่สามารถขอ OTP ได้");
+      console.error("ขอ OTP ไม่สำเร็จ", err);
+      showAlert("ไม่สามารถขอรหัส OTP ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

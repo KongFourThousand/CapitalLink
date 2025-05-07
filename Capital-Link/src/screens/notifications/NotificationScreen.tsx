@@ -33,6 +33,7 @@ const NotificationScreen: React.FC = () => {
     const loadReadNotifications = async () => {
       try {
         const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
+        // console.log("Noti Data", stored);
         const readList: string[] = stored ? JSON.parse(stored) : [];
         setNotifications((prev) =>
           prev.map((notif) =>
@@ -107,12 +108,12 @@ const NotificationScreen: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.header}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <Text style={styles.headerTitle}>แจ้งเตือน</Text>
       </View>
       <FlatList
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#EEEEEE",
     alignItems: "center", // ทำให้ headerTitle อยู่ตรงกลาง
     justifyContent: "center",
-    position: "relative",
+    // position: "relative",
   },
   backButton: {
     position: "absolute",
@@ -160,6 +161,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
+    paddingBottom: 80,
   },
   notificationCard: {
     backgroundColor: "#fff",

@@ -17,11 +17,13 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import OtpVerification from "../../components/common/OtpVerification";
 import * as SecureStore from "expo-secure-store";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 
 const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
+  const { UserData, setUserData } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<OtpRouteProp>();
@@ -40,7 +42,26 @@ const OtpVerificationScreen: React.FC = () => {
           { text: "ตกลง", onPress: () => navigation.navigate("Profile") },
         ]);
       } else if (from === "Register") {
-        await SecureStore.setItemAsync("authToken", "true");
+        try {
+          // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
+          const updatedData = {
+            ...UserData,
+            authToken: "true",
+          };
+          setUserData(updatedData);
+
+          // บันทึก UserData ทั้งหมดลง SecureStore
+          await SecureStore.setItemAsync(
+            "userData",
+            JSON.stringify(updatedData)
+          );
+
+          // นำทางไปตั้งค่า PIN
+          navigation.replace("PinSetup");
+        } catch (error) {
+          console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
+        } finally {
+        }
         navigation.replace("PinSetup");
       } else if (from === "Login") {
         await SecureStore.setItemAsync("authToken", "true");

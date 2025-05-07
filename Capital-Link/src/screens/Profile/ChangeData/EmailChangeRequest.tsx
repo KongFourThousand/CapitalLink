@@ -16,21 +16,20 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
+import { RootStackParamList } from "../../../navigation/RootNavigator";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
-  "NameChange"
+  "EmailChange"
 >;
 
-const NameChangeRequestScreen: React.FC = () => {
+const EmailChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
 
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
-  const [newFirstName, setNewFirstName] = useState("");
-  const [newLastName, setNewLastName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
 
   // เอกสารแนบ
   const [document, setDocument] = useState<string | null>(null);
@@ -85,17 +84,14 @@ const NameChangeRequestScreen: React.FC = () => {
   // ฟังก์ชันยื่นคำขอ
   const handleSubmitRequest = () => {
     // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
-    if (!newFirstName.trim() && !newLastName.trim()) {
-      Alert.alert(
-        "ข้อมูลไม่ครบถ้วน",
-        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง"
-      );
+    if (!newEmail.trim()) {
+      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกอีเมลล์");
       return;
     }
 
     // ถ้าไม่ได้แนบเอกสาร
     if (!document) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนชื่อ-นามสกุล");
+      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนอีเมลล์");
       return;
     }
 
@@ -106,11 +102,11 @@ const NameChangeRequestScreen: React.FC = () => {
       setIsLoading(false);
       Alert.alert(
         "ส่งคำขอสำเร็จ",
-        "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
+        "คำขอเปลี่ยนอีเมลล์ของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
         [
           {
             text: "ตกลง",
-            onPress: () => navigation.navigate("Profile"),
+            onPress: () => navigation.goBack(),
           },
         ]
       );
@@ -133,59 +129,36 @@ const NameChangeRequestScreen: React.FC = () => {
         </TouchableOpacity>
 
         {/* Header Title */}
-        <Text style={styles.headerTitle}>ขอเปลี่ยนชื่อ-นามสกุล</Text>
+        <Text style={styles.headerTitle}>ขอเปลี่ยนอีเมลล์</Text>
 
         <ScrollView contentContainerStyle={styles.contentContainer}>
-          {/* ฟอร์มชื่อ - นามสกุลใหม่ */}
-          {/* <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text> */}
           <View style={styles.formContainer}>
             {/* กรอกชื่อใหม่ */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>ชื่อใหม่</Text>
+              <Text style={styles.inputLabel}>อีเมลล์ใหม่</Text>
               <TextInput
                 style={styles.textInput}
-                value={newFirstName}
-                onChangeText={setNewFirstName}
-                placeholder="กรอกชื่อใหม่"
+                value={newEmail}
+                onChangeText={setNewEmail}
+                placeholder="กรอกอีเมลล์ใหม่"
                 autoCapitalize="words"
                 returnKeyType="next"
                 onSubmitEditing={() => lastNameInputRef.current?.focus()}
               />
             </View>
-
-            {/* กรอกนามสกุลใหม่ */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
-              <TextInput
-                ref={lastNameInputRef}
-                style={styles.textInput}
-                value={newLastName}
-                onChangeText={setNewLastName}
-                placeholder="กรอกนามสกุลใหม่"
-                autoCapitalize="words"
-              />
-            </View>
           </View>
 
-          {/* หมายเหตุใต้ช่องกรอก */}
-          <Text style={styles.formNote}>
-            หากต้องการเปลี่ยนเพียงส่วนใดส่วนหนึ่ง (ชื่อหรือนามสกุล)
-            {"\n"}
-            สามารถปล่อยอีกช่องว่างได้
-          </Text>
-
-          {/* แนบเอกสาร */}
           <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
           <View style={styles.documentContainer}>
             <Text style={styles.documentHint}>
-              แนบภาพถ่ายเอกสารการเปลี่ยนชื่อ-นามสกุลที่ออกโดยหน่วยงานราชการ
+              แนบภาพถ่ายเอกสารการเปลี่ยนอีเมลล์
             </Text>
 
             {document ? (
               <View style={styles.documentPreview}>
                 <Image
                   source={{ uri: document }}
-                  style={styles.documentImage} 
+                  style={styles.documentImage}
                   resizeMode="cover"
                 />
                 <TouchableOpacity
@@ -255,9 +228,8 @@ const NameChangeRequestScreen: React.FC = () => {
   );
 };
 
-export default NameChangeRequestScreen;
+export default EmailChangeRequest;
 
-/** --- Styles --- */
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

@@ -45,6 +45,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
       try {
         const pinFromDevice = await SecureStore.getItemAsync("userPin");
         const failCountFromStore = await SecureStore.getItemAsync("failCount");
+        console.log("failCountFromStore", failCountFromStore);
         if (pinFromDevice) {
           setStoredPin(pinFromDevice);
           if (failCountFromStore) setFailCount(Number(failCountFromStore));

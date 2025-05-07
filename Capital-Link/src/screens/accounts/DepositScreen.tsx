@@ -32,8 +32,47 @@ const DepositScreen: React.FC = () => {
   const DetailRow = ({ detail, title }) => {
     return (
       <View style={styles.dateRow}>
-        <Text style={styles.dateLabel}>{title}:</Text>
+        <Text style={styles.dateLabel}>{title}</Text>
         <Text style={styles.dateValue}>{detail}</Text>
+      </View>
+    );
+  };
+  const DepositAccount = () => {
+    return (
+      <View style={styles.infoCard}>
+        {/* แถบสีทองด้านข้างซ้าย */}
+        <View style={styles.sideBar}></View>
+
+        <View style={styles.cardContent}>
+          <View style={styles.headerRow}>
+            <View style={styles.accountInfo}>
+              <Text style={styles.accountName}>บัญชีสะสมทรัพย์</Text>
+              <Text style={styles.accountNumber}>580-4-xxx571</Text>
+              <Text style={styles.accountOwner}>นาย ก</Text>
+            </View>
+            <View style={styles.balanceContainer}>
+              <Text style={styles.accountBalance}>1,000,000.00</Text>
+              <Text style={styles.currency}>THB</Text>
+            </View>
+          </View>
+
+          <View style={styles.divider}></View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
+            <Text style={styles.value}>3.25%</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>ระยะเวลาฝาก:</Text>
+            <Text style={styles.value}>1 ปี</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>ดอกเบี้ย ณ วันสิ้นสุดสัญญา:</Text>
+            <Text style={styles.value}>32,500 บาท</Text>
+          </View>
+        </View>
       </View>
     );
   };
@@ -41,7 +80,8 @@ const DepositScreen: React.FC = () => {
     return (
       <View style={styles.dateCard}>
         <Text style={styles.accountName}>ประวัติการฝากเงิน</Text>
-        <DetailRow title={"ฝากเงิน"} detail={"500,000"} />
+        <DetailRow title={"ฝากเงินจำนวน"} detail={"500,000"} />
+        <DetailRow title={"ฝากเงินจำนวน"} detail={"500,000"} />
       </View>
     );
   };
@@ -59,42 +99,7 @@ const DepositScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* กล่องข้อมูลบัญชี ส่วนแรก */}
-        <View style={styles.infoCard}>
-          {/* แถบสีทองด้านข้างซ้าย */}
-          <View style={styles.sideBar}></View>
-
-          <View style={styles.cardContent}>
-            <View style={styles.headerRow}>
-              <View style={styles.accountInfo}>
-                <Text style={styles.accountName}>บัญชีสะสมทรัพย์</Text>
-                <Text style={styles.accountNumber}>580-4-xxx571</Text>
-                <Text style={styles.accountOwner}>นาย ก</Text>
-              </View>
-              <View style={styles.balanceContainer}>
-                <Text style={styles.accountBalance}>1,000,000.00</Text>
-                <Text style={styles.currency}>THB</Text>
-              </View>
-            </View>
-
-            <View style={styles.divider}></View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
-              <Text style={styles.value}>3.25%</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>ระยะเวลาฝาก:</Text>
-              <Text style={styles.value}>1 ปี</Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>ดอกเบี้ย ณ วันสิ้นสุดสัญญา:</Text>
-              <Text style={styles.value}>32,500 บาท</Text>
-            </View>
-          </View>
-        </View>
-
+        <DepositAccount />
         {/* กล่องข้อมูลวันที่ ส่วนที่สอง */}
         <View style={styles.dateCard}>
           <View style={styles.dateRow}>
@@ -194,6 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
+    marginBottom: 10,
   },
   balanceContainer: {
     alignItems: "flex-end",
@@ -247,6 +253,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 6,
     elevation: 6,
+    marginTop: 10,
   },
   dateRow: {
     flexDirection: "row",
