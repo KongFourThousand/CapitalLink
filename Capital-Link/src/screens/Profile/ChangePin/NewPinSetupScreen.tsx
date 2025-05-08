@@ -1,12 +1,12 @@
 // NewPinSetupScreen.tsx
 import React, { useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import { useNavigation, RouteProp, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/RootNavigator";
 import PinScreen from "../../../components/common/PinScreen";
 import { validatePin } from "../../../components/common/PinValidator";
 import PinErrorModal from "../../../components/common/PinErrorModal";
-
 
 type NewPinSetupNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -21,9 +21,12 @@ const NewPinSetupScreen: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [pinInputKey, setPinInputKey] = useState(0);
   const route = useRoute<NewPinSetupRouteProp>();
-  const oldPin = route.params?.oldPin;
 
-  const handlePinComplete = (pin: string) => {
+  // const oldPin = route.params?.oldPin;
+
+  const handlePinComplete = async (pin: string) => {
+    const oldPin = await SecureStore.getItem("userPin");
+    console.log("oldPin", oldPin);
     const result = validatePin(pin, oldPin);
 
     if (!result.valid) {

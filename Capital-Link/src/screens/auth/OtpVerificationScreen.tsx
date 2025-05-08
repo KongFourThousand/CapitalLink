@@ -35,40 +35,111 @@ const OtpVerificationScreen: React.FC = () => {
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
 
+  // const handleVerifyOtp = async (otpCode: string) => {
+  //   if (otpCode === "123456") {
+  //     if (from === "PhoneChange") {
+  //       Alert.alert("เปลี่ยนเบอร์สำเร็จ", `เบอร์ของคุณคือ ${phoneNumber}`, [
+  //         { text: "ตกลง", onPress: () => navigation.navigate("Profile") },
+  //       ]);
+  //     } else if (from === "Register") {
+  //       try {
+  //         // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
+  //         const updatedData = {
+  //           ...UserData,
+  //           authToken: "true",
+  //           statusUser: "docSub", // <-- set เป็น docSub
+  //         };
+  //         setUserData(updatedData);
+
+  //         // บันทึก UserData ทั้งหมดลง SecureStore
+  //         await SecureStore.setItemAsync(
+  //           "userData",
+  //           JSON.stringify(updatedData)
+  //         );
+
+  //         // นำทางไปตั้งค่า PIN
+  //         navigation.replace("Pending");
+  //         // navigation.replace("PinSetup");
+  //       } catch (error) {
+  //         console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
+  //       } finally {
+  //       }
+  //       // navigation.replace("PinSetup");
+  //     } else if (from === "Login") {
+  //       await SecureStore.setItemAsync("authToken", "true");
+  //       navigation.replace("PinSetup"); // หรือใส่ค่าจริง
+  //     }
+  //   } else {
+  //     Alert.alert("OTP ไม่ถูกต้อง", "กรุณากรอกใหม่อีกครั้ง");
+  //   }
+  // };
   const handleVerifyOtp = async (otpCode: string) => {
-    if (otpCode === "123456") {
-      if (from === "PhoneChange") {
-        Alert.alert("เปลี่ยนเบอร์สำเร็จ", `เบอร์ของคุณคือ ${phoneNumber}`, [
-          { text: "ตกลง", onPress: () => navigation.navigate("Profile") },
-        ]);
-      } else if (from === "Register") {
+    // ตรวจสอบ OTP ก่อน
+    if (otpCode !== "123456") {
+      Alert.alert("OTP ไม่ถูกต้อง", "กรุณากรอกใหม่อีกครั้ง");
+      return;
+    }
+
+    // ถ้า OTP ถูกต้อง ให้แยกกรณีตามค่า from
+    switch (from) {
+      case "PhoneChange":
+        try {
+          // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
+          const updatedData = {
+            ...UserData,
+            phone: phoneNumber,
+          };
+          setUserData(updatedData);
+
+          // บันทึกลง SecureStore
+          await SecureStore.setItemAsync(
+            "userData",
+            JSON.stringify(updatedData)
+          );
+          Alert.alert("เปลี่ยนเบอร์สำเร็จ", `เบอร์ของคุณคือ ${phoneNumber}`, [
+            {
+              text: "ตกลง",
+              onPress: () => navigation.navigate("Profile"),
+            },
+          ]);
+        } catch (error) {
+          console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
+        }
+        break;
+
+      case "Register":
         try {
           // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
           const updatedData = {
             ...UserData,
             authToken: "true",
+            statusUser: "docSub", // ตั้งค่าเป็น docSub
           };
           setUserData(updatedData);
 
-          // บันทึก UserData ทั้งหมดลง SecureStore
+          // บันทึกลง SecureStore
           await SecureStore.setItemAsync(
             "userData",
             JSON.stringify(updatedData)
           );
 
-          // นำทางไปตั้งค่า PIN
-          navigation.replace("PinSetup");
+          // นำทางไปหน้ารออนุมัติ/ตั้งค่า PIN
+          navigation.replace("Pending");
         } catch (error) {
           console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
-        } finally {
         }
-        navigation.replace("PinSetup");
-      } else if (from === "Login") {
+        break;
+
+      case "Login":
+        // สำหรับกรณี Login ธรรมดา
         await SecureStore.setItemAsync("authToken", "true");
-        navigation.replace("PinSetup"); // หรือใส่ค่าจริง
-      }
-    } else {
-      Alert.alert("OTP ไม่ถูกต้อง", "กรุณากรอกใหม่อีกครั้ง");
+        navigation.replace("PinSetup");
+        break;
+
+      default:
+        // กรณีไม่ได้กำหนด from มา
+        console.warn(`Unknown source: ${from}`);
+        break;
     }
   };
 

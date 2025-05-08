@@ -135,12 +135,12 @@ const PinEntryKeyboardScreen: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* Back Button */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="chevron-back" size={26} color="#CFA459" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Logo */}
         <Image

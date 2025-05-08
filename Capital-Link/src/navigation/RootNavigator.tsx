@@ -25,6 +25,8 @@ import ChangeDataUser from "../screens/Profile/ChangeData/ChangeDataUser";
 import EmailChangeRequest from "../screens/Profile/ChangeData/EmailChangeRequest";
 import AddressChangeRequest from "../screens/Profile/ChangeData/AddressChangeRequest";
 import VerifyPinLock from "../screens/VerifyAccount/VerifyPinLock";
+import { StatusUserType } from "../Data/UserDataStorage";
+import PendingScreen from "../screens/auth/PendingScreen";
 
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -55,6 +57,7 @@ export type RootStackParamList = {
   EmailChange: undefined;
   AddressChange: undefined;
   VerifyPinLock: undefined;
+  Pending: undefined;
 };
 
 // ✅ ใส่ generic ชัดเจน
@@ -64,21 +67,68 @@ const RootNavigator: React.FC = () => {
   const [initialRoute, setInitialRoute] = useState<
     keyof RootStackParamList | null
   >(null);
+  // useEffect(() => {
+  //   const determineInitialRoute = async () => {
+  //     // อ่าน auth token และ flag PIN จาก SecureStore
+  //     const token = await SecureStore.getItemAsync("userData");
+  //     const pinDone = await SecureStore.getItemAsync("userPin");
+
+  //     if (!token) {
+  //       // ยังไม่ล็อกอิน/สมัคร
+  //       setInitialRoute("InitialEntry");
+  //     } else if (!pinDone) {
+  //       // ล็อกอินแล้ว แต่ยังไม่ได้ตั้ง PIN
+  //       setInitialRoute("PinSetup");
+  //     } else {
+  //       // ล็อกอินและตั้ง PIN แล้ว
+  //       setInitialRoute("PinEntry");
+  //     }
+  //   };
+
+  //   determineInitialRoute();
+  // }, []);
   useEffect(() => {
     const determineInitialRoute = async () => {
-      // อ่าน auth token และ flag PIN จาก SecureStore
-      const token = await SecureStore.getItemAsync("userData");
+      // อ่านข้อมูลผู้ใช้จาก SecureStore
+      const userDataJson = await SecureStore.getItemAsync("userData");
       const pinDone = await SecureStore.getItemAsync("userPin");
 
-      if (!token) {
-        // ยังไม่ล็อกอิน/สมัคร
+      if (!userDataJson) {
+        // ยังไม่เคยสมัคร/ล็อกอิน
         setInitialRoute("InitialEntry");
-      } else if (!pinDone) {
-        // ล็อกอินแล้ว แต่ยังไม่ได้ตั้ง PIN
-        setInitialRoute("PinSetup");
-      } else {
-        // ล็อกอินและตั้ง PIN แล้ว
-        setInitialRoute("PinEntry");
+        return;
+      }
+
+      // แปลงเป็น Object แล้วดู statusUser
+      let statusUser: StatusUserType = "underfind";
+      try {
+        const { statusUser: s } = JSON.parse(userDataJson);
+        statusUser = s;
+      } catch {
+        // ถ้าแปลง JSON ไม่ได้ ถือว่า underfind
+        statusUser = "underfind";
+      }
+
+      switch (statusUser) {
+        case "underfind":
+          setInitialRoute("InitialEntry");
+          break;
+        case "docSub":
+          setInitialRoute("Pending"); // หรือชื่อหน้าที่คุณตั้งไว้
+          break;
+        case "docInCom":
+          setInitialRoute("Register"); // หน้าแก้ไข/เติมเอกสาร
+          break;
+        case "NewApp":
+          // ถ้ายังไม่ได้ตั้ง PIN ให้ไป PinSetup ก่อน
+          if (!pinDone) {
+            setInitialRoute("PinSetup");
+          } else {
+            setInitialRoute("PinEntry");
+          }
+          break;
+        default:
+          setInitialRoute("InitialEntry");
       }
     };
 
@@ -123,6 +173,7 @@ const RootNavigator: React.FC = () => {
       <Stack.Screen name="EmailChange" component={EmailChangeRequest} />
       <Stack.Screen name="AddressChange" component={AddressChangeRequest} />
       <Stack.Screen name="VerifyPinLock" component={VerifyPinLock} />
+      <Stack.Screen name="Pending" component={PendingScreen} />
       <Stack.Screen
         name="PinLocked"
         component={PinLocked}

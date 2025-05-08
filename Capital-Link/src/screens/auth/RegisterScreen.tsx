@@ -1,5 +1,5 @@
 // RegisterScreen.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -40,7 +40,7 @@ const { width } = Dimensions.get("window");
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 type UserType = "บุคคลธรรมดา" | "นิติบุคคล";
 const RegisterScreen: React.FC = () => {
-  const { setUserData } = useData();
+  const { UserData, setUserData } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
@@ -70,7 +70,16 @@ const RegisterScreen: React.FC = () => {
       </View>
     );
   }
-
+  useEffect(() => {
+    const CheckdocInCom = () => {
+      if (UserData.statusUser === "docInCom") {
+        showAlert(
+          "ไม่สามารถดำเนินการสมัครได้ เนื่องจากข้อมูลที่กรอกไม่ถูกต้อง กรุณาตรวจสอบและแก้ไขข้อมูลให้ครบถ้วนและถูกต้องก่อนดำเนินการอีกครั้ง"
+        );
+      }
+    };
+    CheckdocInCom();
+  }, []);
   const showAlert = (message: string) => {
     setAlert({ visible: true, message });
   };
@@ -193,6 +202,13 @@ const RegisterScreen: React.FC = () => {
           ]}
         />
       </View>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.personalIdCard &&
+        UserData.userType === "บุคคลธรรมดา" && (
+          <Text style={styles.hintTextError}>
+            **{UserData.errors.personalIdCard}
+          </Text>
+        )}
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
@@ -208,6 +224,11 @@ const RegisterScreen: React.FC = () => {
           maxLength={12}
         />
       </View>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.phone &&
+        UserData.userType === "บุคคลธรรมดา" && (
+          <Text style={styles.hintTextError}>**{UserData.errors.phone}</Text>
+        )}
       {phoneNumber.length < 10 && phoneNumber.length > 0 && (
         <Text style={styles.hintText}>
           กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678
@@ -232,6 +253,13 @@ const RegisterScreen: React.FC = () => {
           </View>
         </View>
       </TouchableOpacity>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.birthDate &&
+        UserData.userType === "บุคคลธรรมดา" && (
+          <Text style={styles.hintTextError}>
+            **{UserData.errors.birthDate}
+          </Text>
+        )}
       {/* แสดง ThaiDatePicker popup */}
       <ThaiDatePicker
         visible={showCustomDatePicker}
@@ -263,6 +291,13 @@ const RegisterScreen: React.FC = () => {
           keyboardType="number-pad"
         />
       </View>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.contactIdCard &&
+        UserData.userType === "นิติบุคคล" && (
+          <Text style={styles.hintTextError}>
+            **{UserData.errors.contactIdCard}
+          </Text>
+        )}
       <Text style={styles.inputLabel}>เลขบัตรประชาชน</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
@@ -296,6 +331,13 @@ const RegisterScreen: React.FC = () => {
           ]}
         />
       </View>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.personalIdCard &&
+        UserData.userType === "นิติบุคคล" && (
+          <Text style={styles.hintTextError}>
+            **{UserData.errors.personalIdCard}
+          </Text>
+        )}
       <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
       <View style={styles.inputContainer}>
         <View style={styles.iconContainer}>
@@ -311,6 +353,11 @@ const RegisterScreen: React.FC = () => {
           maxLength={12}
         />
       </View>
+      {UserData.statusUser === "docInCom" &&
+        UserData.errors.phone &&
+        UserData.userType === "นิติบุคคล" && (
+          <Text style={styles.hintTextError}>**{UserData.errors.phone}</Text>
+        )}
       {phoneNumber.length < 10 && phoneNumber.length > 0 && (
         <Text style={styles.hintText}>
           กรุณากรอกเบอร์โทร 10 หลัก เช่น 0812345678
@@ -459,6 +506,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontWeight: "600",
   },
+  hintTextError: { fontSize: 12, color: "red", marginBottom: 12 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",

@@ -15,7 +15,7 @@ import { RootStackParamList } from "../../navigation/RootNavigator";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  "PinLocked"
+  "VerifyPinLock"
 >;
 
 const PinLockedScreen: React.FC = () => {
@@ -70,7 +70,7 @@ const PinLockedScreen: React.FC = () => {
           keyboardType="number-pad"
           value={idInput}
           onChangeText={handleChange}
-          maxLength={17}
+          maxLength={18}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <TouchableOpacity
