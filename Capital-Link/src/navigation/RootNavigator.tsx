@@ -27,7 +27,7 @@ import AddressChangeRequest from "../screens/Profile/ChangeData/AddressChangeReq
 import VerifyPinLock from "../screens/VerifyAccount/VerifyPinLock";
 import { StatusUserType } from "../Data/UserDataStorage";
 import PendingScreen from "../screens/auth/PendingScreen";
-
+type ReturnTo = "PinEntry" | "Profile";
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
   InitialEntry: undefined;
@@ -46,17 +46,17 @@ export type RootStackParamList = {
   Loan: undefined;
   Notification: undefined;
   Profile: undefined;
-  OldPin: undefined;
+  OldPin: { returnTo: ReturnTo };
   NameChange: undefined;
   PhoneChange: undefined;
   NotiSettings: undefined;
-  NewPinSetup: { oldPin?: string };
-  NewPinConfirm: { firstPin: string };
-  PinLocked: undefined;
+  NewPinSetup: { oldPin?: string; returnTo: ReturnTo };
+  NewPinConfirm: { firstPin: string; returnTo: ReturnTo };
+  PinLocked: { returnTo: ReturnTo };
   ChangeData: undefined;
   EmailChange: undefined;
   AddressChange: undefined;
-  VerifyPinLock: undefined;
+  VerifyPinLock: { returnTo: ReturnTo };
   Pending: undefined;
 };
 
@@ -92,7 +92,8 @@ const RootNavigator: React.FC = () => {
       // อ่านข้อมูลผู้ใช้จาก SecureStore
       const userDataJson = await SecureStore.getItemAsync("userData");
       const pinDone = await SecureStore.getItemAsync("userPin");
-
+      console.log("userDataJson", userDataJson);
+      console.log("pinDone", pinDone);
       if (!userDataJson) {
         // ยังไม่เคยสมัคร/ล็อกอิน
         setInitialRoute("InitialEntry");
@@ -130,6 +131,11 @@ const RootNavigator: React.FC = () => {
         default:
           setInitialRoute("InitialEntry");
       }
+      // if (!pinDone) {
+      //   setInitialRoute("PinSetup");
+      // } else {
+      //   setInitialRoute("PinEntry");
+      // }
     };
 
     determineInitialRoute();

@@ -113,7 +113,7 @@ const OtpVerificationScreen: React.FC = () => {
           const updatedData = {
             ...UserData,
             authToken: "true",
-            statusUser: "docSub", // ตั้งค่าเป็น docSub
+            // statusUser: "docSub", // ตั้งค่าเป็น docSub
           };
           setUserData(updatedData);
 

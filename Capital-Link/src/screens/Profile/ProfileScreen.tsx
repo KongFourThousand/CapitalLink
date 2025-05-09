@@ -34,7 +34,7 @@ const ProfileScreen: React.FC = () => {
 
   // ฟังก์ชันสำหรับเมนูตั้งค่าต่าง ๆ
   const handleChangePin = () => {
-    navigation.navigate("OldPin");
+    navigation.navigate("OldPin", { returnTo: "Profile" });
   };
   const handleRequestNameChange = () => {
     // navigation.navigate("NameChange");
@@ -52,7 +52,7 @@ const ProfileScreen: React.FC = () => {
   // เมื่อยืนยันออกจากระบบ
   const confirmLogout = async () => {
     setModalVisible(false);
-    await SecureStore.deleteItemAsync("authToken");
+    await SecureStore.deleteItemAsync("userData");
     await SecureStore.deleteItemAsync("userPin");
     navigation.replace("InitialEntry");
     // navigation.navigate("PinEntry");

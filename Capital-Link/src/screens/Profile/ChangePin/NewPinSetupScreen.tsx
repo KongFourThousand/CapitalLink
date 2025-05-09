@@ -16,14 +16,18 @@ type NewPinSetupNavProp = NativeStackNavigationProp<
 type NewPinSetupRouteProp = RouteProp<RootStackParamList, "NewPinSetup">; // ✅ เพิ่มบรรทัดนี้
 
 const NewPinSetupScreen: React.FC = () => {
-  const navigation = useNavigation<NewPinSetupNavProp>();
+  const route = useRoute<SetupRoute>();
+  const navigation = useNavigation<SetupNav>();
+  const { returnTo } = route.params;
+  // const navigation = useNavigation<NewPinSetupNavProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [pinInputKey, setPinInputKey] = useState(0);
-  const route = useRoute<NewPinSetupRouteProp>();
+  // const route = useRoute<NewPinSetupRouteProp>();
 
   // const oldPin = route.params?.oldPin;
-
+  type SetupNav = NativeStackNavigationProp<RootStackParamList, "NewPinSetup">;
+  type SetupRoute = RouteProp<RootStackParamList, "NewPinSetup">;
   const handlePinComplete = async (pin: string) => {
     const oldPin = await SecureStore.getItem("userPin");
     console.log("oldPin", oldPin);
@@ -35,7 +39,8 @@ const NewPinSetupScreen: React.FC = () => {
       setPinInputKey((prev) => prev + 1); // รีเซ็ตช่องกรอก
       return;
     }
-    navigation.navigate("NewPinConfirm", { firstPin: pin });
+    // navigation.navigate("NewPinConfirm", { firstPin: pin });
+    navigation.navigate("NewPinConfirm", { firstPin: pin, returnTo });
   };
 
   return (

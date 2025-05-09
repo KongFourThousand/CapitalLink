@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import CustomNumpad from "../../../components/common/CustomNumpad";
 import PinDotRow from "../../../components/common/PinDotRow";
@@ -22,9 +22,11 @@ type OldPinVerifyScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
   "OldPin"
 >;
-
+type OldPinVerifyScreenRouteProp = RouteProp<RootStackParamList, "OldPin">;
 const OldPinVerifyScreen: React.FC = () => {
   const navigation = useNavigation<OldPinVerifyScreenNavProp>();
+  const route = useRoute<OldPinVerifyScreenRouteProp>();
+  const { returnTo } = route.params;
   const [pin, setPin] = useState("");
   const [showLast, setShowLast] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,7 +107,7 @@ const OldPinVerifyScreen: React.FC = () => {
     }
 
     if (pin === storedPin) {
-      navigation.replace("NewPinSetup", { oldPin: storedPin });
+      navigation.replace("NewPinSetup", { oldPin: storedPin, returnTo });
     } else {
       setErrorMessage("PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       setPin("");
@@ -130,7 +132,6 @@ const OldPinVerifyScreen: React.FC = () => {
         <Text style={styles.title}>เปลี่ยนรหัส PIN</Text>
 
         <View style={styles.mainContent}>
-
           {/* 
             (สำคัญ) เลือกแสดง subtitle กับ errorMessage 
             ถ้า errorMessage เป็นค่าว่าง => แสดง subtitle ปกติ

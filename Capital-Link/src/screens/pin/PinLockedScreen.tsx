@@ -30,7 +30,7 @@ const PinLockedScreen: React.FC = () => {
   const handleUnlockPin = async () => {
     // For now, we'll navigate to Login screen as per requirements
     await SecureStore.deleteItemAsync("failCount");
-    navigation.replace("VerifyPinLock");
+    navigation.navigate("VerifyPinLock", { returnTo: "PinEntry" });
     // navigation.replace("Login");
   };
 

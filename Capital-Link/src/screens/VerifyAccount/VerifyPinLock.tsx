@@ -8,18 +8,23 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useData } from "../../Provide/Auth/UserDataProvide";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
+import { Ionicons } from "@expo/vector-icons";
 
-type NavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "VerifyPinLock"
->;
-
+// type NavigationProp = NativeStackNavigationProp<
+//   RootStackParamList,
+//   "VerifyPinLock"
+// >;
+type VerifyNav = NativeStackNavigationProp<RootStackParamList, "VerifyPinLock">;
+type VerifyRoute = RouteProp<RootStackParamList, "VerifyPinLock">;
 const PinLockedScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
+  // const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<VerifyRoute>();
+  const navigation = useNavigation<VerifyNav>();
+  const { returnTo } = route.params;
   const { UserData } = useData();
   const [idInput, setIdInput] = useState("");
   const [error, setError] = useState("");
@@ -47,7 +52,7 @@ const PinLockedScreen: React.FC = () => {
   const handleConfirm = () => {
     const rawInput = idInput.replace(/-/g, "");
     if (rawInput === UserData.personalIdCard) {
-      navigation.navigate("NewPinSetup");
+      navigation.replace("NewPinSetup", { returnTo });
     } else {
       setError("เลขบัตรประชาชนไม่ถูกต้อง");
     }
@@ -59,8 +64,27 @@ const PinLockedScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+      <View style={styles.header}>
+        {returnTo === "PinEntry" && (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={26} color="#CFA459" />
+          </TouchableOpacity>
+        )}
+
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            position: "absolute",
+            left: 0,
+            right: 0,
+          }}
+        >
+          <Text style={styles.title}>ยืนยันตัวตน</Text>
+        </View>
+      </View>
+
       <View style={styles.content}>
-        <Text style={styles.title}>ยืนยันตัวตน</Text>
         <Text style={styles.subtitle}>
           กรุณากรอกเลขบัตรประชาชนของคุณเพื่อปลดล็อค PIN
         </Text>
@@ -90,16 +114,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+  header: {
+    height: 60,
+    flexDirection: "row", // 🔴 สำคัญ
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginTop: StatusBar.currentHeight || 20,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: "center",
   },
+
   title: {
+    // position: "absolute",
+    left: 0,
+    right: 0,
+    textAlign: "center",
     fontSize: 24,
     fontWeight: "bold",
     color: "#2A2867",
-    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
@@ -134,6 +169,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  backButton: {
+    position: "absolute",
+    top: 55,
+    zIndex: 99,
   },
 });
 

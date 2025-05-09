@@ -63,7 +63,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
     const checkLocked = async () => {
       const failCountFromStore = await SecureStore.getItemAsync("failCount");
       if (failCountFromStore && Number(failCountFromStore) >= 5) {
-        navigation.replace("PinLocked");
+        navigation.replace("PinLocked", { returnTo: "PinEntry" });
       }
     };
     checkLocked();
@@ -86,7 +86,7 @@ const PinEntryKeyboardScreen: React.FC = () => {
 
   // เมื่อกด "ลืมรหัส PIN?"
   const handleForgotPin = useCallback(() => {
-    navigation.replace("Login");
+    navigation.navigate("VerifyPinLock", { returnTo: "PinEntry" });
   }, [navigation]);
 
   // เมื่อปิด Error Modal

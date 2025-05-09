@@ -1,7 +1,12 @@
 // NewPinConfirmScreen.tsx
 import React, { useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import {
+  useRoute,
+  useNavigation,
+  RouteProp,
+  CommonActions,
+} from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/RootNavigator";
@@ -9,14 +14,21 @@ import PinScreen from "../../../components/common/PinScreen";
 import PinErrorModal from "../../../components/common/PinErrorModal";
 import CustomAlertModal from "../../../components/common/CustomAlertModal";
 
-type NewPinConfirmNavProp = NativeStackNavigationProp<
+// type NewPinConfirmNavProp = NativeStackNavigationProp<
+//   RootStackParamList,
+//   "NewPinConfirm"
+// >;
+type ConfirmNav = NativeStackNavigationProp<
   RootStackParamList,
   "NewPinConfirm"
 >;
-
+type ConfirmRoute = RouteProp<RootStackParamList, "NewPinConfirm">;
 const NewPinConfirmScreen: React.FC = () => {
-  const route = useRoute();
-  const navigation = useNavigation<NewPinConfirmNavProp>();
+  // const route = useRoute();
+  // const navigation = useNavigation<NewPinConfirmNavProp>();
+  const route = useRoute<ConfirmRoute>();
+  const navigation = useNavigation<ConfirmNav>();
+  const { firstPin, returnTo } = route.params;
   const [pinInputKey, setPinInputKey] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -84,7 +96,13 @@ const NewPinConfirmScreen: React.FC = () => {
         onConfirm={() => {
           setSuccessModalVisible(false); // ปิด modal
           setTimeout(() => {
-            navigation.replace("Profile");
+            // navigation.replace("Profile");
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: returnTo }],
+              })
+            );
           }, 200);
         }}
         onlyConfirm // ✅ ให้มีแค่ปุ่มตกลง
