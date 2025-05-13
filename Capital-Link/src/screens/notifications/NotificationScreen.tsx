@@ -27,19 +27,27 @@ const NotificationScreen: React.FC = () => {
   const navigation = useNavigation<NotificationScreenNavigationProp>();
   const [notifications, setNotifications] =
     useState<Notification[]>(mockNotifications);
-
+  const [unreadCount, setUnreadCount] = useState<number>(
+    mockNotifications.filter((n) => !n.read).length
+  );
   // โหลดรายการ ID ที่อ่านแล้วจาก AsyncStorage เมื่อ component mount
   useEffect(() => {
     const loadReadNotifications = async () => {
       try {
         const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
-        // console.log("Noti Data", stored);
         const readList: string[] = stored ? JSON.parse(stored) : [];
+
         setNotifications((prev) =>
           prev.map((notif) =>
             readList.includes(notif.id) ? { ...notif, read: true } : notif
           )
         );
+
+        // อัปเดต unreadCount หลังโหลดเสร็จ
+        const unread = mockNotifications.filter(
+          (notif) => !readList.includes(notif.id)
+        ).length;
+        setUnreadCount(unread);
       } catch (error) {
         console.error("Error loading read notifications", error);
       }
@@ -55,7 +63,9 @@ const NotificationScreen: React.FC = () => {
     );
     setNotifications(updated);
 
-    // ดึงรายการที่อ่านแล้วจาก state
+    // อัปเดต unreadCount ทันที
+    setUnreadCount(updated.filter((n) => !n.read).length);
+
     const readIds = updated.filter((n) => n.read).map((n) => n.id);
     try {
       await AsyncStorage.setItem(
@@ -123,7 +133,7 @@ const NotificationScreen: React.FC = () => {
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
       />
-      <CustomTabBar activeTab="notification" />
+      <CustomTabBar activeTab="notification" unreadCount={unreadCount} />
     </SafeAreaView>
   );
 };

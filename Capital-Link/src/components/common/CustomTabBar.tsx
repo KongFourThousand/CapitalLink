@@ -14,34 +14,40 @@ export type TabName = "home" | "account" | "notification" | "profile";
 interface CustomTabBarProps {
   activeTab: TabName;
   onTabPress?: (tabName: TabName) => void;
+  unreadCount?: number;
 }
 
 const CustomTabBar: React.FC<CustomTabBarProps> = ({
   activeTab,
   onTabPress,
+  unreadCount: propUnreadCount,
 }) => {
   const navigation = useNavigation<AnyNavigation>();
   const READ_NOTIFICATIONS_KEY = "readNotifications";
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [localUnreadCount, setLocalUnreadCount] = useState<number>(0);
   useEffect(() => {
-    const loadUnreadCount = async () => {
-      // await AsyncStorage.removeItem(READ_NOTIFICATIONS_KEY);
-      try {
-        const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
-        const readList: string[] = stored ? JSON.parse(stored) : [];
-        const unread = mockNotifications.filter(
-          (n) => !readList.includes(n.id)
-        ).length;
-        setUnreadCount(unread);
-      } catch (error) {
-        console.error("Error loading unread count", error);
-      }
-    };
+    if (propUnreadCount === undefined) {
+      const loadUnreadCount = async () => {
+        try {
+          const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
+          const readList: string[] = stored ? JSON.parse(stored) : [];
+          const unread = mockNotifications.filter(
+            (n) => !readList.includes(n.id)
+          ).length;
+          setLocalUnreadCount(unread);
+        } catch (error) {
+          console.error("Error loading unread count", error);
+        }
+      };
 
-    loadUnreadCount();
-    const unsubscribe = navigation.addListener("focus", loadUnreadCount);
-    return unsubscribe;
-  }, [navigation]);
+      loadUnreadCount();
+      const unsubscribe = navigation.addListener("focus", loadUnreadCount);
+      return unsubscribe;
+    }
+  }, [navigation, propUnreadCount]);
+  const displayCount =
+    typeof propUnreadCount === "number" ? propUnreadCount : localUnreadCount;
+
   // ฟังก์ชันสำหรับจัดการเมื่อกดแท็บ
   const handleTabPress = (tabName: TabName) => {
     // ถ้ามีการส่ง onTabPress มาให้ใช้ฟังก์ชันนั้น
@@ -119,9 +125,9 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
             size={22}
             color={activeTab === "notification" ? "#CFA459" : "#616a76"}
           />
-          {unreadCount > 0 && (
+          {displayCount > 0 && (
             <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>{unreadCount}</Text>
+              <Text style={styles.badgeText}>{displayCount}</Text>
             </View>
           )}
         </View>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -15,10 +15,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
-
+import {
+  mockLoanInfos,
+  LoanInfo,
+  LoanHistoryItem,
+  accountTypeMap,
+  StatusLoanTypeMap,
+} from "../../Data/UserDataStorage";
 const { width } = Dimensions.get("window");
-
+const { height } = Dimensions.get("window");
+const CARD_WIDTH = width - 34;
 const LoanScreen: React.FC = () => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const data = mockLoanInfos;
+  const current = data[selectedIndex];
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
 
@@ -26,26 +36,42 @@ const LoanScreen: React.FC = () => {
   const handleBack = () => {
     navigation.navigate("Account");
   };
-
+  const onMomentumScrollEnd = (e: any) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / (CARD_WIDTH + 16));
+    setSelectedIndex(newIndex);
+  };
   // ตัวอย่างปุ่ม "ชำระเงิน"
   const handlePay = () => {
     // ใส่ logic การชำระเงินตามที่ต้องการ
     console.log("ชำระเงิน");
   };
-  const LoanAccount = () => {
+  const DetailRow = ({ title, detail }: { title: string; detail: string }) => (
+    <View style={styles.dateRow}>
+      <Text style={styles.dateLabel}>{title}</Text>
+      <Text style={styles.dateValue}>{detail}</Text>
+    </View>
+  );
+  const LoanAccount = ({ item }: { item: LoanInfo }) => {
     return (
-      <View style={styles.infoCard}>
+      <View style={[styles.infoCard, { width: CARD_WIDTH }]}>
         <View style={styles.sideBar} />
         <View style={styles.cardContent}>
           {/* แถวบน: ข้อมูลบัญชี vs ยอดเงิน */}
           <View style={styles.headerRow}>
             <View style={styles.accountInfo}>
-              <Text style={styles.accountName}>บัญชีสินเชื่อ</Text>
-              <Text style={styles.accountNumber}>580-4-xxx571</Text>
-              <Text style={styles.accountOwner}>นาย ก</Text>
+              <Text style={styles.accountName}>
+                {accountTypeMap[item.accountType]}
+              </Text>
+              <Text style={styles.accountNumber}>{item.accountNumber}</Text>
+              <Text style={styles.accountOwner}>{item.accountHolder}</Text>
             </View>
             <View style={styles.balanceContainer}>
-              <Text style={styles.accountBalance}>1,000,000.00</Text>
+              <Text style={styles.accountBalance}>
+                {item.balance.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </Text>
               <Text style={styles.currency}>THB</Text>
             </View>
           </View>
@@ -56,35 +82,37 @@ const LoanScreen: React.FC = () => {
           {/* รายละเอียดอื่น ๆ */}
           <View style={styles.detailRow}>
             <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
-            <Text style={styles.value}>8.25%</Text>
+            <Text style={styles.value}>{item.interestRate}%</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.label}>วันโอนค่าทำสัญญา:</Text>
-            <Text style={styles.value}>30/01/2025</Text>
+            <Text style={styles.label}>วันถึงกำหนดชำระ:</Text>
+            <Text style={styles.value}>{item.dueDate}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.label}>ยอดคงเหลือ:</Text>
-            <Text style={styles.value}>15,600 บาท</Text>
+            <Text style={styles.label}>ค่างวดครั้งถัดไป:</Text>
+            <Text style={styles.value}>{item.nextInstallment} บาท</Text>
           </View>
         </View>
       </View>
     );
   };
-  const StatusLoan = () => {
+  const StatusLoan = ({ item }: { item: LoanInfo }) => {
     return (
       <View style={styles.statusCard}>
         <View style={styles.cardContent}>
           <View style={styles.detailRow}>
             <Text style={styles.label}>สถานะการชำระ:</Text>
-            <Text style={[styles.value, { color: "#4CAF50" }]}>ปกติ</Text>
+            <Text style={[styles.value, { color: "#4CAF50" }]}>
+              {StatusLoanTypeMap[item.paymentStatus]}
+            </Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.label}>คงเหลือค่าชำระ:</Text>
-            <Text style={styles.value}>0.00 บาท</Text>
+            <Text style={styles.label}>ค่าปรับค้างชำระ:</Text>
+            <Text style={styles.value}>{item.penaltyFee} บาท</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.label}>จำนวนวันคงเหลือ:</Text>
-            <Text style={styles.value}>15 วัน</Text>
+            <Text style={styles.label}>กำหนดชำระภายใน:</Text>
+            <Text style={styles.value}>{item.daysUntilDue} วัน</Text>
           </View>
 
           {/* ปุ่ม "ชำระเงิน" */}
@@ -106,24 +134,19 @@ const LoanScreen: React.FC = () => {
       </View>
     );
   };
-  const HistoryLoan = () => {
+  const HistoryLoan = ({ history }: { history: LoanHistoryItem[] }) => {
     return (
       <View style={styles.scheduleCard}>
         <View style={styles.cardContent}>
           <Text style={styles.scheduleTitle}>ประวัติการผ่อนชำระ</Text>
 
-          <View style={styles.dateRow}>
-            <Text style={styles.dateLabel}>28/02/2025</Text>
-            <Text style={styles.dateValue}>15,500 บาท</Text>
-          </View>
-          <View style={styles.dateRow}>
-            <Text style={styles.dateLabel}>16/03/2025</Text>
-            <Text style={styles.dateValue}>16,500 บาท</Text>
-          </View>
-          <View style={styles.dateRow}>
-            <Text style={styles.dateLabel}>17/04/2025</Text>
-            <Text style={styles.dateValue}>16,500 บาท</Text>
-          </View>
+          {history.map((h) => (
+            <DetailRow
+              key={h.id}
+              title={h.id}
+              detail={h.amount.toLocaleString()}
+            />
+          ))}
         </View>
       </View>
     );
@@ -139,15 +162,45 @@ const LoanScreen: React.FC = () => {
 
       {/* หัวข้อหน้าจอ */}
       <Text style={styles.headerTitle}>สินเชื่อ</Text>
-
+      {/* ====== Card 1: ข้อมูลบัญชีสินเชื่อ ====== */}
+      {/* <LoanAccount item={current} /> */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* ====== Card 1: ข้อมูลบัญชีสินเชื่อ ====== */}
-        <LoanAccount />
+        <View style={styles.carouselContainer}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            decelerationRate="fast"
+            snapToInterval={CARD_WIDTH + 16}
+            snapToAlignment="start"
+            showsHorizontalScrollIndicator={false}
+            // contentContainerStyle={{ paddingHorizontal: 5 }}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+          >
+            {data.map((item, idx) => (
+              <TouchableOpacity
+                key={idx}
+                activeOpacity={0.9}
+                onPress={() => setSelectedIndex(idx)}
+              >
+                <LoanAccount item={item} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <View style={styles.pagination}>
+            {data.map((_, idx) => (
+              <View
+                key={idx}
+                style={[styles.dot, selectedIndex === idx && styles.activeDot]}
+              />
+            ))}
+          </View>
+        </View>
+
         {/* ====== Card 2: สถานะการชำระ ====== */}
-        <StatusLoan />
+        <StatusLoan item={current} />
 
         {/* ====== Card 3: ตารางกำหนดการ / ประวัติการผ่อนชำระ ====== */}
-        <HistoryLoan />
+        <HistoryLoan history={current.history} />
       </ScrollView>
 
       {/* แท็บบาร์ (ถ้ามีการใช้งาน) */}
@@ -198,6 +251,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 6,
     elevation: 6,
+    marginRight: 2,
   },
   statusCard: {
     backgroundColor: "#fff",
@@ -328,5 +382,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#000",
     fontWeight: "500",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
+    // backgroundColor: "pink",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ccc",
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: "#CFA459",
+  },
+  carouselContainer: {
+    // backgroundColor: "red",
+    height: height * 0.22,
+    marginBottom: 16,
   },
 });

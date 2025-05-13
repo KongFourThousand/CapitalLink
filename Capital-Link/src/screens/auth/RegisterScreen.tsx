@@ -33,6 +33,7 @@ import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 import MaskInput from "react-native-mask-input";
 import { mockRequestOtp } from "../../services/mockApi";
 import { useData } from "../../Provide/Auth/UserDataProvide";
+import DatePicker from "../../components/common/DatePicker";
 
 const { width } = Dimensions.get("window");
 
@@ -147,6 +148,7 @@ const RegisterScreen: React.FC = () => {
 
   // เมื่อได้รับวันที่จาก ThaiDatePicker ให้ update state date และ birthDate (แปลงเป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {
+    handleSaveDate();
     setDate(selectedDate);
     const day = selectedDate.getDate().toString().padStart(2, "0");
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
@@ -261,12 +263,19 @@ const RegisterScreen: React.FC = () => {
           </Text>
         )}
       {/* แสดง ThaiDatePicker popup */}
-      <ThaiDatePicker
+      {/* <ThaiDatePicker
         visible={showCustomDatePicker}
         date={date}
         onChange={handleDateChange}
         onClose={handleCloseDatePicker}
         onSave={handleSaveDate}
+      /> */}
+      <DatePicker
+        visible={showCustomDatePicker}
+        date={date}
+        onChange={handleDateChange}
+        onClose={handleCloseDatePicker}
+        // onSave={handleSaveDate}
       />
     </>
   );
@@ -423,16 +432,13 @@ const RegisterScreen: React.FC = () => {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={handleRequestOtp}
-              disabled={phoneNumber.length < 10 || loading}
+              disabled={loading}
             >
               <LinearGradient
                 colors={["#e6c170", "#d4af71", "#c19346"]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
-                style={[
-                  styles.otpButton,
-                  (phoneNumber.length < 10 || loading) && { opacity: 0.6 },
-                ]}
+                style={[styles.otpButton, loading && { opacity: 0.6 }]}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFF" />

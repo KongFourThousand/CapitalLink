@@ -19,6 +19,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { RootStackParamList } from "../../../navigation/RootNavigator";
+import { useData } from "../../../Provide/Auth/UserDataProvide";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,12 +28,10 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const EmailChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-
+  const { UserData } = useData();
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
+  const [StoreEmail, setStoreEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
-
-  // เอกสารแนบ
-  const [document, setDocument] = useState<string | null>(null);
 
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
@@ -45,53 +44,21 @@ const EmailChangeRequest: React.FC = () => {
     navigation.goBack();
   };
 
-  // ฟังก์ชันเลือกรูปเอกสาร
-  const handlePickDocument = async () => {
-    try {
-      // ขอสิทธิ์การเข้าถึง
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "การอนุญาต",
-          "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
-        );
-        return;
-      }
-
-      // เปิดคลังรูปภาพ
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setDocument(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการเลือกเอกสาร:", error);
-      Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
-    }
-  };
-
-  // ฟังก์ชันลบรูปเอกสาร
-  const handleRemoveDocument = () => {
-    setDocument(null);
-  };
-
   // ฟังก์ชันยื่นคำขอ
   const handleSubmitRequest = () => {
-    // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
-    if (!newEmail.trim()) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกอีเมลล์");
+    // ถ้าไม่ได้แนบอีเมลล์เดิม
+    if (!StoreEmail) {
+      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกอีเมลล์เดิม");
       return;
     }
-
-    // ถ้าไม่ได้แนบเอกสาร
-    if (!document) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนอีเมลล์");
+    // ถ้าไม่ได้แนบอีเมลล์เดิม
+    if (StoreEmail != UserData.email) {
+      Alert.alert("ข้อมูลไม่ถูกต้อง", "กรุณากรอกอีเมลล์เดิมให้ถูกต้อง");
+      return;
+    }
+    // ถ้าอีเมลล์ใหม่ว่าง
+    if (!newEmail.trim()) {
+      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกอีเมลล์");
       return;
     }
 
@@ -138,6 +105,18 @@ const EmailChangeRequest: React.FC = () => {
               <Text style={styles.inputLabel}>อีเมลล์ใหม่</Text>
               <TextInput
                 style={styles.textInput}
+                value={StoreEmail}
+                onChangeText={setStoreEmail}
+                placeholder="กรอกอีเมลล์เดิม"
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => lastNameInputRef.current?.focus()}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>อีเมลล์ใหม่</Text>
+              <TextInput
+                style={styles.textInput}
                 value={newEmail}
                 onChangeText={setNewEmail}
                 placeholder="กรอกอีเมลล์ใหม่"
@@ -146,43 +125,6 @@ const EmailChangeRequest: React.FC = () => {
                 onSubmitEditing={() => lastNameInputRef.current?.focus()}
               />
             </View>
-          </View>
-
-          <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
-          <View style={styles.documentContainer}>
-            <Text style={styles.documentHint}>
-              แนบภาพถ่ายเอกสารการเปลี่ยนอีเมลล์
-            </Text>
-
-            {document ? (
-              <View style={styles.documentPreview}>
-                <Image
-                  source={{ uri: document }}
-                  style={styles.documentImage}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity
-                  style={styles.removeDocumentButton}
-                  onPress={handleRemoveDocument}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="close-circle" size={24} color="#FF6B6B" />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handlePickDocument}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name="cloud-upload-outline"
-                  size={24}
-                  color="#CFA459"
-                />
-                <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
-              </TouchableOpacity>
-            )}
           </View>
 
           {/* ปุ่มยื่นคำขอ */}
@@ -210,13 +152,16 @@ const EmailChangeRequest: React.FC = () => {
           <View style={styles.noteContainer}>
             <Text style={styles.noteTitle}>หมายเหตุ:</Text>
             <Text style={styles.noteText}>
-              - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
+              -ระบบจะทำการตรวจสอบอีเมลล์เดิม และเปลี่ยนแปลงอีเมลล์ใหม่ทันที
+              กรุณาตรวจสอบอีเมลล์ให้ถูกต้อง
             </Text>
             <Text style={styles.noteText}>
-              - โปรดตรวจสอบเอกสารให้ถูกต้องและชัดเจนก่อนยื่นคำขอ
+              -
+              กรณีอีเมลล์เดิมที่กรอกมาไม่ถูกต้องจะไม่สามารถเปลี่ยนแปลงอีเมลล์ได้
             </Text>
+
             <Text style={styles.noteText}>
-              - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
+              - หากมีข้อสงสัย กรุณาติดต่อ Call Center: 02-xxx-xxxx
             </Text>
           </View>
 

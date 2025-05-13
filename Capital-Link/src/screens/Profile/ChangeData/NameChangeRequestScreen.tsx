@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   SafeAreaView,
   View,
@@ -14,11 +14,12 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { RootStackParamList } from "../../../navigation/RootNavigator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -37,7 +38,9 @@ const NameChangeRequestScreen: React.FC = () => {
 
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
-
+  // pending state
+  const [isPending, setIsPending] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   // Refs สำหรับ TextInput
   const lastNameInputRef = useRef<TextInput>(null);
 
@@ -45,7 +48,16 @@ const NameChangeRequestScreen: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
+  const submitUrl = "https://api.example.com/profile/name-change";
+  const statusUrl = "https://api.example.com/profile/name-change/status";
 
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("nameChangeRequested").then((val) =>
+        setIsPending(val === "true")
+      );
+    }, [])
+  );
   // ฟังก์ชันเลือกรูปเอกสาร
   const handlePickDocument = async () => {
     try {
@@ -102,19 +114,75 @@ const NameChangeRequestScreen: React.FC = () => {
     setIsLoading(true);
 
     // สมมติว่าส่งข้อมูลไปยัง API
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsLoading(false);
-      Alert.alert(
-        "ส่งคำขอสำเร็จ",
-        "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
-        [
-          {
-            text: "ตกลง",
-            onPress: () => navigation.navigate("Profile"),
-          },
-        ]
-      );
+      await AsyncStorage.setItem("nameChangeRequested", "true");
+      setIsPending(true);
+      // Alert.alert(
+      //   "ส่งคำขอสำเร็จ",
+      //   "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
+      //   [
+      //     {
+      //       text: "ตกลง",
+      //       onPress: () => navigation.navigate("Profile"),
+      //     },
+      //   ]
+      // );
     }, 2000);
+  };
+  const handleSubmit = async () => {
+    if (!newFirstName && !newLastName) {
+      return Alert.alert("กรอกชื่อหรือสกุลใหม่ก่อน");
+    }
+    if (!document) {
+      return Alert.alert("แนบเอกสารก่อน");
+    }
+    setIsLoading(true);
+    try {
+      const res = await fetch(submitUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          newFirstName,
+          newLastName,
+          documentUri: document,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        Alert.alert("Error", json.message || "ส่งไม่สำเร็จ");
+      } else {
+        // สำเร็จ → เก็บ flag & สลับไป pending UI
+        await AsyncStorage.setItem("nameChangeRequested", "true");
+        setIsPending(true);
+      }
+    } catch {
+      Alert.alert("Error", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const checkStatus = async () => {
+    setStatusLoading(true);
+    try {
+      // const res = await fetch(statusUrl);
+      // const { status } = await res.json(); // pending/approved/rejected
+      // if (status === "approved") {
+      //   await AsyncStorage.removeItem("nameChangeRequested");
+      //   Alert.alert("อนุมัติแล้ว", "ไปกรอกใหม่ได้เลย");
+      //   setIsPending(false);
+      // } else if (status === "rejected") {
+      //   await AsyncStorage.removeItem("nameChangeRequested");
+      //   Alert.alert("ถูกปฏิเสธ", "กรุณาส่งคำขอใหม่");
+      //   setIsPending(false);
+      // }
+      await AsyncStorage.removeItem("nameChangeRequested");
+      navigation.goBack();
+    } catch {
+      Alert.alert("Error", "เช็คสถานะไม่สำเร็จ");
+    } finally {
+      setStatusLoading(false);
+    }
   };
 
   return (
@@ -173,65 +241,79 @@ const NameChangeRequestScreen: React.FC = () => {
             {"\n"}
             สามารถปล่อยอีกช่องว่างได้
           </Text>
-
-          {/* แนบเอกสาร */}
-          <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
-          <View style={styles.documentContainer}>
-            <Text style={styles.documentHint}>
-              แนบภาพถ่ายเอกสารการเปลี่ยนชื่อ-นามสกุลที่ออกโดยหน่วยงานราชการ
-            </Text>
-
-            {document ? (
-              <View style={styles.documentPreview}>
-                <Image
-                  source={{ uri: document }}
-                  style={styles.documentImage}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity
-                  style={styles.removeDocumentButton}
-                  onPress={handleRemoveDocument}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="close-circle" size={24} color="#FF6B6B" />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handlePickDocument}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name="cloud-upload-outline"
-                  size={24}
-                  color="#CFA459"
-                />
-                <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* ปุ่มยื่นคำขอ */}
-          <LinearGradient
-            colors={["#c49a45", "#d4af71", "#e0c080"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.submitGradient}
-          >
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmitRequest}
-              activeOpacity={0.8}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFF" size="small" />
+          {isPending ? (
+            <View style={styles.center}>
+              <Text style={styles.title}>คำขอของคุณกำลังรอการตรวจสอบ</Text>
+              {statusLoading ? (
+                <ActivityIndicator size="large" />
               ) : (
-                <Text style={styles.submitButtonText}>ยื่นคำขอ</Text>
+                <TouchableOpacity style={styles.btn} onPress={checkStatus}>
+                  <Text style={styles.btnText}>ตรวจสอบสถานะอีกครั้ง</Text>
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
-          </LinearGradient>
+            </View>
+          ) : (
+            <>
+              {/* แนบเอกสาร */}
+              <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
+              <View style={styles.documentContainer}>
+                <Text style={styles.documentHint}>
+                  แนบภาพถ่ายเอกสารการเปลี่ยนชื่อ-นามสกุลที่ออกโดยหน่วยงานราชการ
+                </Text>
+
+                {document ? (
+                  <View style={styles.documentPreview}>
+                    <Image
+                      source={{ uri: document }}
+                      style={styles.documentImage}
+                      resizeMode="cover"
+                    />
+                    <TouchableOpacity
+                      style={styles.removeDocumentButton}
+                      onPress={handleRemoveDocument}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="close-circle" size={24} color="#FF6B6B" />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.uploadButton}
+                    onPress={handlePickDocument}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name="cloud-upload-outline"
+                      size={24}
+                      color="#CFA459"
+                    />
+                    <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* ปุ่มยื่นคำขอ */}
+              <LinearGradient
+                colors={["#c49a45", "#d4af71", "#e0c080"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.submitGradient}
+              >
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmitRequest}
+                  activeOpacity={0.8}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text style={styles.submitButtonText}>ยื่นคำขอ</Text>
+                  )}
+                </TouchableOpacity>
+              </LinearGradient>
+            </>
+          )}
 
           {/* คำอธิบายเพิ่มเติม */}
           <View style={styles.noteContainer}>
@@ -399,4 +481,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 18,
   },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  btn: {
+    backgroundColor: "#CFA459",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
+  title: { fontSize: 18, textAlign: "center", marginBottom: 24 },
 });

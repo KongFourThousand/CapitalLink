@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   SafeAreaView,
   View,
@@ -14,11 +14,12 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { RootStackParamList } from "../../../navigation/RootNavigator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -36,7 +37,8 @@ const AddressChangeRequest: React.FC = () => {
 
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isPending, setIsPending] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   // Refs สำหรับ TextInput
   const lastNameInputRef = useRef<TextInput>(null);
 
@@ -44,7 +46,8 @@ const AddressChangeRequest: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
+  const submitUrl = "https://api.example.com/profile/name-change";
+  const statusUrl = "https://api.example.com/profile/name-change/status";
   // ฟังก์ชันเลือกรูปเอกสาร
   const handlePickDocument = async () => {
     try {
@@ -75,7 +78,13 @@ const AddressChangeRequest: React.FC = () => {
       Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
     }
   };
-
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem("AddressChangeRequested").then((val) =>
+        setIsPending(val === "true")
+      );
+    }, [])
+  );
   // ฟังก์ชันลบรูปเอกสาร
   const handleRemoveDocument = () => {
     setDocument(null);
@@ -98,21 +107,44 @@ const AddressChangeRequest: React.FC = () => {
     setIsLoading(true);
 
     // สมมติว่าส่งข้อมูลไปยัง API
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsLoading(false);
-      Alert.alert(
-        "ส่งคำขอสำเร็จ",
-        "คำขอเปลี่ยนที่อยู่ของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
-        [
-          {
-            text: "ตกลง",
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      // Alert.alert(
+      //   "ส่งคำขอสำเร็จ",
+      //   "คำขอเปลี่ยนที่อยู่ของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
+      //   [
+      //     {
+      //       text: "ตกลง",
+      //       onPress: () => navigation.goBack(),
+      //     },
+      //   ]
+      // );
+      await AsyncStorage.setItem("AddressChangeRequested", "true");
+      setIsPending(true);
     }, 2000);
   };
-
+  const checkStatus = async () => {
+    setStatusLoading(true);
+    try {
+      // const res = await fetch(statusUrl);
+      // const { status } = await res.json(); // pending/approved/rejected
+      // if (status === "approved") {
+      //   await AsyncStorage.removeItem("nameChangeRequested");
+      //   Alert.alert("อนุมัติแล้ว", "ไปกรอกใหม่ได้เลย");
+      //   setIsPending(false);
+      // } else if (status === "rejected") {
+      //   await AsyncStorage.removeItem("nameChangeRequested");
+      //   Alert.alert("ถูกปฏิเสธ", "กรุณาส่งคำขอใหม่");
+      //   setIsPending(false);
+      // }
+      await AsyncStorage.removeItem("AddressChangeRequested");
+      navigation.goBack();
+    } catch {
+      Alert.alert("Error", "เช็คสถานะไม่สำเร็จ");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -130,99 +162,111 @@ const AddressChangeRequest: React.FC = () => {
 
         {/* Header Title */}
         <Text style={styles.headerTitle}>ขอเปลี่ยนที่อยู่</Text>
-
-        <ScrollView contentContainerStyle={styles.contentContainer}>
-          <View style={styles.formContainer}>
-            {/* กรอกชื่อใหม่ */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>ที่อยู่ใหม่</Text>
-              <TextInput
-                style={styles.textInput}
-                value={newAddress}
-                onChangeText={setNewAddress}
-                placeholder="กรอกที่อยู่ใหม่"
-                autoCapitalize="words"
-                returnKeyType="next"
-                onSubmitEditing={() => lastNameInputRef.current?.focus()}
-              />
-            </View>
-          </View>
-
-          <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
-          <View style={styles.documentContainer}>
-            <Text style={styles.documentHint}>
-              แนบภาพถ่ายเอกสารการเปลี่ยนที่อยู่
-            </Text>
-
-            {document ? (
-              <View style={styles.documentPreview}>
-                <Image
-                  source={{ uri: document }}
-                  style={styles.documentImage}
-                  resizeMode="cover"
-                />
-                <TouchableOpacity
-                  style={styles.removeDocumentButton}
-                  onPress={handleRemoveDocument}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="close-circle" size={24} color="#FF6B6B" />
-                </TouchableOpacity>
-              </View>
+        {isPending ? (
+          <View style={styles.center}>
+            <Text style={styles.title}>คำขอของคุณกำลังรอการตรวจสอบ</Text>
+            {statusLoading ? (
+              <ActivityIndicator size="large" />
             ) : (
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handlePickDocument}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name="cloud-upload-outline"
-                  size={24}
-                  color="#CFA459"
-                />
-                <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
+              <TouchableOpacity style={styles.btn} onPress={checkStatus}>
+                <Text style={styles.btnText}>ตรวจสอบสถานะอีกครั้ง</Text>
               </TouchableOpacity>
             )}
           </View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.contentContainer}>
+            <View style={styles.formContainer}>
+              {/* กรอกชื่อใหม่ */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>ที่อยู่ใหม่</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={newAddress}
+                  onChangeText={setNewAddress}
+                  placeholder="กรอกที่อยู่ใหม่"
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  onSubmitEditing={() => lastNameInputRef.current?.focus()}
+                />
+              </View>
+            </View>
 
-          {/* ปุ่มยื่นคำขอ */}
-          <LinearGradient
-            colors={["#c49a45", "#d4af71", "#e0c080"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.submitGradient}
-          >
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmitRequest}
-              activeOpacity={0.8}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFF" size="small" />
+            <Text style={styles.sectionLabel}>แนบเอกสาร</Text>
+            <View style={styles.documentContainer}>
+              <Text style={styles.documentHint}>
+                แนบภาพถ่ายเอกสารการเปลี่ยนที่อยู่
+              </Text>
+
+              {document ? (
+                <View style={styles.documentPreview}>
+                  <Image
+                    source={{ uri: document }}
+                    style={styles.documentImage}
+                    resizeMode="cover"
+                  />
+                  <TouchableOpacity
+                    style={styles.removeDocumentButton}
+                    onPress={handleRemoveDocument}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="close-circle" size={24} color="#FF6B6B" />
+                  </TouchableOpacity>
+                </View>
               ) : (
-                <Text style={styles.submitButtonText}>ยื่นคำขอ</Text>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={handlePickDocument}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name="cloud-upload-outline"
+                    size={24}
+                    color="#CFA459"
+                  />
+                  <Text style={styles.uploadButtonText}>อัพโหลดเอกสาร</Text>
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
-          </LinearGradient>
+            </View>
 
-          {/* คำอธิบายเพิ่มเติม */}
-          <View style={styles.noteContainer}>
-            <Text style={styles.noteTitle}>หมายเหตุ:</Text>
-            <Text style={styles.noteText}>
-              - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
-            </Text>
-            <Text style={styles.noteText}>
-              - โปรดตรวจสอบเอกสารให้ถูกต้องและชัดเจนก่อนยื่นคำขอ
-            </Text>
-            <Text style={styles.noteText}>
-              - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
-            </Text>
-          </View>
+            {/* ปุ่มยื่นคำขอ */}
+            <LinearGradient
+              colors={["#c49a45", "#d4af71", "#e0c080"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.submitGradient}
+            >
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmitRequest}
+                activeOpacity={0.8}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <Text style={styles.submitButtonText}>ยื่นคำขอ</Text>
+                )}
+              </TouchableOpacity>
+            </LinearGradient>
 
-          {/* Spacer สำหรับ ScrollView */}
-          <View style={{ height: 30 }} />
-        </ScrollView>
+            {/* คำอธิบายเพิ่มเติม */}
+            <View style={styles.noteContainer}>
+              <Text style={styles.noteTitle}>หมายเหตุ:</Text>
+              <Text style={styles.noteText}>
+                - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
+              </Text>
+              <Text style={styles.noteText}>
+                - โปรดตรวจสอบเอกสารให้ถูกต้องและชัดเจนก่อนยื่นคำขอ
+              </Text>
+              <Text style={styles.noteText}>
+                - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
+              </Text>
+            </View>
+
+            {/* Spacer สำหรับ ScrollView */}
+            <View style={{ height: 30 }} />
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -371,4 +415,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 18,
   },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  btn: {
+    backgroundColor: "#CFA459",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
+  title: { fontSize: 18, textAlign: "center", marginBottom: 24 },
 });
