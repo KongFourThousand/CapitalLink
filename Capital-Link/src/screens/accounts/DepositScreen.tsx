@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,16 +10,17 @@ import {
   Dimensions,
   StatusBar,
 } from "react-native";
+import type { NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import {
   mockDepositInfos,
-  DepositInfo,
-  DepositHistoryItem,
+  type DepositInfo,
+  type DepositHistoryItem,
   accountTypeMap,
 } from "../../Data/UserDataStorage";
 const { width } = Dimensions.get("window");
@@ -38,7 +40,7 @@ const DepositScreen: React.FC = () => {
     navigation.goBack();
     // navigation.navigate("Account");
   };
-  const onMomentumScrollEnd = (e: any) => {
+  const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / (CARD_WIDTH + 16));
     setSelectedIndex(newIndex);
@@ -132,7 +134,7 @@ const DepositScreen: React.FC = () => {
           >
             {data.map((item, idx) => (
               <TouchableOpacity
-                key={idx}
+                key={item.accountNumber}
                 activeOpacity={0.9}
                 onPress={() => setSelectedIndex(idx)}
               >
@@ -141,9 +143,9 @@ const DepositScreen: React.FC = () => {
             ))}
           </ScrollView>
           <View style={styles.pagination}>
-            {data.map((_, idx) => (
+            {data.map((item, idx) => (
               <View
-                key={idx}
+                key={item.accountNumber}
                 style={[styles.dot, selectedIndex === idx && styles.activeDot]}
               />
             ))}

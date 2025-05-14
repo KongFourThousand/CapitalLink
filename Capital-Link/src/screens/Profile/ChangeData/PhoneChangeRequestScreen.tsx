@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,9 +14,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import { formatPhoneNumber } from "../../../utils/formatPhoneAndID";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 import { formatPhoneNumberText } from "../../../utils/formatPhoneAndID";

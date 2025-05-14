@@ -1,5 +1,6 @@
 // RegisterScreen.tsx
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -21,17 +22,21 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import { verifyIndividual, verifyJuristic } from "../../services/api";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { formatPhoneNumber, formatThaiID } from "../../utils/formatPhoneAndID";
 import { isValidThaiID } from "../../utils/isValidThaiID";
 import CustomAlertModal from "../../components/common/CustomAlertModal";
 // นำเข้าคอมโพเนนต์ ThaiDatePicker ที่ปรับปรุงแล้ว
 import ThaiDatePicker from "../../components/common/ThaiDatePicker";
 import MaskInput from "react-native-mask-input";
-import { mockRequestOtp } from "../../services/mockApi";
+import {
+  mockRequestOtp,
+  mockSendOtpNotification,
+} from "../../services/mockApi";
 import { useData } from "../../Provide/Auth/UserDataProvide";
 import DatePicker from "../../components/common/DatePicker";
 
@@ -41,7 +46,7 @@ const { width } = Dimensions.get("window");
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 type UserType = "บุคคลธรรมดา" | "นิติบุคคล";
 const RegisterScreen: React.FC = () => {
-  const { UserData, setUserData } = useData();
+  const { UserData, setUserData, setDataUserPending } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
@@ -71,16 +76,16 @@ const RegisterScreen: React.FC = () => {
       </View>
     );
   }
-  useEffect(() => {
-    const CheckdocInCom = () => {
-      if (UserData.statusUser === "docInCom") {
-        showAlert(
-          "ไม่สามารถดำเนินการสมัครได้ เนื่องจากข้อมูลที่กรอกไม่ถูกต้อง กรุณาตรวจสอบและแก้ไขข้อมูลให้ครบถ้วนและถูกต้องก่อนดำเนินการอีกครั้ง"
-        );
-      }
-    };
-    CheckdocInCom();
-  }, []);
+  // useEffect(() => {
+  //   const CheckdocInCom = () => {
+  //     if (UserData.statusUser === "docInCom") {
+  //       showAlert(
+  //         "ไม่สามารถดำเนินการสมัครได้ เนื่องจากข้อมูลที่กรอกไม่ถูกต้อง กรุณาตรวจสอบและแก้ไขข้อมูลให้ครบถ้วนและถูกต้องก่อนดำเนินการอีกครั้ง"
+  //       );
+  //     }
+  //   };
+  //   CheckdocInCom();
+  // }, []);
   const showAlert = (message: string) => {
     setAlert({ visible: true, message });
   };
@@ -123,18 +128,48 @@ const RegisterScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      await mockRequestOtp(phoneNumber);
+      // await mockRequestOtp(phoneNumber);
+      let foundUser = null;
 
       // บันทึกข้อมูลผู้ใช้ลง Context
-      setUserData((prev) => ({
+      if (userType === "บุคคลธรรมดา") {
+        foundUser = await verifyIndividual({
+          personalIdCard: rawPersonalId,
+          birthDate,
+          phone: phoneNumber,
+        });
+      } else {
+        foundUser = await verifyJuristic({
+          companyRegisterNumber: rawCompanyReg,
+          contactIdCard: rawContactId,
+          phone: phoneNumber,
+        });
+      }
+      if (!foundUser) {
+        console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
+        return showAlert(
+          "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
+        );
+      }
+
+      // await mockRequestOtp(phoneNumber);
+      await mockSendOtpNotification(phoneNumber);
+      // setUserData((prev) => ({
+      //   ...prev,
+      //   userType,
+      //   personalIdCard: userType === "บุคคลธรรมดา" ? rawPersonalId : undefined,
+      //   birthDate: userType === "บุคคลธรรมดา" ? birthDate : undefined,
+      //   companyRegisterNumber:
+      //     userType === "นิติบุคคล" ? rawCompanyReg : undefined,
+      //   contactIdCard: userType === "นิติบุคคล" ? rawContactId : undefined,
+      //   phone: phoneNumber,
+      // }));
+      const englishUserType =
+        userType === "บุคคลธรรมดา" ? "individual" : "juristic";
+      setDataUserPending((prev) => ({
         ...prev,
-        userType,
-        personalIdCard: userType === "บุคคลธรรมดา" ? rawPersonalId : undefined,
-        birthDate: userType === "บุคคลธรรมดา" ? birthDate : undefined,
-        companyRegisterNumber:
-          userType === "นิติบุคคล" ? rawCompanyReg : undefined,
-        contactIdCard: userType === "นิติบุคคล" ? rawContactId : undefined,
-        phone: phoneNumber,
+        ...foundUser,
+        userType: englishUserType, // เก็บเป็น english
       }));
 
       navigation.navigate("OtpVerification", { from: "Register", phoneNumber });
@@ -154,6 +189,8 @@ const RegisterScreen: React.FC = () => {
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
     const year = selectedDate.getFullYear() + 543;
     setBirthDate(`${day}/${month}/${year}`);
+    console.log("Selected date:", selectedDate);
+    console.log("Formatted date:", `${day}/${month}/${year}`);
   };
 
   const showDatepicker = () => {

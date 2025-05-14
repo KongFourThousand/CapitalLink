@@ -1,23 +1,31 @@
-// import { DataUserType, DataUser } from "./UserDataStorage";
-export type RegisterPayload = {
-  personalId: string;
+import { DataUsers } from "../Data/UserDataStorage";
+import type { DataUserType } from "../Data/UserDataStorage";
+type IndividualPayload = {
+  personalIdCard: string;
+  birthDate: string;
   phone: string;
 };
 
-// กำหนด mock users
-const MOCK_USERS = [
-  { personalId: "1234567890123", phone: "0812345678", name: "ทดสอบ User" },
-  // เพิ่มรายการอื่นตามต้องการ
-];
+type JuristicPayload = {
+  companyRegisterNumber: string;
+  contactIdCard: string;
+  phone: string;
+};
 
 // ฟังก์ชันตรวจสอบสมาชิก
-export async function verifyMember(payload: RegisterPayload): Promise<boolean> {
+export async function verifyIndividual(
+  payload: IndividualPayload
+): Promise<DataUserType | null> {
   if (__DEV__) {
-    // เลียนแบบดีเลย์เครือข่าย
-    await new Promise((r) => setTimeout(r, 500));
-    // ตรวจสอบใน mock list
-    return MOCK_USERS.some(
-      (u) => u.personalId === payload.personalId && u.phone === payload.phone
+    await new Promise((r) => setTimeout(r, 300)); // ดีเลย์จำลอง
+    return (
+      DataUsers.find(
+        (u) =>
+          u.userType === "individual" &&
+          u.personalIdCard === payload.personalIdCard &&
+          u.birthDate === payload.birthDate &&
+          u.phone === payload.phone
+      ) || null
     );
   }
   // production: เรียกเรียล API
@@ -31,10 +39,20 @@ export async function verifyMember(payload: RegisterPayload): Promise<boolean> {
 }
 
 // ฟังก์ชันสมัครจริง
-export async function registerMember(payload: RegisterPayload) {
+export async function verifyJuristic(
+  payload: JuristicPayload
+): Promise<DataUserType | null> {
   if (__DEV__) {
-    // เลียนแบบสำเร็จ
-    return { success: true, message: "Mock สมัครเรียบร้อย" };
+    await new Promise((r) => setTimeout(r, 300));
+    return (
+      DataUsers.find(
+        (u) =>
+          u.userType === "juristic" &&
+          u.companyRegisterNumber === payload.companyRegisterNumber &&
+          u.contactIdCard === payload.contactIdCard &&
+          u.phone === payload.phone
+      ) || null
+    );
   }
   const res = await fetch("https://api.capitallink.com/register", {
     method: "POST",

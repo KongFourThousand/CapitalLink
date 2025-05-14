@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -17,17 +18,24 @@ import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { formatPhoneNumber } from "../../utils/formatPhoneAndID";
-import { mockRequestOtp } from "../../services/mockApi";
+import {
+  mockRequestOtp,
+  mockSendOtpNotification,
+} from "../../services/mockApi";
+import { useData } from "../../Provide/Auth/UserDataProvide";
+import { DataUsers, type DataUserType } from "../../Data/UserDataStorage";
 
 const { width } = Dimensions.get("window");
 
 const LoginScreen: React.FC = () => {
+  const { setDataUserPending } = useData();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
   });
@@ -47,7 +55,17 @@ const LoginScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      await mockRequestOtp(phoneNumber);
+      const foundUser = DataUsers.find((u) => u.phone === phoneNumber);
+      if (!foundUser) {
+        Alert.alert(
+          "ไม่พบข้อมูลสมาชิก",
+          "กรุณาลงทะเบียนใหม่หรือกรอกเบอร์โทรอีกครั้ง"
+        );
+        return;
+      }
+      setDataUserPending(foundUser);
+      await mockSendOtpNotification(phoneNumber);
+      // await mockRequestOtp(phoneNumber);
       navigation.navigate("OtpVerification", {
         from: "Login",
         phoneNumber: phoneNumber,
@@ -176,7 +194,7 @@ const styles = StyleSheet.create({
     left: 18,
     zIndex: 99,
   },
-  
+
   logoContainer: {
     alignItems: "center",
     marginTop: 20,

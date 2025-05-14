@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  use,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DataUser, DataUserType } from "../../Data/UserDataStorage";
+import type { DataUserType } from "../../Data/UserDataStorage";
+import { DataUser } from "../../Data/UserDataStorage";
 import * as SecureStore from "expo-secure-store";
 const DataContext = createContext(null);
 
@@ -9,6 +16,8 @@ export function useData() {
 }
 export const DataProvider = ({ children }) => {
   const [UserData, setUserData] = useState<DataUserType>(DataUser);
+  const [DataUserPending, setDataUserPending] =
+    useState<DataUserType>(DataUser);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -29,7 +38,9 @@ export const DataProvider = ({ children }) => {
     AsyncStorage.setItem("userData", JSON.stringify(UserData));
   }, [UserData]);
   return (
-    <DataContext.Provider value={{ UserData, setUserData }}>
+    <DataContext.Provider
+      value={{ UserData, setUserData, DataUserPending, setDataUserPending }}
+    >
       {children}
     </DataContext.Provider>
   );

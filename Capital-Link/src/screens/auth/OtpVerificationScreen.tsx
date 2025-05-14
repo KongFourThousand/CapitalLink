@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import {
   View,
   Text,
@@ -12,9 +12,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
-import { useRoute, RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import OtpVerification from "../../components/common/OtpVerification";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../Provide/Auth/UserDataProvide";
@@ -23,7 +23,8 @@ type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
-  const { UserData, setUserData } = useData();
+  const { UserData, setUserData, setDataUserPending, DataUserPending } =
+    useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<OtpRouteProp>();
@@ -111,7 +112,7 @@ const OtpVerificationScreen: React.FC = () => {
         try {
           // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
           const updatedData = {
-            ...UserData,
+            ...DataUserPending,
             authToken: "true",
             // statusUser: "docSub", // ตั้งค่าเป็น docSub
           };
@@ -122,9 +123,11 @@ const OtpVerificationScreen: React.FC = () => {
             "userData",
             JSON.stringify(updatedData)
           );
+          console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", updatedData);
 
           // นำทางไปหน้ารออนุมัติ/ตั้งค่า PIN
-          navigation.replace("Pending");
+          // navigation.replace("Pending");
+          navigation.replace("PinSetup");
         } catch (error) {
           console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
         }
@@ -132,6 +135,7 @@ const OtpVerificationScreen: React.FC = () => {
 
       case "Login":
         // สำหรับกรณี Login ธรรมดา
+        setUserData(DataUserPending);
         await SecureStore.setItemAsync("authToken", "true");
         navigation.replace("PinSetup");
         break;

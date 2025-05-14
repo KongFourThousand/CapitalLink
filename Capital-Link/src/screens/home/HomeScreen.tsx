@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import {
   View,
   Text,
@@ -15,8 +15,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { externalLinks } from "../../Data/bannerLink";
 import BannerAdmin from "../../components/Home/Banner/BannerAdmin";
 import { useData } from "../../Provide/Auth/UserDataProvide";
@@ -31,11 +31,11 @@ const HomeScreen: React.FC = () => {
       const hour = new Date().getHours();
       if (hour < 12) {
         return "สวัสดีตอนเช้า";
-      } else if (hour < 18) {
-        return "สวัสดีตอนบ่าย";
-      } else {
-        return "สวัสดีตอนเย็น";
       }
+      if (hour < 18) {
+        return "สวัสดีตอนบ่าย";
+      }
+      return "สวัสดีตอนเย็น";
     };
 
     return <Text style={styles.welcomeText}>{getGreeting()}</Text>;
@@ -55,7 +55,11 @@ const HomeScreen: React.FC = () => {
         <View style={styles.userInfo}>
           <GreetingText />
           <Text style={styles.userName}>
-            คุณ {UserData.phone ? UserData.phone : "ผู้ใช้งาน"}
+            {UserData.name
+              ? `${UserData.name}${
+                  UserData.lastname ? ` ${UserData.lastname}` : ""
+                }`
+              : "ผู้ใช้งาน"}
           </Text>
         </View>
       </LinearGradient>

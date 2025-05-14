@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
+import type React from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   SafeAreaView,
   View,
@@ -15,10 +16,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<

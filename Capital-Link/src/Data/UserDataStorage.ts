@@ -25,6 +25,35 @@ export const DataUser: DataUserType = {
   userType: "",
   statusUser: "underfind",
 };
+export const DataUsers: DataUserType[] = [
+  {
+    name: "ณัฐฑริกา",
+    lastname: "เกิดอิ่ม",
+    phone: "0825931176",
+    personalIdCard: "1569800000023",
+    contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    address: "กรุงเทพฯ",
+    email: "nattarikakoedim@gmail.com",
+    birthDate: "26/05/2544",
+    companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    userType: "individual",
+    statusUser: "NewApp",
+  },
+  {
+    name: "บริษัท บอทแอนด์ไลฟ์ จำกัด",
+    lastname: "",
+    phone: "0987652022",
+    personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
+    contactIdCard: "1569800000023",
+    address: "กรุงเทพฯ",
+    email: "botandlife@a.co.th",
+    birthDate: "", // ไม่ใช้ในกรณีนิติบุคคล
+    companyRegisterNumber: "0105555000001",
+    userType: "juristic",
+    statusUser: "NewApp",
+  },
+  // ... เพิ่ม mock อื่นได้ตามต้องการ
+];
 export const accountTypeMap: Record<string, string> = {
   loanAccount: "บัญชีสินเชื่อ",
   savingsAccount: "บัญชีสะสมทรัพย์",

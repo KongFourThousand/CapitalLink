@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import type React from "react";
+import { useState, useRef } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,12 +14,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
@@ -28,7 +30,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const EmailChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-  const { UserData } = useData();
+  const { UserData, setUserData } = useData();
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [StoreEmail, setStoreEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -43,17 +45,31 @@ const EmailChangeRequest: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
+  const SaveNewEmail = async () => {
+    const updatedData = {
+      ...UserData,
+      email: newEmail,
+    };
+    setUserData(updatedData);
+    await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
+  };
   // ฟังก์ชันยื่นคำขอ
-  const handleSubmitRequest = () => {
+  const handleSubmitRequest = async () => {
     // ถ้าไม่ได้แนบอีเมลล์เดิม
     if (!StoreEmail) {
       Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกอีเมลล์เดิม");
       return;
     }
     // ถ้าไม่ได้แนบอีเมลล์เดิม
-    if (StoreEmail != UserData.email) {
+    if (StoreEmail !== UserData.email) {
       Alert.alert("ข้อมูลไม่ถูกต้อง", "กรุณากรอกอีเมลล์เดิมให้ถูกต้อง");
+      return;
+    }
+    if (newEmail === StoreEmail) {
+      Alert.alert(
+        "ข้อมูลไม่ถูกต้อง",
+        "กรุณากรอกอีเมลล์ใหม่ให้แตกต่างจากอีเมลล์เดิม"
+      );
       return;
     }
     // ถ้าอีเมลล์ใหม่ว่าง
@@ -63,7 +79,7 @@ const EmailChangeRequest: React.FC = () => {
     }
 
     setIsLoading(true);
-
+    SaveNewEmail();
     // สมมติว่าส่งข้อมูลไปยัง API
     setTimeout(() => {
       setIsLoading(false);
@@ -102,7 +118,7 @@ const EmailChangeRequest: React.FC = () => {
           <View style={styles.formContainer}>
             {/* กรอกชื่อใหม่ */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>อีเมลล์ใหม่</Text>
+              <Text style={styles.inputLabel}>อีเมลล์เดิม</Text>
               <TextInput
                 style={styles.textInput}
                 value={StoreEmail}

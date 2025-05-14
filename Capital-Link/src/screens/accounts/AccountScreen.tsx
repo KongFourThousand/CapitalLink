@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import {
   SafeAreaView,
   StatusBar,
@@ -11,8 +11,8 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
 
@@ -23,7 +23,6 @@ const { width } = Dimensions.get("window");
 
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountNavProp>();
-
 
   // กดดูรายละเอียด "เงินฝาก"
   const handlePressDeposit = () => {
@@ -48,15 +47,20 @@ const AccountScreen: React.FC = () => {
         end={{ x: 1, y: 1 }}
         style={styles.header}
       > */}
-        <Text style={styles.headerTitle}>บัญชี</Text>
+      <Text style={styles.headerTitle}>บัญชี</Text>
       {/* </LinearGradient> */}
 
       {/* เนื้อหาเลื่อนสกอล */}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.container}>
-
           {/* Card: เงินฝาก */}
-          <TouchableOpacity style={styles.accountCard} onPress={handlePressDeposit}>
+          <TouchableOpacity
+            style={styles.accountCard}
+            onPress={handlePressDeposit}
+          >
             <Image
               source={require("../../../assets/account.png")}
               style={styles.cardImage}
@@ -69,7 +73,10 @@ const AccountScreen: React.FC = () => {
           </TouchableOpacity>
 
           {/* Card: สินเชื่อ */}
-          <TouchableOpacity style={styles.accountCard} onPress={handlePressLoan}>
+          <TouchableOpacity
+            style={styles.accountCard}
+            onPress={handlePressLoan}
+          >
             <Image
               source={require("../../../assets/Credit.png")}
               style={styles.cardImage}
@@ -107,7 +114,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#a2754c",
-    textAlign: "center", 
+    textAlign: "center",
     marginTop: 35,
     marginBottom: 15,
   },

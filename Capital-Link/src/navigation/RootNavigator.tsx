@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as SecureStore from "expo-secure-store";
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -25,7 +26,7 @@ import ChangeDataUser from "../screens/Profile/ChangeData/ChangeDataUser";
 import EmailChangeRequest from "../screens/Profile/ChangeData/EmailChangeRequest";
 import AddressChangeRequest from "../screens/Profile/ChangeData/AddressChangeRequest";
 import VerifyPinLock from "../screens/VerifyAccount/VerifyPinLock";
-import { StatusUserType } from "../Data/UserDataStorage";
+import type { DataUserType, StatusUserType } from "../Data/UserDataStorage";
 import PendingScreen from "../screens/auth/PendingScreen";
 
 type ReturnTo = "PinEntry" | "Profile";
@@ -37,6 +38,7 @@ export type RootStackParamList = {
   OtpVerification: {
     from: "Login" | "Register" | "PhoneChange";
     phoneNumber: string;
+    foundUser?: DataUserType;
   };
   PinSetup: undefined;
   PinConfirm: { firstPin: string };
