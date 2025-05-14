@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -8,10 +9,14 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  type RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { useData } from "../../Provide/Auth/UserDataProvide";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { Ionicons } from "@expo/vector-icons";
 
 // type NavigationProp = NativeStackNavigationProp<
@@ -51,10 +56,20 @@ const PinLockedScreen: React.FC = () => {
   // ตรวจสอบและนำทางถ้าเลขถูกต้อง
   const handleConfirm = () => {
     const rawInput = idInput.replace(/-/g, "");
-    if (rawInput === UserData.personalIdCard) {
-      navigation.replace("NewPinSetup", { returnTo });
-    } else {
-      setError("เลขบัตรประชาชนไม่ถูกต้อง");
+    console.log("rawInput", rawInput);
+    console.log("UserData.personalIdCard", UserData);
+    if (UserData.userType === "individual") {
+      if (rawInput === UserData.personalIdCard) {
+        navigation.replace("NewPinSetup", { returnTo });
+      } else {
+        setError("เลขบัตรประชาชนไม่ถูกต้อง");
+      }
+    } else if (UserData.userType === "juristic") {
+      if (rawInput === UserData.contactIdCard) {
+        navigation.replace("NewPinSetup", { returnTo });
+      } else {
+        setError("เลขบัตรประชาชนไม่ถูกต้อง");
+      }
     }
   };
 

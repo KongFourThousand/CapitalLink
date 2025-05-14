@@ -1,5 +1,5 @@
 // PinLockedScreen.tsx
-import React from "react";
+import type React from "react";
 import {
   View,
   Text,
@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");

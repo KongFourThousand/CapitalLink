@@ -1,5 +1,6 @@
 //PinEntryKeyboardScreen.tsx
-import React, { useState, useCallback, useEffect } from "react";
+import type React from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,11 +13,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import CustomNumpad from "../../components/common/CustomNumpad";
 import PinDotRow from "../../components/common/PinDotRow";
 import * as SecureStore from "expo-secure-store";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import PinErrorModal from "../../components/common/PinErrorModal";
 
 const { width } = Dimensions.get("window");
@@ -28,6 +29,7 @@ type PinKeyboardNavProp = NativeStackNavigationProp<
 
 const PinEntryKeyboardScreen: React.FC = () => {
   const navigation = useNavigation<PinKeyboardNavProp>();
+
   const [pin, setPin] = useState("");
   const [failCount, setFailCount] = useState(0);
   const [storedPin, setStoredPin] = useState<string | null>(null);

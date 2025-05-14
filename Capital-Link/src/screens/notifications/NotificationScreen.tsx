@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -11,10 +12,10 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import CustomTabBar from "../../components/common/CustomTabBar";
-import { mockNotifications, Notification } from "../../Data/NotiData";
+import { mockNotifications, type Notification } from "../../Data/NotiData";
 
 type NotificationScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

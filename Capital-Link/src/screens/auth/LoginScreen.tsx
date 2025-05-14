@@ -63,6 +63,7 @@ const LoginScreen: React.FC = () => {
         );
         return;
       }
+      console.log("foundUser", foundUser);
       setDataUserPending(foundUser);
       await mockSendOtpNotification(phoneNumber);
       // await mockRequestOtp(phoneNumber);

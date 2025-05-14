@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -8,17 +9,19 @@ import {
   ScrollView,
   Dimensions,
   StatusBar,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import {
   mockLoanInfos,
-  LoanInfo,
-  LoanHistoryItem,
+  type LoanInfo,
+  type LoanHistoryItem,
   accountTypeMap,
   StatusLoanTypeMap,
 } from "../../Data/UserDataStorage";
@@ -36,7 +39,7 @@ const LoanScreen: React.FC = () => {
   const handleBack = () => {
     navigation.navigate("Account");
   };
-  const onMomentumScrollEnd = (e: any) => {
+  const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / (CARD_WIDTH + 16));
     setSelectedIndex(newIndex);
@@ -97,12 +100,27 @@ const LoanScreen: React.FC = () => {
     );
   };
   const StatusLoan = ({ item }: { item: LoanInfo }) => {
+    const getStatusColor = (statusKey: string) => {
+      switch (statusKey) {
+        case "Current":
+          return "#4CAF50"; // เขียว
+        case "Overdue":
+          return "#F44336"; // แดง
+        default:
+          return "#000000"; // ดำ ถ้าเจอสถานะอื่น
+      }
+    };
     return (
       <View style={styles.statusCard}>
         <View style={styles.cardContent}>
           <View style={styles.detailRow}>
             <Text style={styles.label}>สถานะการชำระ:</Text>
-            <Text style={[styles.value, { color: "#4CAF50" }]}>
+            <Text
+              style={[
+                styles.value,
+                { color: getStatusColor(item.paymentStatus) },
+              ]}
+            >
               {StatusLoanTypeMap[item.paymentStatus]}
             </Text>
           </View>
@@ -178,7 +196,7 @@ const LoanScreen: React.FC = () => {
           >
             {data.map((item, idx) => (
               <TouchableOpacity
-                key={idx}
+                key={item.accountNumber}
                 activeOpacity={0.9}
                 onPress={() => setSelectedIndex(idx)}
               >
@@ -187,9 +205,9 @@ const LoanScreen: React.FC = () => {
             ))}
           </ScrollView>
           <View style={styles.pagination}>
-            {data.map((_, idx) => (
+            {data.map((item, idx) => (
               <View
-                key={idx}
+                key={item.accountNumber}
                 style={[styles.dot, selectedIndex === idx && styles.activeDot]}
               />
             ))}

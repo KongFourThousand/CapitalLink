@@ -149,7 +149,7 @@ export const mockLoanInfos: LoanInfo[] = [
   {
     accountType: "loanAccount",
     balance: 1000000.0,
-    accountNumber: "580-4-123571",
+    accountNumber: "580-4-456571",
     accountHolder: "Mr. A",
     interestRate: 8.25,
     depositDate: "30/04/2024",

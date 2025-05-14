@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import PinScreen from "../../components/common/PinScreen";
 import PinErrorModal from "../../components/common/PinErrorModal";
 

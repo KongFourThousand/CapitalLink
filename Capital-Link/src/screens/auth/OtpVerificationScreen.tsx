@@ -136,6 +136,7 @@ const OtpVerificationScreen: React.FC = () => {
       case "Login":
         // สำหรับกรณี Login ธรรมดา
         setUserData(DataUserPending);
+        await SecureStore.setItemAsync("userData", JSON.stringify(UserData));
         await SecureStore.setItemAsync("authToken", "true");
         navigation.replace("PinSetup");
         break;

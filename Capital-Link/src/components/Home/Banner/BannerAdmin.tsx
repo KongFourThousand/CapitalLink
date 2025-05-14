@@ -8,8 +8,9 @@ import {
   Linking,
   Dimensions,
   Text,
+  type ViewToken,
 } from "react-native";
-import { BannerFromAPI } from "../../../Data/bannerLink";
+import { BannerFromAPI, type BannerLink } from "../../../Data/bannerLink";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 16; // same as HomeScreen paddingHorizontal
@@ -18,13 +19,13 @@ const BANNER_WIDTH = SCREEN_WIDTH - HORIZONTAL_PADDING * 2;
 const BannerAdmin = () => {
   const data = Object.values(BannerFromAPI);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList<any>>(null);
+  const flatListRef = useRef<FlatList<BannerLink>>(null);
 
   const viewabilityConfig = useRef({
     viewAreaCoveragePercentThreshold: 50,
   }).current;
   const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: any[] }) => {
+    ({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
       if (viewableItems.length > 0) {
         setCurrentIndex(viewableItems[0].index ?? 0);
       }
@@ -67,9 +68,16 @@ const BannerAdmin = () => {
             onPress={() => handleOpenLink(item.url)}
           >
             <Image
-              source={item.image}
+              // source={item.image}
+              source={{
+                uri: item.image,
+              }}
               style={styles.bannerImage}
               resizeMode="cover"
+              // onError={(e) =>
+              //   console.warn("Image load error:", e.nativeEvent.error)
+              // }
+              // onLoad={() => console.log("Image loaded!")}
             />
             <View style={styles.bannerOverlay}>
               <Text style={styles.bannerTitle}>{item.title}</Text>
@@ -80,9 +88,9 @@ const BannerAdmin = () => {
 
       {/* Pagination Dots */}
       <View style={styles.pagination}>
-        {data.map((_, i) => (
+        {data.map((item, i) => (
           <View
-            key={i}
+            key={item.id}
             style={[styles.dot, currentIndex === i && styles.activeDot]}
           />
         ))}

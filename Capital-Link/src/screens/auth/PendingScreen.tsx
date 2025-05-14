@@ -1,5 +1,5 @@
 // screens/auth/PendingScreen.tsx
-import React from "react";
+import type React from "react";
 import {
   SafeAreaView,
   View,
@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useData } from "../../Provide/Auth/UserDataProvide";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
 import * as SecureStore from "expo-secure-store";
 
 const PendingScreen: React.FC = () => {
