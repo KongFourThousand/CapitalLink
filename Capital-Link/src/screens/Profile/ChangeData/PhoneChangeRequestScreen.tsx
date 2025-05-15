@@ -20,6 +20,7 @@ import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import { formatPhoneNumber } from "../../../utils/formatPhoneAndID";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 import { formatPhoneNumberText } from "../../../utils/formatPhoneAndID";
+import { mockSendOtpNotification } from "../../../services/mockApi";
 
 type PhoneChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -39,12 +40,12 @@ const PhoneChangeRequestScreen: React.FC = () => {
     setNewPhone(digits);
   };
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (newPhone.length !== 10) {
       Alert.alert("ข้อมูลไม่ถูกต้อง", "กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
       return;
     }
-
+    await mockSendOtpNotification(newPhone);
     navigation.navigate("OtpVerification", {
       from: "PhoneChange",
       phoneNumber: newPhone,

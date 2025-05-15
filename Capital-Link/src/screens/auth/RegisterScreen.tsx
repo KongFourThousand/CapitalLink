@@ -151,6 +151,11 @@ const RegisterScreen: React.FC = () => {
           "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
         );
       }
+      if (foundUser.statusUser === "NewApp") {
+        return showAlert(
+          "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
+        );
+      }
 
       // await mockRequestOtp(phoneNumber);
       await mockSendOtpNotification(phoneNumber);

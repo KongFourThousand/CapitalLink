@@ -1,7 +1,13 @@
-export type StatusUserType = "underfind" | "docSub" | "docInCom" | "NewApp";
+export type StatusUserType =
+  | "underfind"
+  | "docSub"
+  | "docInCom"
+  | "NewApp"
+  | "NoApp";
 export interface DataUserType {
   name: string;
   lastname: string;
+  companyName: string;
   phone: string;
   personalIdCard: string;
   contactIdCard: string;
@@ -15,6 +21,7 @@ export interface DataUserType {
 export const DataUser: DataUserType = {
   name: "",
   lastname: "",
+  companyName: "",
   phone: "",
   personalIdCard: "",
   contactIdCard: "",
@@ -29,6 +36,7 @@ export const DataUsers: DataUserType[] = [
   {
     name: "ณัฐฑริกา",
     lastname: "เกิดอิ่ม",
+    companyName: "",
     phone: "0825931176",
     personalIdCard: "1569800000023",
     contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
@@ -40,8 +48,23 @@ export const DataUsers: DataUserType[] = [
     statusUser: "NewApp",
   },
   {
-    name: "บริษัท บอทแอนด์ไลฟ์ จำกัด",
+    name: "มะมะมะ",
+    lastname: "หมูเด้ง",
+    companyName: "",
+    phone: "0911022724",
+    personalIdCard: "1569800000023",
+    contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    address: "พะเยา",
+    email: "nattarikakoedim@gmail.com",
+    birthDate: "26/05/2544",
+    companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    userType: "individual",
+    statusUser: "NoApp",
+  },
+  {
+    name: "",
     lastname: "",
+    companyName: "บริษัท บอทแอนด์ไลฟ์ จำกัด",
     phone: "0987652022",
     personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
     contactIdCard: "1569800000023",
@@ -55,6 +78,7 @@ export const DataUsers: DataUserType[] = [
   {
     name: "พาณินี",
     lastname: "ไชยวรณ์",
+    companyName: "",
     phone: "0980176332",
     personalIdCard: "1909802556459",
     contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
@@ -66,8 +90,9 @@ export const DataUsers: DataUserType[] = [
     statusUser: "NewApp",
   },
   {
-    name: "บริษัท BNL จำกัด",
+    name: "",
     lastname: "",
+    companyName: "บริษัท BNL จำกัด",
     phone: "0888888888",
     personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
     contactIdCard: "1909802556459",

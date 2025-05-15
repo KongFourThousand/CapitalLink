@@ -63,6 +63,13 @@ const LoginScreen: React.FC = () => {
         );
         return;
       }
+      if (foundUser.statusUser !== "NewApp") {
+        Alert.alert(
+          "หมายเลขนี้ยังไม่ถูกลงทะเบียนผ่านแอปพลิเคชัน",
+          "กรุณาลงทะเบียนเพื่อเข้าใช้งานแอปพลิเคชัน"
+        );
+        return;
+      }
       console.log("foundUser", foundUser);
       setDataUserPending(foundUser);
       await mockSendOtpNotification(phoneNumber);

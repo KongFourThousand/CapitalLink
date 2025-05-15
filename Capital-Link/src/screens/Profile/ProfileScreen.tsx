@@ -100,8 +100,9 @@ const ProfileScreen: React.FC = () => {
           {/* ตัด icon รูปโปรไฟล์ออก */}
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>
-              คุณ{" "}
-              {UserData.name
+              {UserData.companyName
+                ? UserData.companyName
+                : UserData.name
                 ? `${UserData.name}${
                     UserData.lastname ? ` ${UserData.lastname}` : ""
                   }`

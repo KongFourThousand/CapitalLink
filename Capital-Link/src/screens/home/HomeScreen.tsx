@@ -55,7 +55,9 @@ const HomeScreen: React.FC = () => {
         <View style={styles.userInfo}>
           <GreetingText />
           <Text style={styles.userName}>
-            {UserData.name
+            {UserData.companyName
+              ? UserData.companyName
+              : UserData.name
               ? `${UserData.name}${
                   UserData.lastname ? ` ${UserData.lastname}` : ""
                 }`
