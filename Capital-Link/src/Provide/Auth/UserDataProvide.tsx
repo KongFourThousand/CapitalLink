@@ -9,11 +9,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { DataUserType } from "../../Data/UserDataStorage";
 import { DataUser } from "../../Data/UserDataStorage";
 import * as SecureStore from "expo-secure-store";
+import * as Notifications from "expo-notifications";
 const DataContext = createContext(null);
 
 export function useData() {
   return useContext(DataContext);
 }
+
 export const DataProvider = ({ children }) => {
   const [UserData, setUserData] = useState<DataUserType>(DataUser);
   const [DataUserPending, setDataUserPending] =

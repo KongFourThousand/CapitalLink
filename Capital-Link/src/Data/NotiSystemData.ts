@@ -1,10 +1,13 @@
 export interface NotiCategory {
-  key: string;
+  key: NotiCategoryKey;
   title: string;
   description: string;
   enabled: boolean;
 }
-
+export type NotiCategoryKey =
+  | "notifications_system_enabled"
+  | "notifications_account_enabled"
+  | "notifications_news_enabled";
 export const defaultCategories: NotiCategory[] = [
   {
     key: "notifications_system_enabled",

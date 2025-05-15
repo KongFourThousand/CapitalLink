@@ -14,13 +14,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import { useData } from "../../../Provide/Auth/UserDataProvide";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -29,6 +31,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
+  const { UserData, setUserData } = useData();
 
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newFirstName, setNewFirstName] = useState("");
@@ -119,6 +122,15 @@ const NameChangeRequestScreen: React.FC = () => {
       setIsLoading(false);
       await AsyncStorage.setItem("nameChangeRequested", "true");
       setIsPending(true);
+      const updatedData = {
+        ...UserData,
+        ...(newFirstName.trim() && { name: newFirstName.trim() }),
+        ...(newLastName.trim() && { lastname: newLastName.trim() }),
+      };
+      setUserData(updatedData);
+
+      // บันทึกลง SecureStore
+      await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
       // Alert.alert(
       //   "ส่งคำขอสำเร็จ",
       //   "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
@@ -212,11 +224,15 @@ const NameChangeRequestScreen: React.FC = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>ชื่อใหม่</Text>
               <TextInput
-                style={styles.textInput}
+                style={[
+                  styles.textInput,
+                  isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
+                ]}
                 value={newFirstName}
                 onChangeText={setNewFirstName}
                 placeholder="กรอกชื่อใหม่"
                 autoCapitalize="words"
+                editable={!isPending}
                 returnKeyType="next"
                 onSubmitEditing={() => lastNameInputRef.current?.focus()}
               />
@@ -227,31 +243,37 @@ const NameChangeRequestScreen: React.FC = () => {
               <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
               <TextInput
                 ref={lastNameInputRef}
-                style={styles.textInput}
+                style={[
+                  styles.textInput,
+                  isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
+                ]}
                 value={newLastName}
                 onChangeText={setNewLastName}
                 placeholder="กรอกนามสกุลใหม่"
+                editable={!isPending}
                 autoCapitalize="words"
               />
             </View>
           </View>
 
           {/* หมายเหตุใต้ช่องกรอก */}
-          <Text style={styles.formNote}>
-            หากต้องการเปลี่ยนเพียงส่วนใดส่วนหนึ่ง (ชื่อหรือนามสกุล)
-            {"\n"}
-            สามารถปล่อยอีกช่องว่างได้
-          </Text>
+          <View style={styles.inputGroupRow}>
+            <Text style={styles.formNote}>
+              หากต้องการเปลี่ยนเพียงส่วนใดส่วนหนึ่ง (ชื่อหรือนามสกุล)
+              {"\n"}
+              สามารถปล่อยอีกช่องว่างได้
+            </Text>
+            {isPending && (
+              <TouchableOpacity style={styles.btn} onPress={checkStatus}>
+                <FontAwesome5 name="redo" size={20} color="#CFA459" />
+              </TouchableOpacity>
+            )}
+          </View>
+
           {isPending ? (
             <View style={styles.center}>
               <Text style={styles.title}>คำขอของคุณกำลังรอการตรวจสอบ</Text>
-              {statusLoading ? (
-                <ActivityIndicator size="large" />
-              ) : (
-                <TouchableOpacity style={styles.btn} onPress={checkStatus}>
-                  <Text style={styles.btnText}>ตรวจสอบสถานะอีกครั้ง</Text>
-                </TouchableOpacity>
-              )}
+              {statusLoading && <ActivityIndicator size="large" />}
             </View>
           ) : (
             <>
@@ -379,6 +401,13 @@ const styles = StyleSheet.create({
   inputGroup: {
     marginBottom: 16,
   },
+  inputGroupRow: {
+    marginBottom: 16,
+    // backgroundColor: "pink",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
@@ -397,8 +426,9 @@ const styles = StyleSheet.create({
   formNote: {
     fontSize: 13,
     color: "#666",
-    marginBottom: 24,
-    lineHeight: 18,
+    // marginBottom: 24,
+    // lineHeight: 18,
+    flex: 1,
   },
   documentContainer: {
     marginBottom: 24,
@@ -489,11 +519,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   btn: {
-    backgroundColor: "#CFA459",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
+    // backgroundColor: "#CFA459",
+    // borderRadius: 5,
   },
-  btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
-  title: { fontSize: 18, textAlign: "center", marginBottom: 24 },
+
+  title: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 24,
+    color: "#a2754c",
+  },
+  textInputDisabled: {
+    backgroundColor: "#f0f0f0",
+    color: "#999",
+  },
 });

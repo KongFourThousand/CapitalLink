@@ -175,11 +175,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 999,
   },
-  carouselContainer: {
-    // backgroundColor: "red",
-    height: height * 0.22,
-    marginBottom: 16,
-  },
+
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
@@ -200,7 +196,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     shadowColor: "#000",
     shadowOffset: { width: 10, height: 2 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 6,
     marginRight: 2,
@@ -339,10 +335,14 @@ const styles = StyleSheet.create({
     color: "#CFA459",
     fontWeight: "600",
   },
+  carouselContainer: {
+    // backgroundColor: "red",
+    marginBottom: 16,
+  },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 8,
+    // marginTop: 8,
     // backgroundColor: "pink",
   },
   dot: {

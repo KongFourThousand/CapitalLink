@@ -52,6 +52,32 @@ export const DataUsers: DataUserType[] = [
     userType: "juristic",
     statusUser: "NewApp",
   },
+  {
+    name: "พาณินี",
+    lastname: "ไชยวรณ์",
+    phone: "0980176332",
+    personalIdCard: "1909802556459",
+    contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    address: "กรุงเทพฯ",
+    email: "mllalli@gmail.com",
+    birthDate: "08/06/2544",
+    companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
+    userType: "individual",
+    statusUser: "NewApp",
+  },
+  {
+    name: "บริษัท BNL จำกัด",
+    lastname: "",
+    phone: "0888888888",
+    personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
+    contactIdCard: "1909802556459",
+    address: "กรุงเทพฯ",
+    email: "botnlife@a.co.th",
+    birthDate: "", // ไม่ใช้ในกรณีนิติบุคคล
+    companyRegisterNumber: "0105555000002",
+    userType: "juristic",
+    statusUser: "NewApp",
+  },
   // ... เพิ่ม mock อื่นได้ตามต้องการ
 ];
 export const accountTypeMap: Record<string, string> = {

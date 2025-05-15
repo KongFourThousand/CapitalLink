@@ -14,13 +14,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import { useData } from "../../../Provide/Auth/UserDataProvide";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -29,7 +31,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const AddressChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-
+  const { UserData, setUserData } = useData();
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newAddress, setNewAddress] = useState("");
 
@@ -123,6 +125,14 @@ const AddressChangeRequest: React.FC = () => {
       // );
       await AsyncStorage.setItem("AddressChangeRequested", "true");
       setIsPending(true);
+      const updatedData = {
+        ...UserData,
+        ...(newAddress.trim() && { address: newAddress.trim() }),
+      };
+      setUserData(updatedData);
+
+      // บันทึกลง SecureStore
+      await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
     }, 2000);
   };
   const checkStatus = async () => {
@@ -171,7 +181,11 @@ const AddressChangeRequest: React.FC = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>ที่อยู่ใหม่</Text>
               <TextInput
-                style={styles.textInput}
+                style={[
+                  styles.textInput,
+                  isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
+                ]}
+                editable={!isPending}
                 value={newAddress}
                 onChangeText={setNewAddress}
                 placeholder="กรอกที่อยู่ใหม่"
@@ -183,13 +197,7 @@ const AddressChangeRequest: React.FC = () => {
           {isPending ? (
             <View style={styles.center}>
               <Text style={styles.title}>คำขอของคุณกำลังรอการตรวจสอบ</Text>
-              {statusLoading ? (
-                <ActivityIndicator size="large" />
-              ) : (
-                <TouchableOpacity style={styles.btn} onPress={checkStatus}>
-                  <Text style={styles.btnText}>ตรวจสอบสถานะอีกครั้ง</Text>
-                </TouchableOpacity>
-              )}
+              {statusLoading && <ActivityIndicator size="large" />}
             </View>
           ) : (
             <>
@@ -254,6 +262,11 @@ const AddressChangeRequest: React.FC = () => {
           )}
           {/* คำอธิบายเพิ่มเติม */}
           <View style={styles.noteContainer}>
+            {isPending && (
+              <TouchableOpacity style={styles.btn} onPress={checkStatus}>
+                <FontAwesome5 name="redo" size={20} color="#CFA459" />
+              </TouchableOpacity>
+            )}
             <Text style={styles.noteTitle}>หมายเหตุ:</Text>
             <Text style={styles.noteText}>
               - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
@@ -424,11 +437,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   btn: {
-    backgroundColor: "#CFA459",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
+    position: "absolute",
+    top: 16,
+    right: 16,
   },
-  btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
-  title: { fontSize: 18, textAlign: "center", marginBottom: 24 },
+  textInputDisabled: {
+    backgroundColor: "#f0f0f0",
+    color: "#999",
+  },
+  title: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 24,
+    color: "#a2754c",
+  },
 });

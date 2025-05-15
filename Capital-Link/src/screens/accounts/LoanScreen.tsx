@@ -37,7 +37,8 @@ const LoanScreen: React.FC = () => {
 
   // ปุ่ม Back → กลับหน้า "บัญชี" (หรือหน้าเดิม)
   const handleBack = () => {
-    navigation.navigate("Account");
+    // navigation.navigate("Account");
+    navigation.goBack();
   };
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 8,
+    // marginTop: 8,
     // backgroundColor: "pink",
   },
   dot: {
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     // backgroundColor: "red",
-    height: height * 0.22,
+    // height: height * 0.3,
     marginBottom: 16,
   },
 });

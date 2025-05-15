@@ -1,5 +1,6 @@
 // NotificationSettingsScreen.tsx
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -12,38 +13,15 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/RootNavigator";
-
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/RootNavigator";
+import {
+  defaultCategories,
+  type NotiCategory,
+} from "../../Data/NotiSystemData";
+import { mockToggleNotificationApi } from "../../Data/NotiData";
+import * as Notifications from "expo-notifications";
 type NavProp = NativeStackNavigationProp<RootStackParamList, "NotiSettings">;
-
-interface NotiCategory {
-  key: string;
-  title: string;
-  description: string;
-  enabled: boolean;
-}
-
-const defaultCategories: NotiCategory[] = [
-  {
-    key: "notifications_system_enabled",
-    title: "แจ้งเตือนระบบ",
-    description: "ข้อความแจ้งเตือนจากระบบ เมื่อมีอัปเดตต่างๆ",
-    enabled: true,
-  },
-  {
-    key: "notifications_account_enabled",
-    title: "แจ้งเตือนบัญชี",
-    description: "เกี่ยวกับรายการบัญชี ฝาก–ถอน ยอดเงิน",
-    enabled: true,
-  },
-  {
-    key: "notifications_news_enabled",
-    title: "แจ้งข่าวสาร",
-    description: "ข่าวสาร โปรโมชั่น และอีเวนต์สำคัญ",
-    enabled: true,
-  },
-];
 
 const NotificationSettingsScreen: React.FC = () => {
   const navigation = useNavigation<NavProp>();
@@ -51,31 +29,55 @@ const NotificationSettingsScreen: React.FC = () => {
     useState<NotiCategory[]>(defaultCategories);
 
   // โหลดค่าจาก AsyncStorage
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const keys = defaultCategories.map((c) => c.key);
+  //       const stores = await AsyncStorage.multiGet(keys);
+  //       const updated = categories.map((cat) => {
+  //         const found = stores.find(([k]) => k === cat.key);
+  //         if (found && found[1] != null) {
+  //           return { ...cat, enabled: JSON.parse(found[1]!) };
+  //         }
+  //         return cat;
+  //       });
+  //       setCategories(updated);
+  //     } catch (err) {
+  //       console.error("Error loading notification settings:", err);
+  //     }
+  //   })();
+  // }, []);
   useEffect(() => {
-    (async () => {
-      try {
-        const keys = defaultCategories.map((c) => c.key);
-        const stores = await AsyncStorage.multiGet(keys);
-        const updated = categories.map((cat) => {
-          const found = stores.find(([k]) => k === cat.key);
-          if (found && found[1] != null) {
-            return { ...cat, enabled: JSON.parse(found[1]!) };
-          }
-          return cat;
-        });
-        setCategories(updated);
-      } catch (err) {
-        console.error("Error loading notification settings:", err);
-      }
-    })();
+    const loadSettings = async () => {
+      const list = await Promise.all(
+        defaultCategories.map(async (cat) => {
+          const stored = await AsyncStorage.getItem(cat.key);
+          const enabled = stored === null ? cat.enabled : stored === "true";
+          return { ...cat, enabled };
+        })
+      );
+      setCategories(list);
+    };
+    loadSettings();
   }, []);
-
   // Toggle แต่ละประเภท
   const handleToggleCategory = async (key: string, value: boolean) => {
     const updated = categories.map((cat) =>
       cat.key === key ? { ...cat, enabled: value } : cat
     );
     setCategories(updated);
+    await mockToggleNotificationApi(key, value);
+    if (value) {
+      const cat = defaultCategories.find((c) => c.key === key);
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `🔔 เปิดแจ้งเตือน ${cat?.title}`,
+          body: `คุณได้เปิดการแจ้งเตือนสำหรับ ${cat?.title}`,
+          data: { category: key },
+        },
+        trigger: null, // ส่งทันที
+      });
+    }
     try {
       await AsyncStorage.setItem(key, JSON.stringify(value));
     } catch (err) {
