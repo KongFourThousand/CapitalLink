@@ -26,6 +26,14 @@ export default function App() {
       if (status !== "granted") {
         console.warn("Permission for notifications not granted!");
       }
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("otp-channel", {
+          name: "OTP Notifications",
+          importance: Notifications.AndroidImportance.MAX,
+          sound: "default",
+          vibrationPattern: [0, 250, 250, 250],
+        });
+      }
     })();
   }, []);
   return (

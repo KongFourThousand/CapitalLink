@@ -135,7 +135,7 @@ const RegisterScreen: React.FC = () => {
       if (userType === "บุคคลธรรมดา") {
         foundUser = await verifyIndividual({
           personalIdCard: rawPersonalId,
-          birthDate,
+          birthDate: birthDate,
           phone: phoneNumber,
         });
       } else {

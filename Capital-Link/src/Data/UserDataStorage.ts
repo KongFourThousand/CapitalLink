@@ -59,7 +59,7 @@ export const DataUsers: DataUserType[] = [
     birthDate: "26/05/2544",
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
     userType: "individual",
-    statusUser: "NoApp",
+    statusUser: "underfind",
   },
   {
     name: "",
@@ -101,13 +101,13 @@ export const DataUsers: DataUserType[] = [
     birthDate: "", // ไม่ใช้ในกรณีนิติบุคคล
     companyRegisterNumber: "0105555000002",
     userType: "juristic",
-    statusUser: "NewApp",
+    statusUser: "underfind",
   },
   // ... เพิ่ม mock อื่นได้ตามต้องการ
 ];
 export const accountTypeMap: Record<string, string> = {
   loanAccount: "บัญชีสินเชื่อ",
-  savingsAccount: "บัญชีสะสมทรัพย์",
+  savingsAccount: "ใบรับฝากเงิน",
   currentAccount: "บัญชีกระแสรายวัน",
   creditAccount: "บัญชีบัตรเครดิต",
 };
@@ -116,6 +116,7 @@ export interface DepositHistoryItem {
   amount: number;
 }
 export interface DepositInfo {
+  id: string; // ใช้สำหรับการแสดงผลใน UI
   accountType: string;
   balance: number;
   accountNumber: string;
@@ -129,6 +130,7 @@ export interface DepositInfo {
 }
 export const mockDepositInfos: DepositInfo[] = [
   {
+    id: "1",
     accountType: "savingsAccount",
     balance: 1000000.0,
     accountNumber: "580-4-562571",
@@ -144,6 +146,176 @@ export const mockDepositInfos: DepositInfo[] = [
     ],
   },
   {
+    id: "2",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "3",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "4",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "5",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "6",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "7",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "8",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "9",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "10",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "11",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "12",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "13",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "14",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "15",
     accountType: "savingsAccount",
     balance: 250000.0,
     accountNumber: "123-4-789888",
@@ -163,8 +335,11 @@ export const StatusLoanTypeMap: Record<string, string> = {
 export interface LoanHistoryItem {
   id: string;
   amount: number;
+  interest?: number; // จำนวนดอกเบี้ย (ถ้ามี)
+  principalAmount?: number; // จำนวนเงินต้น (ถ้ามี)
 }
 export interface LoanInfo {
+  id: string; // ใช้สำหรับการแสดงผลใน UI
   accountType: string; // ประเภทบัญชี
   balance: number; // ยอดสินเชื่อคงเหลือ (บาท)
   accountNumber: string; // เลขบัญชี (masked)
@@ -180,6 +355,7 @@ export interface LoanInfo {
 }
 export const mockLoanInfos: LoanInfo[] = [
   {
+    id: "1",
     accountType: "loanAccount",
     balance: 1000000.0,
     accountNumber: "580-4-123571",
@@ -192,12 +368,28 @@ export const mockLoanInfos: LoanInfo[] = [
     penaltyFee: 0,
     daysUntilDue: 15,
     history: [
-      { id: "28/02/2025", amount: 25000 },
-      { id: "31/01/2025", amount: 15500 },
-      { id: "31/12/2024", amount: 15500 },
+      {
+        id: "28/02/2025",
+        amount: 25000,
+        interest: 0.69,
+        principalAmount: 18241,
+      },
+      {
+        id: "31/01/2025",
+        amount: 15500,
+        interest: 0.69,
+        principalAmount: 8683,
+      },
+      {
+        id: "31/12/2024",
+        amount: 15500,
+        interest: 0.69,
+        principalAmount: 8625,
+      },
     ],
   },
   {
+    id: "2",
     accountType: "loanAccount",
     balance: 1000000.0,
     accountNumber: "580-4-456571",
@@ -210,9 +402,24 @@ export const mockLoanInfos: LoanInfo[] = [
     penaltyFee: 1500,
     daysUntilDue: 15,
     history: [
-      { id: "28/02/2025", amount: 15500 },
-      { id: "31/01/2025", amount: 15500 },
-      { id: "31/12/2024", amount: 15500 },
+      {
+        id: "28/02/2025",
+        amount: 25000,
+        interest: 0.69,
+        principalAmount: 18241,
+      },
+      {
+        id: "31/01/2025",
+        amount: 15500,
+        interest: 0.69,
+        principalAmount: 8683,
+      },
+      {
+        id: "31/12/2024",
+        amount: 15500,
+        interest: 0.69,
+        principalAmount: 8625,
+      },
     ],
   },
 ];

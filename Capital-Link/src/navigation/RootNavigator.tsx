@@ -117,12 +117,12 @@ const RootNavigator: React.FC = () => {
         case "underfind":
           setInitialRoute("InitialEntry");
           break;
-        case "docSub":
-          setInitialRoute("Pending"); // หรือชื่อหน้าที่คุณตั้งไว้
-          break;
-        case "docInCom":
-          setInitialRoute("Register"); // หน้าแก้ไข/เติมเอกสาร
-          break;
+        // case "docSub":
+        //   setInitialRoute("Pending"); // หรือชื่อหน้าที่คุณตั้งไว้
+        //   break;
+        // case "docInCom":
+        //   setInitialRoute("Register"); // หน้าแก้ไข/เติมเอกสาร
+        //   break;
         case "NewApp":
           // ถ้ายังไม่ได้ตั้ง PIN ให้ไป PinSetup ก่อน
           if (!pinDone) {
@@ -134,11 +134,6 @@ const RootNavigator: React.FC = () => {
         default:
           setInitialRoute("InitialEntry");
       }
-      // if (!pinDone) {
-      //   setInitialRoute("PinSetup");
-      // } else {
-      //   setInitialRoute("PinEntry");
-      // }
     };
 
     determineInitialRoute();

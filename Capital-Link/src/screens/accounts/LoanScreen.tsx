@@ -11,6 +11,7 @@ import {
   StatusBar,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -25,9 +26,12 @@ import {
   accountTypeMap,
   StatusLoanTypeMap,
 } from "../../Data/UserDataStorage";
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 const CARD_WIDTH = width - 34;
+const SPACING = 16; // ระยะห่างระหว่างแต่ละ card
+const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 const LoanScreen: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const data = mockLoanInfos;
@@ -97,6 +101,46 @@ const LoanScreen: React.FC = () => {
             <Text style={styles.value}>{item.nextInstallment} บาท</Text>
           </View>
         </View>
+      </View>
+    );
+  };
+  const PaginationDot = () => {
+    return (
+      // {/* <View style={styles.pagination}>
+      //       {data.map((item, idx) => (
+      //         <View
+      //           key={item.id}
+      //           style={[styles.dot, selectedIndex === idx && styles.activeDot]}
+      //         />
+      //       ))}
+      //     </View> */}
+      //     {/* <View style={styles.pagination}>
+      //       <Text>
+      //         {selectedIndex + 1} / {data.length}
+      //       </Text>
+      //     </View> */}
+      <View style={styles.pagination}>
+        {data.map((_, idx) => {
+          const diff = Math.abs(idx - selectedIndex);
+          // กำหนด opacity ตามระยะ: 0 = เต็ม, 1 = กลาง, >=2 = จาง
+          const opacity = diff === 0 ? 1 : diff === 1 ? 0.6 : 0.3;
+          // กำหนดขนาดตามระยะ: 0 = ใหญ่สุด, 1 = กลาง, >=2 = เล็กสุด
+          const size = diff === 0 ? 10 : diff === 1 ? 8 : 6;
+
+          return (
+            <View
+              key={_.id}
+              style={{
+                width: size,
+                height: size,
+                borderRadius: size / 2,
+                backgroundColor: "#CFA459",
+                opacity,
+                marginHorizontal: 4,
+              }}
+            />
+          );
+        })}
       </View>
     );
   };
@@ -185,7 +229,7 @@ const LoanScreen: React.FC = () => {
       {/* <LoanAccount item={current} /> */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.carouselContainer}>
-          <ScrollView
+          {/* <ScrollView
             horizontal
             pagingEnabled
             decelerationRate="fast"
@@ -204,15 +248,32 @@ const LoanScreen: React.FC = () => {
                 <LoanAccount item={item} />
               </TouchableOpacity>
             ))}
-          </ScrollView>
-          <View style={styles.pagination}>
-            {data.map((item, idx) => (
-              <View
-                key={item.accountNumber}
-                style={[styles.dot, selectedIndex === idx && styles.activeDot]}
-              />
-            ))}
-          </View>
+          </ScrollView> */}
+          <FlatList
+            horizontal
+            data={data}
+            keyExtractor={(item) => item.id.toString()}
+            // เว้นขอบซ้าย–ขวา เพื่อให้การ์ดแรก+สุดอยู่กึ่งกลาง
+            contentContainerStyle={{ paddingHorizontal: SIDE_PADDING / 2.5 }}
+            showsHorizontalScrollIndicator={false}
+            // ระยะที่จะ snap = ความกว้างการ์ด + ระยะห่าง
+            snapToInterval={CARD_WIDTH + SPACING}
+            decelerationRate="fast"
+            // เปลี่ยนเป็นล็อคที่กลางหน้าจอ
+            snapToAlignment="center"
+            // หรือจะเปลี่ยนเป็น offsets เองก็ได้ (ดูข้อสองข้างล่าง)
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setSelectedIndex(index)}
+                style={{ width: CARD_WIDTH, marginRight: SPACING }}
+              >
+                <LoanAccount item={item} />
+              </TouchableOpacity>
+            )}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+          />
+          <PaginationDot />
         </View>
 
         {/* ====== Card 2: สถานะการชำระ ====== */}

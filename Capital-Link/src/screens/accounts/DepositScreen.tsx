@@ -9,9 +9,11 @@ import {
   ScrollView,
   Dimensions,
   StatusBar,
+  FlatList,
 } from "react-native";
 import type { NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AnimatedDotsCarousel from "react-native-animated-dots-carousel";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
@@ -23,9 +25,12 @@ import {
   type DepositHistoryItem,
   accountTypeMap,
 } from "../../Data/UserDataStorage";
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 const CARD_WIDTH = width - 34;
+const SPACING = 16; // ระยะห่างระหว่างแต่ละ card
+const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 const DepositScreen: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const data = mockDepositInfos;
@@ -91,6 +96,92 @@ const DepositScreen: React.FC = () => {
       </View>
     </View>
   );
+  const PaginationDot = () => {
+    return (
+      <View style={styles.pagination}>
+        {data.map((item, idx) => (
+          <View
+            key={item.id}
+            style={[styles.dot, selectedIndex === idx && styles.activeDot]}
+          />
+        ))}
+      </View>
+      //     {/* <View style={styles.pagination}>
+      //       <Text>
+      //         {selectedIndex + 1} / {data.length}
+      //       </Text>
+      //     </View> */}
+      // <View style={styles.pagination}>
+      //   {data.map((_, idx) => {
+      //     const diff = Math.abs(idx - selectedIndex);
+      //     // กำหนด opacity ตามระยะ: 0 = เต็ม, 1 = กลาง, >=2 = จาง
+      //     const opacity = diff === 0 ? 1 : diff === 1 ? 0.6 : 0.3;
+      //     // กำหนดขนาดตามระยะ: 0 = ใหญ่สุด, 1 = กลาง, >=2 = เล็กสุด
+      //     const size = diff === 0 ? 10 : diff === 1 ? 8 : 6;
+
+      //     return (
+      //       <View
+      //         key={_.id}
+      //         style={{
+      //           width: size,
+      //           height: size,
+      //           borderRadius: size / 2,
+      //           backgroundColor: "#CFA459",
+      //           opacity,
+      //           marginHorizontal: 4,
+      //         }}
+      //       />
+      //     );
+      //   })}
+      // </View>
+
+      // <AnimatedDotsCarousel
+      //   length={data.length}
+      //   currentIndex={selectedIndex}
+      //   maxIndicators={5}
+      //   // กำหนดลักษณะ dot ปัจจุบัน
+      //   activeIndicatorConfig={{
+      //     color: "#CFA459",
+      //     margin: 4,
+      //     opacity: 1,
+      //     size: 10,
+      //   }}
+      //   // กำหนดลักษณะ dot ที่ไม่ active
+      //   inactiveIndicatorConfig={{
+      //     color: "#CFA459",
+      //     margin: 4,
+      //     opacity: 0.5,
+      //     size: 8,
+      //   }}
+      //   // เม็ด dot รอบนอกที่ค่อยๆ เล็กลง
+      //   decreasingDots={[
+      //     {
+      //       quantity: 1,
+      //       config: { color: "#CFA459", margin: 4, opacity: 0.5, size: 6 },
+      //     },
+      //     {
+      //       quantity: 1,
+      //       config: { color: "#CFA459", margin: 4, opacity: 0.3, size: 4 },
+      //     },
+      //   ]}
+      //   // ให้ animation ลื่นไหลเวลาเปลี่ยน index
+      //   interpolateOpacityAndColor={true}
+      //   duration={250}
+
+      //   // ถ้าอยากให้ลาก dot แล้ว scroll carousel ด้วย
+      //   // scrollableDotsConfig={{
+      //   //   setIndex,
+      //   //   onNewIndex: (newIndex) =>
+      //   //     flatListRef.current?.scrollToOffset({
+      //   //       offset: newIndex * (CARD_WIDTH + SPACING),
+      //   //       animated: true,
+      //   //     }),
+      //   //   containerBackgroundColor: "rgba(200,200,200,0.2)",
+      //   //   container: { padding: 8, borderRadius: 12 },
+      //   // }}
+      // />
+    );
+  };
   const DetailAccount = () => {
     return (
       <View style={styles.dateCard}>
@@ -122,34 +213,53 @@ const DepositScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* กล่องข้อมูลบัญชี ส่วนแรก */}
         <View style={styles.carouselContainer}>
-          <ScrollView
+          {/* <ScrollView
             horizontal
             pagingEnabled
             decelerationRate="fast"
             snapToInterval={CARD_WIDTH + 16}
             snapToAlignment="start"
             showsHorizontalScrollIndicator={false}
-            // contentContainerStyle={{ paddingHorizontal: 5 }}
+            contentContainerStyle={{ paddingHorizontal: 16 }}
             onMomentumScrollEnd={onMomentumScrollEnd}
           >
             {data.map((item, idx) => (
               <TouchableOpacity
-                key={item.accountNumber}
+                key={item.id}
                 activeOpacity={0.9}
                 onPress={() => setSelectedIndex(idx)}
               >
                 <DepositAccount item={item} />
               </TouchableOpacity>
             ))}
-          </ScrollView>
-          <View style={styles.pagination}>
-            {data.map((item, idx) => (
-              <View
-                key={item.accountNumber}
-                style={[styles.dot, selectedIndex === idx && styles.activeDot]}
-              />
-            ))}
-          </View>
+          </ScrollView> */}
+          <FlatList
+            horizontal
+            data={data}
+            keyExtractor={(item) => item.id.toString()}
+            // เว้นขอบซ้าย–ขวา เพื่อให้การ์ดแรก+สุดอยู่กึ่งกลาง
+            contentContainerStyle={{ paddingHorizontal: SIDE_PADDING / 2.5 }}
+            showsHorizontalScrollIndicator={false}
+            // ระยะที่จะ snap = ความกว้างการ์ด + ระยะห่าง
+            snapToInterval={CARD_WIDTH + SPACING}
+            decelerationRate="fast"
+            // เปลี่ยนเป็นล็อคที่กลางหน้าจอ
+            snapToAlignment="center"
+            // หรือจะเปลี่ยนเป็น offsets เองก็ได้ (ดูข้อสองข้างล่าง)
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => setSelectedIndex(index)}
+                style={{ width: CARD_WIDTH, marginRight: SPACING }}
+              >
+                <DepositAccount item={item} />
+              </TouchableOpacity>
+            )}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+          />
+
+          {/* pagination dots */}
+          <PaginationDot />
         </View>
         {/* กล่องข้อมูลวันที่ ส่วนที่สอง */}
         <DetailAccount />
