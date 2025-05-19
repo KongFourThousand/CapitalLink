@@ -1,17 +1,40 @@
-export type StatusUserType =
-  | "underfind"
-  | "docSub"
-  | "docInCom"
-  | "NewApp"
-  | "NoApp";
+// export type StatusUserType =
+//   | "underfind"
+//   | "docSub"
+//   | "docInCom"
+//   | "NewApp"
+//   | "NoApp";
+export type StatusUserType = "underfind" | "NewApp";
+export interface RegisterIndividualType {
+  personalIdCard?: string;
+  brithDate?: string;
+  phone?: string;
+}
+export const RegisterIndividual: RegisterIndividualType = {
+  personalIdCard: "",
+  brithDate: "",
+  phone: "",
+};
+export interface RegisterJuristicType {
+  companyRegisterNumber?: string;
+  contactIdCard?: string;
+  phone?: string;
+}
+export const RegisterJuristic: RegisterJuristicType = {
+  companyRegisterNumber: "",
+  contactIdCard: "",
+  phone: "",
+};
 export interface DataUserType {
+  titlename: string;
   name: string;
   lastname: string;
   companyName: string;
   phone: string;
   personalIdCard: string;
   contactIdCard: string;
-  address: string;
+  idCardAddress: string;
+  mailingAddress: string;
   email: string;
   birthDate: string;
   companyRegisterNumber: string;
@@ -19,13 +42,15 @@ export interface DataUserType {
   statusUser: StatusUserType;
 }
 export const DataUser: DataUserType = {
+  titlename: "",
   name: "",
   lastname: "",
   companyName: "",
   phone: "",
   personalIdCard: "",
   contactIdCard: "",
-  address: "",
+  idCardAddress: "",
+  mailingAddress: "",
   email: "",
   birthDate: "",
   companyRegisterNumber: "",
@@ -34,13 +59,15 @@ export const DataUser: DataUserType = {
 };
 export const DataUsers: DataUserType[] = [
   {
+    titlename: "นางสาว",
     name: "ณัฐฑริกา",
     lastname: "เกิดอิ่ม",
     companyName: "",
     phone: "0825931176",
     personalIdCard: "1569800000023",
     contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
-    address: "กรุงเทพฯ",
+    idCardAddress: "กรุงเทพฯ",
+    mailingAddress: "กรุงเทพฯ",
     email: "nattarikakoedim@gmail.com",
     birthDate: "26/05/2544",
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
@@ -48,13 +75,15 @@ export const DataUsers: DataUserType[] = [
     statusUser: "NewApp",
   },
   {
+    titlename: "นางสาว",
     name: "มะมะมะ",
     lastname: "หมูเด้ง",
     companyName: "",
     phone: "0911022724",
     personalIdCard: "1569800000023",
     contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
-    address: "พะเยา",
+    idCardAddress: "พะเยา",
+    mailingAddress: "พะเยา",
     email: "nattarikakoedim@gmail.com",
     birthDate: "26/05/2544",
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
@@ -62,13 +91,15 @@ export const DataUsers: DataUserType[] = [
     statusUser: "underfind",
   },
   {
+    titlename: "",
     name: "",
     lastname: "",
     companyName: "บริษัท บอทแอนด์ไลฟ์ จำกัด",
     phone: "0987652022",
     personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
     contactIdCard: "1569800000023",
-    address: "กรุงเทพฯ",
+    idCardAddress: "กรุงเทพฯ",
+    mailingAddress: "กรุงเทพฯ",
     email: "botandlife@a.co.th",
     birthDate: "", // ไม่ใช้ในกรณีนิติบุคคล
     companyRegisterNumber: "0105555000001",
@@ -76,13 +107,15 @@ export const DataUsers: DataUserType[] = [
     statusUser: "NewApp",
   },
   {
+    titlename: "นางสาว",
     name: "พาณินี",
     lastname: "ไชยวรณ์",
     companyName: "",
     phone: "0980176332",
     personalIdCard: "1909802556459",
     contactIdCard: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
-    address: "กรุงเทพฯ",
+    idCardAddress: "กรุงเทพฯ",
+    mailingAddress: "กรุงเทพฯ",
     email: "mllalli@gmail.com",
     birthDate: "08/06/2544",
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
@@ -90,13 +123,15 @@ export const DataUsers: DataUserType[] = [
     statusUser: "NewApp",
   },
   {
+    titlename: "",
     name: "",
     lastname: "",
     companyName: "บริษัท BNL จำกัด",
     phone: "0888888888",
     personalIdCard: "", // ไม่ใช้ในกรณีนิติบุคคล
     contactIdCard: "1909802556459",
-    address: "กรุงเทพฯ",
+    idCardAddress: "กรุงเทพฯ",
+    mailingAddress: "กรุงเทพฯ",
     email: "botnlife@a.co.th",
     birthDate: "", // ไม่ใช้ในกรณีนิติบุคคล
     companyRegisterNumber: "0105555000002",
@@ -316,6 +351,84 @@ export const mockDepositInfos: DepositInfo[] = [
   },
   {
     id: "15",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "16",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "17",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "18",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "19",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "20",
+    accountType: "savingsAccount",
+    balance: 250000.0,
+    accountNumber: "123-4-789888",
+    accountHolder: "นาย ก",
+    interestRate: 5,
+    term: "3",
+    maturityInterest: 25000,
+    depositDate: "15/01/2025",
+    maturityDate: "15/01/2028",
+    history: [{ id: "15/01/2025", amount: 250_000 }],
+  },
+  {
+    id: "21",
     accountType: "savingsAccount",
     balance: 250000.0,
     accountNumber: "123-4-789888",

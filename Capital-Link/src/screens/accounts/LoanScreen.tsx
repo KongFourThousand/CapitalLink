@@ -26,6 +26,7 @@ import {
   accountTypeMap,
   StatusLoanTypeMap,
 } from "../../Data/UserDataStorage";
+import LoanCarousel from "../../components/Account/LoanCarousel";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
@@ -34,6 +35,7 @@ const SPACING = 16; // ระยะห่างระหว่างแต่ล
 const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 const LoanScreen: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [index, setIndex] = useState<number>(0);
   const data = mockLoanInfos;
   const current = data[selectedIndex];
   const navigation =
@@ -48,6 +50,7 @@ const LoanScreen: React.FC = () => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / (CARD_WIDTH + 16));
     setSelectedIndex(newIndex);
+    setIndex(newIndex);
   };
   // ตัวอย่างปุ่ม "ชำระเงิน"
   const handlePay = () => {
@@ -228,54 +231,15 @@ const LoanScreen: React.FC = () => {
       {/* ====== Card 1: ข้อมูลบัญชีสินเชื่อ ====== */}
       {/* <LoanAccount item={current} /> */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <View style={styles.carouselContainer}>
-          {/* <ScrollView
-            horizontal
-            pagingEnabled
-            decelerationRate="fast"
-            snapToInterval={CARD_WIDTH + 16}
-            snapToAlignment="start"
-            showsHorizontalScrollIndicator={false}
-            // contentContainerStyle={{ paddingHorizontal: 5 }}
-            onMomentumScrollEnd={onMomentumScrollEnd}
-          >
-            {data.map((item, idx) => (
-              <TouchableOpacity
-                key={item.accountNumber}
-                activeOpacity={0.9}
-                onPress={() => setSelectedIndex(idx)}
-              >
-                <LoanAccount item={item} />
-              </TouchableOpacity>
-            ))}
-          </ScrollView> */}
-          <FlatList
-            horizontal
-            data={data}
-            keyExtractor={(item) => item.id.toString()}
-            // เว้นขอบซ้าย–ขวา เพื่อให้การ์ดแรก+สุดอยู่กึ่งกลาง
-            contentContainerStyle={{ paddingHorizontal: SIDE_PADDING / 2.5 }}
-            showsHorizontalScrollIndicator={false}
-            // ระยะที่จะ snap = ความกว้างการ์ด + ระยะห่าง
-            snapToInterval={CARD_WIDTH + SPACING}
-            decelerationRate="fast"
-            // เปลี่ยนเป็นล็อคที่กลางหน้าจอ
-            snapToAlignment="center"
-            // หรือจะเปลี่ยนเป็น offsets เองก็ได้ (ดูข้อสองข้างล่าง)
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => setSelectedIndex(index)}
-                style={{ width: CARD_WIDTH, marginRight: SPACING }}
-              >
-                <LoanAccount item={item} />
-              </TouchableOpacity>
-            )}
-            onMomentumScrollEnd={onMomentumScrollEnd}
-          />
-          <PaginationDot />
-        </View>
-
+        <LoanCarousel
+          data={data}
+          selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
+          index={index}
+          setIndex={setIndex}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          LoanAccount={LoanAccount}
+        />
         {/* ====== Card 2: สถานะการชำระ ====== */}
         <StatusLoan item={current} />
 

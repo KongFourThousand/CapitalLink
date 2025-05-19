@@ -21,6 +21,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNPickerSelect from "react-native-picker-select";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 
@@ -32,6 +33,14 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
   const { UserData, setUserData } = useData();
+  const prefixOptions = [
+    { label: "นาย", value: "นาย" },
+    { label: "นาง", value: "นาง" },
+    { label: "นางสาว", value: "นางสาว" },
+    { label: "เด็กชาย", value: "เด็กชาย" },
+    { label: "เด็กหญิง", value: "เด็กหญิง" },
+    { label: "อื่นๆ", value: "อื่นๆ" },
+  ];
 
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newFirstName, setNewFirstName] = useState("");
@@ -197,7 +206,45 @@ const NameChangeRequestScreen: React.FC = () => {
       setStatusLoading(false);
     }
   };
+  const PrefixDropdown = () => {
+    const [prefix, setPrefix] = useState("");
 
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>คำนำหน้า</Text>
+        <RNPickerSelect
+          onValueChange={(value) => setPrefix(value)}
+          items={prefixOptions}
+          placeholder={{ label: "เลือกคำนำหน้า", value: null }}
+          style={{
+            inputIOS: styles.textInput,
+            inputAndroid: styles.textInput,
+          }}
+          value={prefix}
+        />
+      </View>
+    );
+  };
+  const InputData = ({ title, value, setValue, placeholder }) => {
+    return (
+      <View style={styles.inputGroup}>
+        <Text style={styles.inputLabel}>{title}</Text>
+        <TextInput
+          style={[
+            styles.textInput,
+            isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
+          ]}
+          value={value}
+          onChangeText={setValue}
+          placeholder={placeholder}
+          autoCapitalize="words"
+          editable={!isPending}
+          returnKeyType="next"
+          onSubmitEditing={() => lastNameInputRef.current?.focus()}
+        />
+      </View>
+    );
+  };
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -221,6 +268,7 @@ const NameChangeRequestScreen: React.FC = () => {
           {/* <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text> */}
           <View style={styles.formContainer}>
             {/* กรอกชื่อใหม่ */}
+            <PrefixDropdown />
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>ชื่อใหม่</Text>
               <TextInput
@@ -532,5 +580,24 @@ const styles = StyleSheet.create({
   textInputDisabled: {
     backgroundColor: "#f0f0f0",
     color: "#999",
+  },
+  container: {
+    marginVertical: 12,
+    // paddingHorizontal: 16,
+  },
+  label: {
+    marginBottom: 6,
+    fontSize: 16,
+    color: "#333",
+  },
+  input: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    color: "#000",
+    backgroundColor: "#fff",
   },
 });
