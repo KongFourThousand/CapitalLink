@@ -143,7 +143,7 @@ const ChangeDataUser: React.FC = () => {
         </View>
 
         {/* ปุ่มออกจากระบบ ด้วย Gradient */}
-        <LinearGradient
+        {/* <LinearGradient
           colors={["#c49a45", "#d4af71", "#e0c080"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -162,7 +162,7 @@ const ChangeDataUser: React.FC = () => {
             />
             <Text style={styles.logoutText}>ออกจากระบบ</Text>
           </TouchableOpacity>
-        </LinearGradient>
+        </LinearGradient> */}
 
         {/* Spacer */}
         <View style={{ height: 80 }} />

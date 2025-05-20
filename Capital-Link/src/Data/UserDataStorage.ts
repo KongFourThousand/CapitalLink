@@ -169,7 +169,7 @@ export const mockDepositInfos: DepositInfo[] = [
     accountType: "savingsAccount",
     balance: 1000000.0,
     accountNumber: "580-4-562571",
-    accountHolder: "นาย ก",
+    accountHolder: "นางสาว ณัฐฑริกา เกิดอิ่ม",
     interestRate: 3.25,
     term: "1",
     maturityInterest: 32500,
@@ -458,7 +458,7 @@ export interface LoanInfo {
   accountNumber: string; // เลขบัญชี (masked)
   accountHolder: string; // ชื่อผู้กู้
   interestRate: number; // อัตราดอกเบี้ย (%)
-  depositDate: string; // วันเริ่มสัญญา (dd/MM/yyyy)
+  LoanDate: string; // วันเริ่มสัญญา (dd/MM/yyyy)
   dueDate: string; // วันถึงกำหนดชำระ (dd/MM/yyyy)
   nextInstallment: number; // ค่างวดครั้งถัดไป (บาท)
   paymentStatus: string; // สถานะการชำระ
@@ -474,7 +474,7 @@ export const mockLoanInfos: LoanInfo[] = [
     accountNumber: "580-4-123571",
     accountHolder: "Mr. A",
     interestRate: 8.25,
-    depositDate: "30/04/2024",
+    LoanDate: "30/04/2024",
     dueDate: "30/04/2025",
     nextInstallment: 15500,
     paymentStatus: "Current", // On-time payment
@@ -484,19 +484,19 @@ export const mockLoanInfos: LoanInfo[] = [
       {
         id: "28/02/2025",
         amount: 25000,
-        interest: 0.69,
+        interest: 6759,
         principalAmount: 18241,
       },
       {
         id: "31/01/2025",
         amount: 15500,
-        interest: 0.69,
+        interest: 6817,
         principalAmount: 8683,
       },
       {
         id: "31/12/2024",
         amount: 15500,
-        interest: 0.69,
+        interest: 6875,
         principalAmount: 8625,
       },
     ],
@@ -508,7 +508,7 @@ export const mockLoanInfos: LoanInfo[] = [
     accountNumber: "580-4-456571",
     accountHolder: "Mr. A",
     interestRate: 8.25,
-    depositDate: "30/04/2024",
+    LoanDate: "30/04/2024",
     dueDate: "30/04/2025",
     nextInstallment: 15500,
     paymentStatus: "Overdue", // On-time payment
@@ -517,20 +517,20 @@ export const mockLoanInfos: LoanInfo[] = [
     history: [
       {
         id: "28/02/2025",
-        amount: 25000,
-        interest: 0.69,
-        principalAmount: 18241,
+        amount: 15500,
+        interest: 6817,
+        principalAmount: 8683,
       },
       {
         id: "31/01/2025",
         amount: 15500,
-        interest: 0.69,
+        interest: 6817,
         principalAmount: 8683,
       },
       {
         id: "31/12/2024",
         amount: 15500,
-        interest: 0.69,
+        interest: 6875,
         principalAmount: 8625,
       },
     ],

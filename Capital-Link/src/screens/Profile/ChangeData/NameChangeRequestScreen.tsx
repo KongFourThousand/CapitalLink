@@ -21,7 +21,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import RNPickerSelect from "react-native-picker-select";
+import { Picker } from "@react-native-picker/picker";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 
@@ -33,6 +33,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
   const { UserData, setUserData } = useData();
+  const [selectedPrefix, setSelectedPrefix] = useState("");
   const prefixOptions = [
     { label: "นาย", value: "นาย" },
     { label: "นาง", value: "นาง" },
@@ -110,10 +111,10 @@ const NameChangeRequestScreen: React.FC = () => {
   // ฟังก์ชันยื่นคำขอ
   const handleSubmitRequest = () => {
     // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
-    if (!newFirstName.trim() && !newLastName.trim()) {
+    if (!newFirstName.trim() && !newLastName.trim() && !selectedPrefix) {
       Alert.alert(
         "ข้อมูลไม่ครบถ้วน",
-        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง"
+        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง หรือเลือกคำนำหน้า"
       );
       return;
     }
@@ -135,11 +136,13 @@ const NameChangeRequestScreen: React.FC = () => {
         ...UserData,
         ...(newFirstName.trim() && { name: newFirstName.trim() }),
         ...(newLastName.trim() && { lastname: newLastName.trim() }),
+        ...(selectedPrefix.trim() && { titlename: selectedPrefix.trim() }),
       };
       setUserData(updatedData);
 
       // บันทึกลง SecureStore
       await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
+      console.log("Updated user data:", updatedData);
       // Alert.alert(
       //   "ส่งคำขอสำเร็จ",
       //   "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
@@ -212,16 +215,18 @@ const NameChangeRequestScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.label}>คำนำหน้า</Text>
-        <RNPickerSelect
-          onValueChange={(value) => setPrefix(value)}
-          items={prefixOptions}
-          placeholder={{ label: "เลือกคำนำหน้า", value: null }}
-          style={{
-            inputIOS: styles.textInput,
-            inputAndroid: styles.textInput,
-          }}
-          value={prefix}
-        />
+        <Picker
+          selectedValue={selectedPrefix}
+          onValueChange={(itemValue) => setSelectedPrefix(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="เลือกคำนำหน้า" value="" />
+          <Picker.Item label="นาย" value="นาย" />
+          <Picker.Item label="นาง" value="นาง" />
+          <Picker.Item label="นางสาว" value="นางสาว" />
+          <Picker.Item label="เด็กชาย" value="เด็กชาย" />
+          <Picker.Item label="เด็กหญิง" value="เด็กหญิง" />
+        </Picker>
       </View>
     );
   };
@@ -269,7 +274,7 @@ const NameChangeRequestScreen: React.FC = () => {
           <View style={styles.formContainer}>
             {/* กรอกชื่อใหม่ */}
             <PrefixDropdown />
-            <View style={styles.inputGroup}>
+            {/* <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>ชื่อใหม่</Text>
               <TextInput
                 style={[
@@ -284,10 +289,15 @@ const NameChangeRequestScreen: React.FC = () => {
                 returnKeyType="next"
                 onSubmitEditing={() => lastNameInputRef.current?.focus()}
               />
-            </View>
-
+            </View> */}
+            <InputData
+              title={"ชื่อใหม่"}
+              placeholder={"กรอกชื่อใหม่"}
+              value={newFirstName}
+              setValue={setNewFirstName}
+            />
             {/* กรอกนามสกุลใหม่ */}
-            <View style={styles.inputGroup}>
+            {/* <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
               <TextInput
                 ref={lastNameInputRef}
@@ -301,7 +311,13 @@ const NameChangeRequestScreen: React.FC = () => {
                 editable={!isPending}
                 autoCapitalize="words"
               />
-            </View>
+            </View> */}
+            <InputData
+              title={"นามสกุลใหม่"}
+              placeholder={"กรอกนามสกุลใหม่"}
+              value={newLastName}
+              setValue={setNewLastName}
+            />
           </View>
 
           {/* หมายเหตุใต้ช่องกรอก */}
@@ -590,14 +606,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  input: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
+  picker: {
+    backgroundColor: "#F9F9F9",
     borderRadius: 8,
     color: "#000",
-    backgroundColor: "#fff",
   },
 });

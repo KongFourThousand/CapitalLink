@@ -1,9 +1,10 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -14,6 +15,7 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
@@ -27,6 +29,8 @@ import {
   StatusLoanTypeMap,
 } from "../../Data/UserDataStorage";
 import LoanCarousel from "../../components/Account/LoanCarousel";
+import PaymentEvidenceModal from "../../components/Account/PaymentEvidenceModal";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
@@ -34,10 +38,16 @@ const CARD_WIDTH = width - 34;
 const SPACING = 16; // ระยะห่างระหว่างแต่ละ card
 const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 const LoanScreen: React.FC = () => {
+  const { loanData, setLoanData } = useData();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [index, setIndex] = useState<number>(0);
-  const data = mockLoanInfos;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentImage, setPaymentImage] = useState<string | null>(null);
+  const data = loanData;
   const current = data[selectedIndex];
+  const [selectedLoanIdForPayment, setSelectedLoanIdForPayment] = useState<
+    string | null
+  >(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
 
@@ -54,8 +64,38 @@ const LoanScreen: React.FC = () => {
   };
   // ตัวอย่างปุ่ม "ชำระเงิน"
   const handlePay = () => {
-    // ใส่ logic การชำระเงินตามที่ต้องการ
-    console.log("ชำระเงิน");
+    const currentLoanId = loanData[selectedIndex]?.id;
+    if (currentLoanId) {
+      setSelectedLoanIdForPayment(currentLoanId); // ✅ ล็อกบัญชีที่ต้องชำระ
+      setShowPaymentModal(true);
+    }
+  };
+  useEffect(() => {
+    if (showPaymentModal && loanData[selectedIndex]) {
+      setSelectedLoanIdForPayment(loanData[selectedIndex].id);
+    }
+  }, [selectedIndex, showPaymentModal]);
+  const handleSubmitEvidence = (imageUri: string | null) => {
+    const updated = loanData.map((loan) =>
+      loan.id === selectedLoanIdForPayment
+        ? { ...loan, daysUntilDue: 30 }
+        : loan
+    );
+
+    setLoanData(updated);
+    setShowPaymentModal(false);
+    setSelectedLoanIdForPayment(null); // ✅ เคลียร์หลังใช้งาน
+  };
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setPaymentImage(result.assets[0].uri);
+    }
   };
   const DetailRow = ({ title, detail }: { title: string; detail: string }) => (
     <View style={styles.dateRow}>
@@ -63,29 +103,83 @@ const LoanScreen: React.FC = () => {
       <Text style={styles.dateValue}>{detail}</Text>
     </View>
   );
+  const DetailHistoryRow = ({
+    title,
+    detail,
+  }: {
+    title: string;
+    detail: string;
+  }) => (
+    <View style={styles.dateRow}>
+      <Text style={styles.dateLabelHistory}>{title}</Text>
+      <View style={styles.balanceRow}>
+        <Text style={styles.dateValueHistory}>{detail} </Text>
+        <Text style={styles.currencyHistory}>บาท</Text>
+      </View>
+    </View>
+  );
+  const ExpandableHistoryRow = ({ item }: { item: LoanHistoryItem }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+      <View>
+        <TouchableOpacity
+          onPress={() => setExpanded(!expanded)}
+          style={styles.dateRow}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Ionicons
+              name={expanded ? "chevron-down" : "chevron-forward"}
+              size={18}
+              color="#CFA459"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={styles.dateLabel}>{item.id}</Text>
+          </View>
+          <View style={styles.balanceRow}>
+            <Text style={styles.dateValue}>{item.amount.toLocaleString()}</Text>
+            <Text style={styles.currency}> บาท</Text>
+          </View>
+        </TouchableOpacity>
+
+        {expanded && (
+          <View style={styles.detailContainer}>
+            <DetailHistoryRow
+              title="เงินต้น"
+              detail={item.principalAmount?.toLocaleString() || "0"}
+            />
+            <DetailHistoryRow
+              title="ดอกเบี้ย"
+              detail={item.interest?.toLocaleString() || "0"}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
   const LoanAccount = ({ item }: { item: LoanInfo }) => {
     return (
       <View style={[styles.infoCard, { width: CARD_WIDTH }]}>
         <View style={styles.sideBar} />
         <View style={styles.cardContent}>
           {/* แถวบน: ข้อมูลบัญชี vs ยอดเงิน */}
-          <View style={styles.headerRow}>
-            <View style={styles.accountInfo}>
-              <Text style={styles.accountName}>
-                {accountTypeMap[item.accountType]}
-              </Text>
-              <Text style={styles.accountNumber}>{item.accountNumber}</Text>
-              <Text style={styles.accountOwner}>{item.accountHolder}</Text>
-            </View>
-            <View style={styles.balanceContainer}>
+          <Text style={styles.accountName}>
+            {accountTypeMap[item.accountType]}
+          </Text>
+
+          {/* Account Number + Balance in same row */}
+          <View style={styles.rowBetween}>
+            <Text style={styles.accountNumber}>{item.accountNumber}</Text>
+            <View style={styles.balanceRow}>
               <Text style={styles.accountBalance}>
                 {item.balance.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </Text>
-              <Text style={styles.currency}>THB</Text>
+              <Text style={styles.currency}>บาท</Text>
             </View>
           </View>
+          <Text style={styles.accountOwner}>{item.accountHolder}</Text>
 
           {/* เส้นแบ่ง */}
           <View style={styles.divider} />
@@ -98,10 +192,6 @@ const LoanScreen: React.FC = () => {
           <View style={styles.detailRow}>
             <Text style={styles.label}>วันถึงกำหนดชำระ:</Text>
             <Text style={styles.value}>{item.dueDate}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>ค่างวดครั้งถัดไป:</Text>
-            <Text style={styles.value}>{item.nextInstallment} บาท</Text>
           </View>
         </View>
       </View>
@@ -148,6 +238,7 @@ const LoanScreen: React.FC = () => {
     );
   };
   const StatusLoan = ({ item }: { item: LoanInfo }) => {
+    const isEvidenceSubmitted = item.daysUntilDue === 30;
     const getStatusColor = (statusKey: string) => {
       switch (statusKey) {
         case "Current":
@@ -172,18 +263,25 @@ const LoanScreen: React.FC = () => {
               {StatusLoanTypeMap[item.paymentStatus]}
             </Text>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>ค่าปรับค้างชำระ:</Text>
-            <Text style={styles.value}>{item.penaltyFee} บาท</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>กำหนดชำระภายใน:</Text>
-            <Text style={styles.value}>{item.daysUntilDue} วัน</Text>
-          </View>
+
+          <DetailRow title="กำหนดชำระครั้งถัดไป:" detail={`${item.dueDate}`} />
+          <DetailRow title="ค่างวด:" detail={`${item.nextInstallment} บาท`} />
+          <DetailRow
+            title="ค่าปรับค้างชำระ:"
+            detail={`${item.penaltyFee} บาท`}
+          />
+          <DetailRow
+            title="กำหนดชำระภายใน:"
+            detail={`${item.daysUntilDue} วัน`}
+          />
 
           {/* ปุ่ม "ชำระเงิน" */}
           <LinearGradient
-            colors={["#c49a45", "#d4af71", "#e0c080"]}
+            colors={
+              isEvidenceSubmitted
+                ? ["#bbb", "#bbb"] // สีเทา
+                : ["#c49a45", "#d4af71", "#e0c080"]
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.payButton}
@@ -192,11 +290,20 @@ const LoanScreen: React.FC = () => {
               style={styles.payButtonContainer}
               onPress={handlePay}
               activeOpacity={0.9}
+              disabled={isEvidenceSubmitted} // ✅ ปิดการกด
             >
-              <Text style={styles.payButtonText}>ชำระเงิน</Text>
+              <Text style={styles.payButtonText}>ส่งหลักฐานการชำระ</Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
+        <PaymentEvidenceModal
+          visible={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSubmit={(imageUri) => {
+            handleSubmitEvidence(imageUri);
+            setPaymentImage(null); // เคลียร์หลังใช้งาน
+          }}
+        />
       </View>
     );
   };
@@ -204,14 +311,17 @@ const LoanScreen: React.FC = () => {
     return (
       <View style={styles.scheduleCard}>
         <View style={styles.cardContent}>
-          <Text style={styles.scheduleTitle}>ประวัติการผ่อนชำระ</Text>
-
-          {history.map((h) => (
-            <DetailRow
+          <Text style={styles.scheduleTitle}>ประวัติการชำระ</Text>
+          <View style={styles.divider} />
+          {/* {history.map((h) => (
+            <DetailHistoryRow
               key={h.id}
               title={h.id}
               detail={h.amount.toLocaleString()}
             />
+          ))} */}
+          {history.map((item) => (
+            <ExpandableHistoryRow key={item.id} item={item} />
           ))}
         </View>
       </View>
@@ -230,7 +340,11 @@ const LoanScreen: React.FC = () => {
       <Text style={styles.headerTitle}>สินเชื่อ</Text>
       {/* ====== Card 1: ข้อมูลบัญชีสินเชื่อ ====== */}
       {/* <LoanAccount item={current} /> */}
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
+      >
         <LoanCarousel
           data={data}
           selectedIndex={selectedIndex}
@@ -341,15 +455,16 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   accountName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#878787",
+    marginBottom: 5,
   },
   accountNumber: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 10,
+    fontSize: 15,
+    color: "#4A4A4A",
     marginBottom: 2,
+    fontWeight: "500",
   },
   accountOwner: {
     fontSize: 14,
@@ -360,17 +475,22 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   accountBalance: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#4A4A4A",
+    marginRight: 5,
   },
   currency: {
-    fontSize: 14,
+    fontSize: 15,
+    color: "#666",
+  },
+  currencyHistory: {
+    fontSize: 12,
     color: "#666",
   },
   divider: {
     height: 1,
-    backgroundColor: "#666",
+    backgroundColor: "rgba(0, 0, 0, 0.38)",
     marginBottom: 15,
   },
 
@@ -411,7 +531,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
-    color: "#000",
+    color: "#878787",
   },
   dateRow: {
     flexDirection: "row",
@@ -422,8 +542,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
+  dateLabelHistory: {
+    fontSize: 12,
+    color: "#666",
+  },
   dateValue: {
     fontSize: 14,
+    color: "#000",
+    fontWeight: "500",
+  },
+  dateValueHistory: {
+    fontSize: 12,
     color: "#000",
     fontWeight: "500",
   },
@@ -447,5 +576,79 @@ const styles = StyleSheet.create({
     // backgroundColor: "red",
     // height: height * 0.3,
     marginBottom: 16,
+  },
+  balanceRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  detailContainer: {
+    paddingLeft: 26,
+    paddingBottom: 12,
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  modalContent: {
+    width: 280,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+  modalText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 10,
+  },
+  modalSubtext: {
+    fontSize: 14,
+    color: "#777",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: "#CFA459",
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  uploadBox: {
+    borderWidth: 1.5,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    width: 220,
+    height: 220,
+  },
+  uploadText: {
+    fontSize: 16,
+    color: "#666",
   },
 });

@@ -54,6 +54,7 @@ const RegisterScreen: React.FC = () => {
   });
 
   const [userType, setUserType] = useState<UserType>("บุคคลธรรมดา");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   // State สำหรับข้อมูลฟอร์ม
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -94,7 +95,19 @@ const RegisterScreen: React.FC = () => {
     const digits = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digits);
   };
+  const checkMismatchedFields = (inputData: any, storedData: any) => {
+    const mismatches: string[] = [];
 
+    Object.keys(inputData).forEach((key) => {
+      const inputVal = inputData[key]?.trim?.() || "";
+      const storedVal = storedData[key]?.trim?.() || "";
+      if (inputVal && storedVal && inputVal !== storedVal) {
+        mismatches.push(key);
+      }
+    });
+
+    return mismatches;
+  };
   const handleRequestOtp = async () => {
     const rawPersonalId = personalIdCard.replace(/\D/g, "");
     const rawCompanyReg = companyRegisterNumber.replace(/\D/g, "");
@@ -145,8 +158,37 @@ const RegisterScreen: React.FC = () => {
           phone: phoneNumber,
         });
       }
+      // const fieldNamesTH = {
+      //   personalIdCard: "เลขบัตรประชาชน",
+      //   phone: "เบอร์โทร",
+      //   birthDate: "วันเกิด",
+      //   contactIdCard: "เลขบัตรผู้ติดต่อ",
+      //   companyRegisterNumber: "เลขทะเบียนนิติบุคคล",
+      // };
+      // const inputData =
+      //   userType === "บุคคลธรรมดา"
+      //     ? {
+      //         personalIdCard: rawPersonalId,
+      //         birthDate: birthDate,
+      //         phone: phoneNumber,
+      //       }
+      //     : {
+      //         companyRegisterNumber: rawCompanyReg,
+      //         contactIdCard: rawContactId,
+      //         phone: phoneNumber,
+      //       };
+      // const mismatches = checkMismatchedFields(inputData, UserData);
+      // if (mismatches.length > 0) {
+      //   console.log("ข้อมูลที่กรอกไม่ตรงกับระบบเดิม", inputData);
+      //   return showAlert(
+      //     `${mismatches
+      //       .map((key) => fieldNamesTH[key] || key)
+      //       .join(", ")}ที่กรอกไม่ตรงกับระบบเดิม `
+      //   );
+      // }
+
       if (!foundUser) {
-        console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
+        // console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
         return showAlert(
           "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
         );

@@ -37,6 +37,7 @@ export async function verifyIndividual(
   // const json = await res.json();
   // return json.exists;
   await new Promise((r) => setTimeout(r, 300)); // ดีเลย์จำลอง
+
   return (
     DataUsers.find(
       (u) =>
@@ -81,3 +82,54 @@ export async function verifyJuristic(
     ) || null
   );
 }
+// export const verifyIndividual = async ({
+//   personalIdCard,
+//   birthDate,
+//   phone,
+// }) => {
+//   const user = DataUsers.find(
+//     (u) =>
+//       u.personalIdCard === personalIdCard &&
+//       u.birthDate === birthDate &&
+//       u.userType === "individual"
+//   );
+
+//   if (!user) return null;
+
+//   if (user.phone !== phone) {
+//     return {
+//       ...user,
+//       errors: {
+//         phone: "เบอร์โทรไม่ตรงกับข้อมูลที่ลงทะเบียนไว้",
+//       },
+//     };
+//   }
+
+//   return user; // ตรงทั้งหมด
+// };
+// export const verifyJuristic = async ({
+//   companyRegisterNumber,
+//   contactIdCard,
+//   phone,
+// }) => {
+//   const user = DataUsers.find(
+//     (u) =>
+//       u.companyRegisterNumber === companyRegisterNumber &&
+//       u.contactIdCard === contactIdCard &&
+//       u.userType === "juristic"
+//   );
+
+//   if (!user) return null;
+
+//   if (user.phone !== phone) {
+//     return {
+//       ...user,
+
+//       errors: {
+//         phone: "เบอร์โทรไม่ตรงกับข้อมูลที่ลงทะเบียนไว้",
+//       },
+//     };
+//   }
+
+//   return user;
+// };

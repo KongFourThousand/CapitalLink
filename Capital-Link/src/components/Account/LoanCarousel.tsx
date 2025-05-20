@@ -30,7 +30,6 @@ interface Props {
 
 const LoanCarousel: React.FC<Props> = ({
   data,
-  selectedIndex,
   setSelectedIndex,
   index,
   setIndex,

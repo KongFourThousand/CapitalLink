@@ -23,6 +23,7 @@ import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
+import { Checkbox } from "react-native-paper";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -32,6 +33,9 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 const AddressChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
   const { UserData, setUserData } = useData();
+  const [addressType, setAddressType] = useState<
+    "idCardAddress" | "mailingAddress"
+  >("idCardAddress");
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newAddress, setNewAddress] = useState("");
 
@@ -113,25 +117,26 @@ const AddressChangeRequest: React.FC = () => {
       setIsLoading(false);
       setNewAddress("");
       setDocument(null);
-      // Alert.alert(
-      //   "ส่งคำขอสำเร็จ",
-      //   "คำขอเปลี่ยนที่อยู่ของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
-      //   [
-      //     {
-      //       text: "ตกลง",
-      //       onPress: () => navigation.goBack(),
-      //     },
-      //   ]
-      // );
+
       await AsyncStorage.setItem("AddressChangeRequested", "true");
       setIsPending(true);
-      const updatedData = {
-        ...UserData,
-        ...(newAddress.trim() && { address: newAddress.trim() }),
-      };
-      setUserData(updatedData);
 
-      // บันทึกลง SecureStore
+      let updatedData;
+
+      if (addressType === "idCardAddress") {
+        updatedData = {
+          ...UserData,
+          idCardAddress: newAddress.trim(), // ← บันทึกในฟิลด์นี้
+        };
+      } else {
+        updatedData = {
+          ...UserData,
+          mailingAddress: newAddress.trim(), // ← หรือฟิลด์นี้
+        };
+      }
+
+      setUserData(updatedData);
+      console.log("Updated UserData:", updatedData);
       await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
     }, 2000);
   };
@@ -156,6 +161,45 @@ const AddressChangeRequest: React.FC = () => {
     } finally {
       setStatusLoading(false);
     }
+  };
+  const ChooseAddress = () => {
+    return (
+      <View style={{ marginBottom: 16 }}>
+        {/* <Text style={styles.inputLabel}>ประเภทที่อยู่</Text> */}
+        <TouchableOpacity
+          onPress={() => setAddressType("idCardAddress")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+          disabled={isPending}
+        >
+          <Ionicons
+            name={
+              addressType === "idCardAddress" ? "checkbox" : "square-outline"
+            }
+            size={20}
+            color="#CFA459"
+          />
+          <Text style={styles.Checkbox}>ที่อยู่ตามบัตรประชาชน</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setAddressType("mailingAddress")}
+          style={{ flexDirection: "row", alignItems: "center" }}
+          disabled={isPending}
+        >
+          <Ionicons
+            name={
+              addressType === "mailingAddress" ? "checkbox" : "square-outline"
+            }
+            size={20}
+            color="#CFA459"
+          />
+          <Text style={{ marginLeft: 8 }}>ที่อยู่สำหรับส่งเอกสาร</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -193,6 +237,7 @@ const AddressChangeRequest: React.FC = () => {
                 returnKeyType="next"
               />
             </View>
+            <ChooseAddress />
           </View>
           {isPending ? (
             <View style={styles.center}>
@@ -450,5 +495,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 24,
     color: "#a2754c",
+  },
+  Checkbox: {
+    marginLeft: 8,
+    color: "#C79B55",
   },
 });

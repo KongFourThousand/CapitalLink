@@ -54,30 +54,46 @@ const DepositScreen: React.FC = () => {
   const DetailRow = ({ title, detail }: { title: string; detail: string }) => (
     <View style={styles.dateRow}>
       <Text style={styles.dateLabel}>{title}</Text>
-      <Text style={styles.dateValue}>{detail}</Text>
+      <Text style={styles.dateValue}>{detail} </Text>
+    </View>
+  );
+  const DetailHistoryRow = ({
+    title,
+    detail,
+  }: {
+    title: string;
+    detail: string;
+  }) => (
+    <View style={styles.dateRow}>
+      <Text style={styles.dateLabel}>{title}</Text>
+      <View style={styles.balanceRow}>
+        <Text style={styles.dateValue}>{detail} </Text>
+        <Text style={styles.currency}>บาท</Text>
+      </View>
     </View>
   );
   const DepositAccount = ({ item }: { item: DepositInfo }) => (
     <View style={[styles.infoCard, { width: CARD_WIDTH }]}>
       <View style={styles.sideBar} />
       <View style={styles.cardContent}>
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.accountName}>
-              {accountTypeMap[item.accountType]}
-            </Text>
-            <Text style={styles.accountNumber}>{item.accountNumber}</Text>
-            <Text style={styles.accountOwner}>{item.accountHolder}</Text>
-          </View>
-          <View style={styles.balanceContainer}>
+        {/* Top Row */}
+        <Text style={styles.accountName}>
+          {accountTypeMap[item.accountType]}
+        </Text>
+
+        {/* Account Number + Balance in same row */}
+        <View style={styles.rowBetween}>
+          <Text style={styles.accountNumber}>{item.accountNumber}</Text>
+          <View style={styles.balanceRow}>
             <Text style={styles.accountBalance}>
               {item.balance.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
               })}
             </Text>
-            <Text style={styles.currency}>THB</Text>
+            <Text style={styles.currency}>บาท</Text>
           </View>
         </View>
+        <Text style={styles.accountOwner}>{item.accountHolder}</Text>
         <View style={styles.divider} />
         <View style={styles.detailRow}>
           <Text style={styles.label}>อัตราดอกเบี้ย:</Text>
@@ -88,7 +104,13 @@ const DepositScreen: React.FC = () => {
           <Text style={styles.value}>{item.term} ปี</Text>
         </View>
         <View style={styles.detailRow}>
-          <Text style={styles.label}>ดอกเบี้ยสิ้นสุด:</Text>
+          <Text style={styles.label}>ดอกเบี้ยชำระรายเดือน:</Text>
+          <Text style={styles.value}>
+            {item.maturityInterest.toLocaleString()} บาท
+          </Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.label}>ภาษี:</Text>
           <Text style={styles.value}>
             {item.maturityInterest.toLocaleString()} บาท
           </Text>
@@ -99,7 +121,7 @@ const DepositScreen: React.FC = () => {
   const DetailAccount = () => {
     return (
       <View style={styles.dateCard}>
-        <DetailRow title="วันที่ฝาก:" detail={current.depositDate} />
+        <DetailRow title="วันที่เริ่มฝาก:" detail={current.depositDate} />
         <DetailRow title="วันสิ้นสุดสัญญา:" detail={current.maturityDate} />
       </View>
     );
@@ -107,8 +129,13 @@ const DepositScreen: React.FC = () => {
   const HistoryDeposit = ({ history }: { history: DepositHistoryItem[] }) => (
     <View style={styles.dateCard}>
       <Text style={styles.accountName}>ประวัติการฝากเงิน</Text>
+      <View style={styles.divider} />
       {history.map((h) => (
-        <DetailRow key={h.id} title={h.id} detail={h.amount.toLocaleString()} />
+        <DetailHistoryRow
+          key={h.id}
+          title={h.id}
+          detail={h.amount.toLocaleString()}
+        />
       ))}
     </View>
   );
@@ -123,7 +150,17 @@ const DepositScreen: React.FC = () => {
 
       {/* Header Title */}
       <Text style={styles.headerTitle}>เงินฝาก</Text>
-
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitleSum}>ยอดรวมเงินฝาก</Text>
+        <Text style={styles.headerDetailSum}>
+          <Text style={styles.totalAmount}>
+            {data
+              .reduce((sum, item) => sum + item.balance, 0)
+              .toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Text>
+          <Text style={styles.bahtText}> บาท</Text>
+        </Text>
+      </View>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* กล่องข้อมูลบัญชีเงินฝาก */}
         <DepositCarousel
@@ -168,6 +205,31 @@ const styles = StyleSheet.create({
     marginTop: 35,
     marginBottom: 20,
   },
+  headerTitleSum: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#878787",
+    textAlign: "center",
+    // marginTop: 35,
+    // marginBottom: 20,
+  },
+  headerDetailSum: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#878787",
+    textAlign: "center",
+    // marginTop: 35,
+    // marginBottom: 20,
+  },
+  totalAmount: {
+    fontWeight: "700",
+    color: "#2A2867",
+  },
+
+  bahtText: {
+    color: "#888",
+    fontWeight: "500",
+  },
   contentContainer: {
     paddingHorizontal: 16,
     paddingBottom: 100, // เพิ่มส่วนนี้เพื่อให้เนื้อหาไม่ถูกซ่อนโดย tabBar
@@ -186,7 +248,7 @@ const styles = StyleSheet.create({
     marginRight: 2,
   },
   sideBar: {
-    width: 5,
+    width: 10,
     //height:50,
     backgroundColor: "#CFA459",
     borderTopLeftRadius: 12,
@@ -201,42 +263,45 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 5,
+    paddingHorizontal: 16,
   },
   accountInfo: {
     alignItems: "flex-start",
   },
   accountName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 10,
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#878787",
+    marginBottom: 5,
   },
   balanceContainer: {
     alignItems: "flex-end",
+    flexDirection: "row",
   },
   accountBalance: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#000",
+    color: "#4A4A4A",
+    marginRight: 5,
   },
   currency: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#666",
   },
   accountNumber: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 10,
+    fontSize: 15,
+    color: "#4A4A4A",
     marginBottom: 2,
+    fontWeight: "500",
   },
   accountOwner: {
     fontSize: 14,
-    color: "#666",
+    color: "#4A4A4A",
     marginBottom: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: "#666",
+    backgroundColor: "rgba(0, 0, 0, 0.38)",
     marginBottom: 15,
   },
   detailRow: {
@@ -246,7 +311,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: "#666",
+    color: "#878787",
   },
   value: {
     fontSize: 14,
@@ -338,5 +403,15 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     backgroundColor: "#CFA459",
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  balanceRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
   },
 });
