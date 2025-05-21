@@ -70,11 +70,6 @@ const LoanScreen: React.FC = () => {
       setShowPaymentModal(true);
     }
   };
-  useEffect(() => {
-    if (showPaymentModal && loanData[selectedIndex]) {
-      setSelectedLoanIdForPayment(loanData[selectedIndex].id);
-    }
-  }, [selectedIndex, showPaymentModal]);
   const handleSubmitEvidence = (imageUri: string | null) => {
     const updated = loanData.map((loan) =>
       loan.id === selectedLoanIdForPayment

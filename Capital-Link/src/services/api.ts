@@ -82,54 +82,56 @@ export async function verifyJuristic(
     ) || null
   );
 }
-// export const verifyIndividual = async ({
-//   personalIdCard,
-//   birthDate,
-//   phone,
-// }) => {
-//   const user = DataUsers.find(
-//     (u) =>
-//       u.personalIdCard === personalIdCard &&
-//       u.birthDate === birthDate &&
-//       u.userType === "individual"
-//   );
+export const mockVerifyIndividual = async ({
+  personalIdCard,
+  birthDate,
+  phone,
+}) => {
+  const clean = (s) => (s || "").replace(/\D/g, "").trim();
 
-//   if (!user) return null;
+  const candidates = DataUsers.filter(
+    (u) =>
+      u.userType === "individual" &&
+      clean(u.personalIdCard) === clean(personalIdCard) &&
+      u.birthDate?.trim() === birthDate.trim()
+  );
 
-//   if (user.phone !== phone) {
-//     return {
-//       ...user,
-//       errors: {
-//         phone: "เบอร์โทรไม่ตรงกับข้อมูลที่ลงทะเบียนไว้",
-//       },
-//     };
-//   }
+  if (candidates.length === 0) {
+    return null;
+  }
 
-//   return user; // ตรงทั้งหมด
-// };
-// export const verifyJuristic = async ({
-//   companyRegisterNumber,
-//   contactIdCard,
-//   phone,
-// }) => {
-//   const user = DataUsers.find(
-//     (u) =>
-//       u.companyRegisterNumber === companyRegisterNumber &&
-//       u.contactIdCard === contactIdCard &&
-//       u.userType === "juristic"
-//   );
+  const matched = candidates.find((u) => clean(u.phone) === clean(phone));
 
-//   if (!user) return null;
+  if (!matched) {
+    return { status: "incorrect" }; // เบอร์ไม่ตรงกับชุดข้อมูลนั้น
+  }
 
-//   if (user.phone !== phone) {
-//     return {
-//       ...user,
+  return { status: "match", user: matched };
+};
 
-//       errors: {
-//         phone: "เบอร์โทรไม่ตรงกับข้อมูลที่ลงทะเบียนไว้",
-//       },
-//     };
-//   }
+export const mockVerifyJuristic = async ({
+  companyRegisterNumber,
+  contactIdCard,
+  phone,
+}) => {
+  const clean = (s) => (s || "").replace(/\D/g, "").trim();
 
-//   return user;
-// };
+  const candidates = DataUsers.filter(
+    (u) =>
+      u.userType === "juristic" &&
+      clean(u.companyRegisterNumber) === clean(companyRegisterNumber) &&
+      clean(u.contactIdCard) === clean(contactIdCard)
+  );
+
+  if (candidates.length === 0) {
+    return null; // ไม่พบเลย
+  }
+
+  const matched = candidates.find((u) => clean(u.phone) === clean(phone));
+
+  if (!matched) {
+    return { status: "incorrect" }; // เบอร์ไม่ตรงกับข้อมูลที่มี
+  }
+
+  return { status: "match", user: matched };
+};

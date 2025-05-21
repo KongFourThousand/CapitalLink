@@ -22,7 +22,12 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { verifyIndividual, verifyJuristic } from "../../services/api";
+import {
+  mockVerifyIndividual,
+  mockVerifyJuristic,
+  verifyIndividual,
+  verifyJuristic,
+} from "../../services/api";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -39,6 +44,7 @@ import {
 } from "../../services/mockApi";
 import { useData } from "../../Provide/Auth/UserDataProvide";
 import DatePicker from "../../components/common/DatePicker";
+import type { DataUserType } from "../../Data/UserDataStorage";
 
 const { width } = Dimensions.get("window");
 
@@ -95,19 +101,6 @@ const RegisterScreen: React.FC = () => {
     const digits = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digits);
   };
-  const checkMismatchedFields = (inputData: any, storedData: any) => {
-    const mismatches: string[] = [];
-
-    Object.keys(inputData).forEach((key) => {
-      const inputVal = inputData[key]?.trim?.() || "";
-      const storedVal = storedData[key]?.trim?.() || "";
-      if (inputVal && storedVal && inputVal !== storedVal) {
-        mismatches.push(key);
-      }
-    });
-
-    return mismatches;
-  };
   const handleRequestOtp = async () => {
     const rawPersonalId = personalIdCard.replace(/\D/g, "");
     const rawCompanyReg = companyRegisterNumber.replace(/\D/g, "");
@@ -142,63 +135,73 @@ const RegisterScreen: React.FC = () => {
     try {
       setLoading(true);
       // await mockRequestOtp(phoneNumber);
-      let foundUser = null;
+      // let foundUser = null;
 
-      // บันทึกข้อมูลผู้ใช้ลง Context
+      // // บันทึกข้อมูลผู้ใช้ลง Context
+      // if (userType === "บุคคลธรรมดา") {
+      //   foundUser = await verifyIndividual({
+      //     personalIdCard: rawPersonalId,
+      //     birthDate: birthDate,
+      //     phone: phoneNumber,
+      //   });
+      // } else {
+      //   foundUser = await verifyJuristic({
+      //     companyRegisterNumber: rawCompanyReg,
+      //     contactIdCard: rawContactId,
+      //     phone: phoneNumber,
+      //   });
+      // }
+
+      // if (!foundUser) {
+      //   // console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
+      //   return showAlert(
+      //     "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
+      //   );
+      // }
+      // if (foundUser.statusUser === "NewApp") {
+      //   return showAlert(
+      //     "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
+      //   );
+      // }
+      let response:
+        | { status: string; user?: undefined }
+        | { status: string; user: DataUserType };
+
       if (userType === "บุคคลธรรมดา") {
-        foundUser = await verifyIndividual({
+        response = await mockVerifyIndividual({
           personalIdCard: rawPersonalId,
-          birthDate: birthDate,
+          birthDate,
           phone: phoneNumber,
         });
       } else {
-        foundUser = await verifyJuristic({
+        response = await mockVerifyJuristic({
           companyRegisterNumber: rawCompanyReg,
           contactIdCard: rawContactId,
           phone: phoneNumber,
         });
       }
-      // const fieldNamesTH = {
-      //   personalIdCard: "เลขบัตรประชาชน",
-      //   phone: "เบอร์โทร",
-      //   birthDate: "วันเกิด",
-      //   contactIdCard: "เลขบัตรผู้ติดต่อ",
-      //   companyRegisterNumber: "เลขทะเบียนนิติบุคคล",
-      // };
-      // const inputData =
-      //   userType === "บุคคลธรรมดา"
-      //     ? {
-      //         personalIdCard: rawPersonalId,
-      //         birthDate: birthDate,
-      //         phone: phoneNumber,
-      //       }
-      //     : {
-      //         companyRegisterNumber: rawCompanyReg,
-      //         contactIdCard: rawContactId,
-      //         phone: phoneNumber,
-      //       };
-      // const mismatches = checkMismatchedFields(inputData, UserData);
-      // if (mismatches.length > 0) {
-      //   console.log("ข้อมูลที่กรอกไม่ตรงกับระบบเดิม", inputData);
-      //   return showAlert(
-      //     `${mismatches
-      //       .map((key) => fieldNamesTH[key] || key)
-      //       .join(", ")}ที่กรอกไม่ตรงกับระบบเดิม `
-      //   );
-      // }
-
-      if (!foundUser) {
-        // console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
+      console.log("response", response);
+      // ✅ ไม่พบเลย
+      if (!response) {
         return showAlert(
           "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
         );
       }
+
+      // ✅ ถ้าพบแต่ข้อมูลไม่ตรง
+      if (response.status === "incorrect") {
+        return showAlert("ข้อมูลของคุณไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง");
+      }
+
+      // ✅ ถ้าพบและข้อมูลตรง
+      const foundUser = response.user;
+
+      // ⛔ ถ้ามีสถานะว่าเคยสมัครแล้ว
       if (foundUser.statusUser === "NewApp") {
         return showAlert(
           "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
         );
       }
-
       // await mockRequestOtp(phoneNumber);
       await mockSendOtpNotification(phoneNumber);
       // setUserData((prev) => ({
