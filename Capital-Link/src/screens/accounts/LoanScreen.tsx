@@ -98,6 +98,18 @@ const LoanScreen: React.FC = () => {
       <Text style={styles.dateValue}>{detail}</Text>
     </View>
   );
+  const DetailRowCard = ({
+    title,
+    detail,
+  }: {
+    title: string;
+    detail: string;
+  }) => (
+    <View style={styles.dateRow}>
+      <Text style={styles.dateLabelcard}>{title}</Text>
+      <Text style={styles.dateValuecard}>{detail}</Text>
+    </View>
+  );
   const DetailHistoryRow = ({
     title,
     detail,
@@ -147,6 +159,10 @@ const LoanScreen: React.FC = () => {
               title="ดอกเบี้ย"
               detail={item.interest?.toLocaleString() || "0"}
             />
+            <DetailHistoryRow
+              title="ค่าปรับ"
+              detail={item.penaltyFee?.toLocaleString() || "0"}
+            />
           </View>
         )}
       </View>
@@ -185,7 +201,7 @@ const LoanScreen: React.FC = () => {
             <Text style={styles.value}>{item.interestRate}%</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.label}>วันถึงกำหนดชำระ:</Text>
+            <Text style={styles.label}>วันครบกำหนดสัญญา:</Text>
             <Text style={styles.value}>{item.dueDate}</Text>
           </View>
         </View>
@@ -259,13 +275,21 @@ const LoanScreen: React.FC = () => {
             </Text>
           </View>
 
-          <DetailRow title="กำหนดชำระครั้งถัดไป:" detail={`${item.dueDate}`} />
-          <DetailRow title="ค่างวด:" detail={`${item.nextInstallment} บาท`} />
-          <DetailRow
+          <DetailRowCard
+            title="กำหนดชำระครั้งถัดไป:"
+            detail={`${item.dueDate}`}
+          />
+          <DetailRowCard
+            title="ค่างวด:"
+            detail={`${item.nextInstallment.toLocaleString(undefined, {
+              minimumFractionDigits: 0,
+            })} บาท`}
+          />
+          <DetailRowCard
             title="ค่าปรับค้างชำระ:"
             detail={`${item.penaltyFee} บาท`}
           />
-          <DetailRow
+          <DetailRowCard
             title="กำหนดชำระภายใน:"
             detail={`${item.daysUntilDue} วัน`}
           />
@@ -480,7 +504,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   currencyHistory: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#666",
   },
   divider: {
@@ -536,18 +560,31 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontSize: 14,
     color: "#666",
+    fontWeight: "600",
+  },
+  dateLabelcard: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
   },
   dateLabelHistory: {
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: "500",
     color: "#666",
+    // color: "red",
   },
   dateValue: {
     fontSize: 14,
     color: "#000",
     fontWeight: "500",
   },
+  dateValuecard: {
+    fontSize: 14,
+    color: "#000",
+    fontWeight: "500",
+  },
   dateValueHistory: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#000",
     fontWeight: "500",
   },

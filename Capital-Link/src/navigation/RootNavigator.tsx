@@ -28,7 +28,14 @@ import AddressChangeRequest from "../screens/Profile/ChangeData/AddressChangeReq
 import VerifyPinLock from "../screens/VerifyAccount/VerifyPinLock";
 import type { DataUserType, StatusUserType } from "../Data/UserDataStorage";
 import PendingScreen from "../screens/auth/PendingScreen";
+import { useData } from "../Provide/Auth/UserDataProvide";
 
+import {
+  handleIncomingNotification,
+  syncPushToken,
+} from "../services/NotiPush";
+import * as Notifications from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 type ReturnTo = "PinEntry" | "Profile";
 // 🧠 ประกาศ Type ของ Route ทั้งหมด
 export type RootStackParamList = {
@@ -67,77 +74,112 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator: React.FC = () => {
+  const { setNotifications } = useData();
   const [initialRoute, setInitialRoute] = useState<
     keyof RootStackParamList | null
   >(null);
-  // useEffect(() => {
-  //   const determineInitialRoute = async () => {
-  //     // อ่าน auth token และ flag PIN จาก SecureStore
-  //     const token = await SecureStore.getItemAsync("userData");
-  //     const pinDone = await SecureStore.getItemAsync("userPin");
 
-  //     if (!token) {
-  //       // ยังไม่ล็อกอิน/สมัคร
-  //       setInitialRoute("InitialEntry");
-  //     } else if (!pinDone) {
-  //       // ล็อกอินแล้ว แต่ยังไม่ได้ตั้ง PIN
-  //       setInitialRoute("PinSetup");
-  //     } else {
-  //       // ล็อกอินและตั้ง PIN แล้ว
-  //       setInitialRoute("PinEntry");
-  //     }
-  //   };
-
-  //   determineInitialRoute();
-  // }, []);
   useEffect(() => {
     const determineInitialRoute = async () => {
-      // อ่านข้อมูลผู้ใช้จาก SecureStore
-      const userDataJson = await SecureStore.getItemAsync("userData");
+      // อ่าน auth token และ flag PIN จาก SecureStore
+      const token = await SecureStore.getItemAsync("userData");
       const pinDone = await SecureStore.getItemAsync("userPin");
-      console.log("userDataJson", userDataJson);
-      console.log("pinDone", pinDone);
-      if (!userDataJson) {
-        // ยังไม่เคยสมัคร/ล็อกอิน
+
+      if (!token) {
+        // ยังไม่ล็อกอิน/สมัคร
         setInitialRoute("InitialEntry");
-        return;
-      }
-
-      // แปลงเป็น Object แล้วดู statusUser
-      let statusUser: StatusUserType = "underfind";
-      try {
-        const { statusUser: s } = JSON.parse(userDataJson);
-        statusUser = s;
-      } catch {
-        // ถ้าแปลง JSON ไม่ได้ ถือว่า underfind
-        statusUser = "underfind";
-      }
-
-      switch (statusUser) {
-        case "underfind":
-          setInitialRoute("InitialEntry");
-          break;
-        // case "docSub":
-        //   setInitialRoute("Pending"); // หรือชื่อหน้าที่คุณตั้งไว้
-        //   break;
-        // case "docInCom":
-        //   setInitialRoute("Register"); // หน้าแก้ไข/เติมเอกสาร
-        //   break;
-        case "NewApp":
-          // ถ้ายังไม่ได้ตั้ง PIN ให้ไป PinSetup ก่อน
-          if (!pinDone) {
-            setInitialRoute("PinSetup");
-          } else {
-            setInitialRoute("PinEntry");
-          }
-          break;
-        default:
-          setInitialRoute("InitialEntry");
+      } else if (!pinDone) {
+        // ล็อกอินแล้ว แต่ยังไม่ได้ตั้ง PIN
+        setInitialRoute("PinSetup");
+      } else {
+        // ล็อกอินและตั้ง PIN แล้ว
+        setInitialRoute("PinEntry");
       }
     };
 
     determineInitialRoute();
   }, []);
+  useEffect(() => {
+    syncPushToken();
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        (async () => {
+          const data = notification.request.content.data;
+          const newNoti = {
+            id: String(Date.now()), // ✅ บังคับให้เป็น string
+            key: String(data.key || data.type || "unknown"), // ✅ fallback
+            title: notification.request.content.title ?? "ไม่มีหัวข้อ",
+            message: notification.request.content.body ?? "ไม่มีข้อความ",
+            date: String(data.date || new Date().toISOString().split("T")[0]),
+            read: false,
+          };
+
+          console.log("📥 Receiving new noti:", newNoti);
+          await handleIncomingNotification(newNoti);
+
+          const stored = await AsyncStorage.getItem("readNotifications");
+          const parsed = stored ? JSON.parse(stored) : [];
+          const clean = parsed.filter((n) => n && typeof n === "object");
+          setNotifications(clean); // <== ต้องมี
+          console.log("📥 After handleIncomingNotification, stored =", stored);
+        })();
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
+  // useEffect(() => {
+  //   const determineInitialRoute = async () => {
+  //     // อ่านข้อมูลผู้ใช้จาก SecureStore
+  //     const userDataJson = await SecureStore.getItemAsync("userData");
+  //     const pinDone = await SecureStore.getItemAsync("userPin");
+  //     console.log("userDataJson", userDataJson);
+  //     console.log("pinDone", pinDone);
+  //     if (!userDataJson) {
+  //       // ยังไม่เคยสมัคร/ล็อกอิน
+  //       setInitialRoute("InitialEntry");
+  //       return;
+  //     }
+
+  //     // แปลงเป็น Object แล้วดู statusUser
+  //     let statusUser: StatusUserType = "underfind";
+  //     try {
+  //       const { statusUser: s } = JSON.parse(userDataJson);
+  //       statusUser = s;
+  //     } catch {
+  //       // ถ้าแปลง JSON ไม่ได้ ถือว่า underfind
+  //       statusUser = "underfind";
+  //     }
+
+  //     switch (statusUser) {
+  //       case "underfind":
+  //         setInitialRoute("InitialEntry");
+  //         break;
+  //       // case "docSub":
+  //       //   setInitialRoute("Pending"); // หรือชื่อหน้าที่คุณตั้งไว้
+  //       //   break;
+  //       // case "docInCom":
+  //       //   setInitialRoute("Register"); // หน้าแก้ไข/เติมเอกสาร
+  //       //   break;
+  //       case "NewApp":
+  //         // ถ้ายังไม่ได้ตั้ง PIN ให้ไป PinSetup ก่อน
+  //         if (!pinDone) {
+  //           setInitialRoute("PinSetup");
+  //         } else {
+  //           setInitialRoute("PinEntry");
+  //         }
+  //         break;
+  //       default:
+  //         setInitialRoute("InitialEntry");
+  //     }
+  //   };
+
+  //   determineInitialRoute();
+  // }, []);
 
   if (!initialRoute) {
     // รอโหลดค่าสถานะ (อาจแสดง Splash)

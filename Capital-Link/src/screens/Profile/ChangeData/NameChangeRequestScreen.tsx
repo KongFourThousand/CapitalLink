@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { useState, useRef, useCallback } from "react";
 import {
   SafeAreaView,
@@ -72,6 +72,20 @@ const NameChangeRequestScreen: React.FC = () => {
       );
     }, [])
   );
+  const NoteSection = React.memo(() => (
+    <View style={styles.noteContainer}>
+      <Text style={styles.noteTitle}>หมายเหตุ:</Text>
+      <Text style={styles.noteText}>
+        - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
+      </Text>
+      <Text style={styles.noteText}>
+        - โปรดตรวจสอบเอกสารให้ถูกต้องและชัดเจนก่อนยื่นคำขอ
+      </Text>
+      <Text style={styles.noteText}>
+        - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
+      </Text>
+    </View>
+  ));
   // ฟังก์ชันเลือกรูปเอกสาร
   const handlePickDocument = async () => {
     try {
@@ -210,8 +224,6 @@ const NameChangeRequestScreen: React.FC = () => {
     }
   };
   const PrefixDropdown = () => {
-    const [prefix, setPrefix] = useState("");
-
     return (
       <View style={styles.container}>
         <Text style={styles.label}>คำนำหน้า</Text>
@@ -403,7 +415,7 @@ const NameChangeRequestScreen: React.FC = () => {
           )}
 
           {/* คำอธิบายเพิ่มเติม */}
-          <View style={styles.noteContainer}>
+          {/* <View style={styles.noteContainer}>
             <Text style={styles.noteTitle}>หมายเหตุ:</Text>
             <Text style={styles.noteText}>
               - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
@@ -414,7 +426,8 @@ const NameChangeRequestScreen: React.FC = () => {
             <Text style={styles.noteText}>
               - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
             </Text>
-          </View>
+          </View> */}
+          <NoteSection />
 
           {/* Spacer สำหรับ ScrollView */}
           <View style={{ height: 30 }} />

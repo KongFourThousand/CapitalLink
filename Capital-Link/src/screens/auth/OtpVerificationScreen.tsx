@@ -113,10 +113,11 @@ const OtpVerificationScreen: React.FC = () => {
           // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
           const updatedData = {
             ...DataUserPending,
-            authToken: "true",
             // statusUser: "docSub", // ตั้งค่าเป็น docSub
           };
+          await SecureStore.setItemAsync("authToken", "true");
           setUserData(updatedData);
+          console.log("UserData", updatedData);
 
           // บันทึกลง SecureStore
           await SecureStore.setItemAsync(

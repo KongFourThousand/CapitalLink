@@ -10,6 +10,7 @@ import type { DataUserType, LoanInfo } from "../../Data/UserDataStorage";
 import { DataUser, mockLoanInfos } from "../../Data/UserDataStorage";
 import * as SecureStore from "expo-secure-store";
 import * as Notifications from "expo-notifications";
+import { mockNotifications, type Notification } from "../../Data/NotiData";
 const DataContext = createContext(null);
 
 export function useData() {
@@ -19,6 +20,8 @@ export function useData() {
 export const DataProvider = ({ children }) => {
   const [UserData, setUserData] = useState<DataUserType>(DataUser);
   const [loanData, setLoanData] = useState<LoanInfo[]>(mockLoanInfos);
+  const [notifications, setNotifications] =
+    useState<Notification[]>(mockNotifications);
   const [DataUserPending, setDataUserPending] =
     useState<DataUserType>(DataUser);
   const [loading, setLoading] = useState<boolean>(true);
@@ -49,6 +52,8 @@ export const DataProvider = ({ children }) => {
         setDataUserPending,
         loanData,
         setLoanData,
+        notifications,
+        setNotifications,
       }}
     >
       {children}

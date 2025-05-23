@@ -66,18 +66,7 @@ const NotificationSettingsScreen: React.FC = () => {
       cat.key === key ? { ...cat, enabled: value } : cat
     );
     setCategories(updated);
-    await mockToggleNotificationApi(key, value);
-    if (value) {
-      const cat = defaultCategories.find((c) => c.key === key);
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `🔔 เปิดแจ้งเตือน ${cat?.title}`,
-          body: `คุณได้เปิดการแจ้งเตือนสำหรับ ${cat?.title}`,
-          data: { category: key },
-        },
-        trigger: null, // ส่งทันที
-      });
-    }
+
     try {
       await AsyncStorage.setItem(key, JSON.stringify(value));
     } catch (err) {

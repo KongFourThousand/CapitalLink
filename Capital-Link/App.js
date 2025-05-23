@@ -7,35 +7,27 @@ import * as Notifications from "expo-notifications";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { Provider as PaperProvider } from "react-native-paper";
 import { registerTranslation, th } from "react-native-paper-dates";
-import { DataProvider } from "./src/Provide/Auth/UserDataProvide";
+import { DataProvider, useData } from "./src/Provide/Auth/UserDataProvide";
+import { isCategoryEnabled } from "./src/services/NotiPush";
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async ({ request }) => {
+    const data = request.content.data;
+    const notiKey = String(data.key || data.type || "unknown");
+    const enabled = await isCategoryEnabled(notiKey);
+
+    return {
+      shouldShowAlert: enabled,
+      shouldPlaySound: enabled,
+      shouldSetBadge: enabled,
+      shouldShowBanner: enabled,
+      shouldShowList: enabled,
+    };
+  },
 });
 export default function App() {
   const navigationRef = useRef(null); // ไม่ต้องระบุ generic
   registerTranslation("th", th);
-  // ขอ Permission สำหรับ Local Notifications
-  useEffect(() => {
-    (async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.warn("Permission for notifications not granted!");
-      }
-      if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("otp-channel", {
-          name: "OTP Notifications",
-          importance: Notifications.AndroidImportance.MAX,
-          sound: "default",
-          vibrationPattern: [0, 250, 250, 250],
-        });
-      }
-    })();
-  }, []);
+
   return (
     <PaperProvider>
       <DataProvider>

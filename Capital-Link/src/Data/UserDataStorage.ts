@@ -148,6 +148,7 @@ export const accountTypeMap: Record<string, string> = {
 };
 export interface DepositHistoryItem {
   id: string;
+  date: string;
   amount: number;
 }
 export interface DepositInfo {
@@ -176,8 +177,8 @@ export const mockDepositInfos: DepositInfo[] = [
     depositDate: "21/03/2024",
     maturityDate: "21/03/2025",
     history: [
-      { id: "21/03/2024", amount: 500_000 },
-      { id: "21/04/2024", amount: 500_000 },
+      { id: "21/03/2024", date: "21/03/2024", amount: 500_000 },
+      { id: "21/04/2024", date: "21/04/2024", amount: 500_000 },
     ],
   },
   {
@@ -191,7 +192,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "3",
@@ -204,7 +205,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "4",
@@ -217,7 +218,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "5",
@@ -230,7 +231,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "6",
@@ -243,7 +244,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "7",
@@ -256,7 +257,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "8",
@@ -269,7 +270,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "9",
@@ -282,7 +283,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "10",
@@ -295,7 +296,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "11",
@@ -308,7 +309,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "12",
@@ -321,7 +322,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "13",
@@ -334,7 +335,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "14",
@@ -347,7 +348,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "15",
@@ -360,7 +361,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "16",
@@ -373,7 +374,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "17",
@@ -386,7 +387,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "18",
@@ -399,7 +400,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "19",
@@ -412,7 +413,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "20",
@@ -425,7 +426,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
   {
     id: "21",
@@ -438,7 +439,7 @@ export const mockDepositInfos: DepositInfo[] = [
     maturityInterest: 25000,
     depositDate: "15/01/2025",
     maturityDate: "15/01/2028",
-    history: [{ id: "15/01/2025", amount: 250_000 }],
+    history: [{ id: "15/01/2025", date: "15/01/2025", amount: 250_000 }],
   },
 ];
 export const StatusLoanTypeMap: Record<string, string> = {
@@ -447,9 +448,11 @@ export const StatusLoanTypeMap: Record<string, string> = {
 };
 export interface LoanHistoryItem {
   id: string;
+  date: string; // วันที่ชำระ (format dd/MM/yyyy)
   amount: number;
   interest?: number; // จำนวนดอกเบี้ย (ถ้ามี)
   principalAmount?: number; // จำนวนเงินต้น (ถ้ามี)
+  penaltyFee?: number; // ค่าปรับ (ถ้ามี)
 }
 export interface LoanInfo {
   id: string; // ใช้สำหรับการแสดงผลใน UI
@@ -483,21 +486,27 @@ export const mockLoanInfos: LoanInfo[] = [
     history: [
       {
         id: "28/02/2025",
+        date: "28/02/2025",
         amount: 25000,
         interest: 6759,
         principalAmount: 18241,
+        penaltyFee: 0,
       },
       {
         id: "31/01/2025",
+        date: "31/01/2025",
         amount: 15500,
         interest: 6817,
         principalAmount: 8683,
+        penaltyFee: 0,
       },
       {
         id: "31/12/2024",
+        date: "31/12/2024",
         amount: 15500,
         interest: 6875,
         principalAmount: 8625,
+        penaltyFee: 0,
       },
     ],
   },
@@ -517,21 +526,27 @@ export const mockLoanInfos: LoanInfo[] = [
     history: [
       {
         id: "28/02/2025",
-        amount: 15500,
+        date: "28/02/2025",
+        amount: 15600,
         interest: 6817,
         principalAmount: 8683,
+        penaltyFee: 100,
       },
       {
         id: "31/01/2025",
-        amount: 15500,
+        date: "31/01/2025",
+        amount: 15700,
         interest: 6817,
         principalAmount: 8683,
+        penaltyFee: 200,
       },
       {
         id: "31/12/2024",
-        amount: 15500,
+        date: "31/12/2024",
+        amount: 16500,
         interest: 6875,
         principalAmount: 8625,
+        penaltyFee: 1000,
       },
     ],
   },

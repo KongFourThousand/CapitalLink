@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { mockNotifications } from "../../Data/NotiData";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 // แบบง่าย ไม่ต้องเชื่อมกับ RootStackParamList ที่อาจจะมีปัญหา
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type AnyNavigation = NativeStackNavigationProp<any>;
 
 // ประเภทของแท็บ
@@ -22,19 +25,23 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   onTabPress,
   unreadCount: propUnreadCount,
 }) => {
+  const { notifications, setNotifications } = useData();
   const navigation = useNavigation<AnyNavigation>();
   const READ_NOTIFICATIONS_KEY = "readNotifications";
-  const [localUnreadCount, setLocalUnreadCount] = useState<number>(0);
+  // const [localUnreadCount, setLocalUnreadCount] = useState<number>(0);
   useEffect(() => {
     if (propUnreadCount === undefined) {
       const loadUnreadCount = async () => {
         try {
-          const stored = await AsyncStorage.getItem(READ_NOTIFICATIONS_KEY);
-          const readList: string[] = stored ? JSON.parse(stored) : [];
-          const unread = mockNotifications.filter(
-            (n) => !readList.includes(n.id)
-          ).length;
-          setLocalUnreadCount(unread);
+          const stored = await AsyncStorage.getItem("readNotifications");
+          const parsed = stored ? JSON.parse(stored) : [];
+
+          const clean = Array.isArray(parsed)
+            ? parsed.filter((n) => n && typeof n === "object")
+            : [];
+
+          const unread = clean.filter((n) => !n.read).length;
+          // setLocalUnreadCount(unread);
         } catch (error) {
           console.error("Error loading unread count", error);
         }
@@ -45,8 +52,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
       return unsubscribe;
     }
   }, [navigation, propUnreadCount]);
-  const displayCount =
-    typeof propUnreadCount === "number" ? propUnreadCount : localUnreadCount;
+  const displayCount = notifications.filter((n) => !n.read).length;
 
   // ฟังก์ชันสำหรับจัดการเมื่อกดแท็บ
   const handleTabPress = (tabName: TabName) => {

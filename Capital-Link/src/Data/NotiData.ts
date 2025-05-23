@@ -10,31 +10,31 @@ export interface Notification {
 }
 export type NotificationType = "news" | "system" | "account";
 export const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    key: "news",
-    title: "โปรโมชั่นใหม่",
-    message: "รับส่วนลดพิเศษ 20% สำหรับการใช้บริการเงินฝากวันนี้เท่านั้น!",
-    date: "2025-05-15",
-    read: false,
-  },
-  {
-    id: "2",
-    key: "account",
-    title: "แจ้งเตือนการชำระเงิน",
-    message: "คุณมีการชำระเงินที่ค้างอยู่ กรุณาตรวจสอบรายละเอียดในแอป",
-    date: "2025-05-14",
-    read: false,
-  },
-  {
-    id: "3",
-    key: "system",
-    title: "อัปเดตระบบ",
-    message:
-      "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
-    date: "2025-05-15",
-    read: false,
-  },
+  // {
+  //   id: "1",
+  //   key: "news",
+  //   title: "โปรโมชั่นใหม่",
+  //   message: "รับส่วนลดพิเศษ 20% สำหรับการใช้บริการเงินฝากวันนี้เท่านั้น!",
+  //   date: "2025-05-15",
+  //   read: false,
+  // },
+  // {
+  //   id: "2",
+  //   key: "account",
+  //   title: "แจ้งเตือนการชำระเงิน",
+  //   message: "คุณมีการชำระเงินที่ค้างอยู่ กรุณาตรวจสอบรายละเอียดในแอป",
+  //   date: "2025-05-14",
+  //   read: false,
+  // },
+  // {
+  //   id: "3",
+  //   key: "system",
+  //   title: "อัปเดตระบบ",
+  //   message:
+  //     "ระบบของเราได้มีการอัปเดตแล้ว กรุณารีสตาร์ทแอปเพื่อรับประสบการณ์ใหม่",
+  //   date: "2025-05-15",
+  //   read: false,
+  // },
 ];
 export const mockToggleNotificationApi = async (
   key: string,

@@ -104,7 +104,7 @@ const DepositScreen: React.FC = () => {
           <Text style={styles.value}>{item.term} ปี</Text>
         </View>
         <View style={styles.detailRow}>
-          <Text style={styles.label}>ดอกเบี้ยชำระรายเดือน:</Text>
+          <Text style={styles.label}>ดอกเบี้ยรับรายเดือน:</Text>
           <Text style={styles.value}>
             {item.maturityInterest.toLocaleString()} บาท
           </Text>
@@ -122,7 +122,7 @@ const DepositScreen: React.FC = () => {
     return (
       <View style={styles.dateCard}>
         <DetailRow title="วันที่เริ่มฝาก:" detail={current.depositDate} />
-        <DetailRow title="วันสิ้นสุดสัญญา:" detail={current.maturityDate} />
+        <DetailRow title="วันที่ครบกำหนด:" detail={current.maturityDate} />
       </View>
     );
   };

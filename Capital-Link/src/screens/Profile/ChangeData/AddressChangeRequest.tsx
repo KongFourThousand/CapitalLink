@@ -24,6 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 import { Checkbox } from "react-native-paper";
+import type { DataUserType } from "../../../Data/UserDataStorage";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -121,7 +122,7 @@ const AddressChangeRequest: React.FC = () => {
       await AsyncStorage.setItem("AddressChangeRequested", "true");
       setIsPending(true);
 
-      let updatedData;
+      let updatedData: DataUserType;
 
       if (addressType === "idCardAddress") {
         updatedData = {
@@ -196,7 +197,7 @@ const AddressChangeRequest: React.FC = () => {
             size={20}
             color="#CFA459"
           />
-          <Text style={{ marginLeft: 8 }}>ที่อยู่สำหรับส่งเอกสาร</Text>
+          <Text style={styles.Checkbox}>ที่อยู่สำหรับส่งเอกสาร</Text>
         </TouchableOpacity>
       </View>
     );
