@@ -18,6 +18,7 @@ import { useRoute, type RouteProp } from "@react-navigation/native";
 import OtpVerification from "../../components/common/OtpVerification";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../Provide/Auth/UserDataProvide";
+import { api, apiWeb } from "../../../API/route";
 type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 
 const { width } = Dimensions.get("window");
@@ -31,6 +32,7 @@ const OtpVerificationScreen: React.FC = () => {
 
   const from = route.params?.from || "Login";
   const phoneNumber = route.params?.phoneNumber || "";
+  const data = route.params?.Data || "";
 
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
@@ -111,24 +113,32 @@ const OtpVerificationScreen: React.FC = () => {
       case "Register":
         try {
           // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
-          const updatedData = {
-            ...DataUserPending,
-            // statusUser: "docSub", // ตั้งค่าเป็น docSub
-          };
-          await SecureStore.setItemAsync("authToken", "true");
-          setUserData(updatedData);
-          console.log("UserData", updatedData);
-
+          // const updatedData = {
+          //   ...DataUserPending,
+          //   // statusUser: "docSub", // ตั้งค่าเป็น docSub
+          // };
+          // await SecureStore.setItemAsync("authToken", "true");
+          // setUserData(updatedData);
+          // const data = {
+          //   phone: phoneNumber,
+          // };
+          console.log("UserData", data);
+          const res = await api("register/individual", data, "json", "POST");
+          const resWeb = await apiWeb("", "", "", "GET");
+          // const textData = await res; // ดึงข้อมูลออกมาเป็น Text
+          // const jsonData = await textData.json();
+          // const status = jsonData.msg;
+          console.log("Data", res);
+          console.log("Web", resWeb);
           // บันทึกลง SecureStore
-          await SecureStore.setItemAsync(
-            "userData",
-            JSON.stringify(updatedData)
-          );
-          console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", updatedData);
-
+          // await SecureStore.setItemAsync(
+          //   "userData",
+          //   JSON.stringify(updatedData)
+          // );
+          // console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", updatedData);
           // นำทางไปหน้ารออนุมัติ/ตั้งค่า PIN
           // navigation.replace("Pending");
-          navigation.replace("PinSetup");
+          // navigation.replace("PinSetup");
         } catch (error) {
           console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
         }

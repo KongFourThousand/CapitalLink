@@ -156,6 +156,13 @@ const NotificationScreen: React.FC = () => {
         </TouchableOpacity> */}
         <Text style={styles.headerTitle}>แจ้งเตือน</Text>
       </View>
+      {notifications.length === 0 && (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ fontSize: 16, color: "#999" }}>ไม่มีการแจ้งเตือน</Text>
+        </View>
+      )}
       <FlatList
         data={notifications}
         // keyExtractor={(item) => item.id}

@@ -134,95 +134,28 @@ const RegisterScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      // await mockRequestOtp(phoneNumber);
-      // let foundUser = null;
-
-      // // บันทึกข้อมูลผู้ใช้ลง Context
-      // if (userType === "บุคคลธรรมดา") {
-      //   foundUser = await verifyIndividual({
-      //     personalIdCard: rawPersonalId,
-      //     birthDate: birthDate,
-      //     phone: phoneNumber,
-      //   });
-      // } else {
-      //   foundUser = await verifyJuristic({
-      //     companyRegisterNumber: rawCompanyReg,
-      //     contactIdCard: rawContactId,
-      //     phone: phoneNumber,
-      //   });
-      // }
-
-      // if (!foundUser) {
-      //   // console.log("ไม่พบข้อมูลสมาชิก", rawContactId);
-      //   return showAlert(
-      //     "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
-      //   );
-      // }
-      // if (foundUser.statusUser === "NewApp") {
-      //   return showAlert(
-      //     "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
-      //   );
-      // }
-      let response:
-        | { status: string; user?: undefined }
-        | { status: string; user: DataUserType };
-
+      await mockSendOtpNotification(phoneNumber);
       if (userType === "บุคคลธรรมดา") {
-        response = await mockVerifyIndividual({
-          personalIdCard: rawPersonalId,
-          birthDate,
-          phone: phoneNumber,
+        navigation.navigate("OtpVerification", {
+          from: "Register",
+          phoneNumber,
+          Data: {
+            personalIdCard: rawPersonalId,
+            birthDate,
+            phone: phoneNumber,
+          },
         });
       } else {
-        response = await mockVerifyJuristic({
-          companyRegisterNumber: rawCompanyReg,
-          contactIdCard: rawContactId,
-          phone: phoneNumber,
+        navigation.navigate("OtpVerification", {
+          from: "Register",
+          phoneNumber,
+          Data: {
+            companyRegisterNumber: rawCompanyReg,
+            contactIdCard: rawContactId,
+            phone: phoneNumber,
+          },
         });
       }
-      console.log("response", response);
-      // ✅ ไม่พบเลย
-      if (!response) {
-        return showAlert(
-          "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
-        );
-      }
-
-      // ✅ ถ้าพบแต่ข้อมูลไม่ตรง
-      if (response.status === "incorrect") {
-        return showAlert("ข้อมูลของคุณไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง");
-      }
-
-      // ✅ ถ้าพบและข้อมูลตรง
-      const foundUser = response.user;
-
-      // ⛔ ถ้ามีสถานะว่าเคยสมัครแล้ว
-      if (foundUser.statusUser === "NewApp") {
-        return showAlert(
-          "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
-        );
-      }
-      // await mockRequestOtp(phoneNumber);
-      await mockSendOtpNotification(phoneNumber);
-      // setUserData((prev) => ({
-      //   ...prev,
-      //   userType,
-      //   personalIdCard: userType === "บุคคลธรรมดา" ? rawPersonalId : undefined,
-      //   birthDate: userType === "บุคคลธรรมดา" ? birthDate : undefined,
-      //   companyRegisterNumber:
-      //     userType === "นิติบุคคล" ? rawCompanyReg : undefined,
-      //   contactIdCard: userType === "นิติบุคคล" ? rawContactId : undefined,
-      //   phone: phoneNumber,
-      // }));
-      const englishUserType =
-        userType === "บุคคลธรรมดา" ? "individual" : "juristic";
-      setDataUserPending((prev) => ({
-        ...prev,
-        ...foundUser,
-        userType: englishUserType, // เก็บเป็น english
-      }));
-
-      navigation.navigate("OtpVerification", { from: "Register", phoneNumber });
     } catch (err) {
       console.error("ขอ OTP ไม่สำเร็จ", err);
       showAlert("ไม่สามารถขอรหัส OTP ได้ กรุณาลองใหม่อีกครั้ง");
@@ -230,6 +163,99 @@ const RegisterScreen: React.FC = () => {
       setLoading(false);
     }
   };
+  // const handleRequestOtp = async () => {
+  //   const rawPersonalId = personalIdCard.replace(/\D/g, "");
+  //   const rawCompanyReg = companyRegisterNumber.replace(/\D/g, "");
+  //   const rawContactId = contactIdCard.replace(/\D/g, "");
+
+  //   if (userType === "บุคคลธรรมดา") {
+  //     if (rawPersonalId.length !== 13) {
+  //       return showAlert("กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก");
+  //     }
+  //     if (!isValidThaiID(rawPersonalId)) {
+  //       return showAlert("เลขบัตรประชาชนไม่ถูกต้อง");
+  //     }
+  //     if (!birthDate) {
+  //       return showAlert("กรุณาเลือกวันเกิด");
+  //     }
+  //   } else {
+  //     if (rawCompanyReg.length !== 13) {
+  //       return showAlert("กรุณากรอกเลขทะเบียนนิติบุคคลให้ครบ 13 หลัก");
+  //     }
+  //     if (rawContactId.length !== 13) {
+  //       return showAlert("กรุณากรอกเลขบัตรประชาชนผู้ติดต่อให้ครบ 13 หลัก");
+  //     }
+  //     if (!isValidThaiID(rawContactId)) {
+  //       return showAlert("เลขบัตรประชาชนผู้ติดต่อไม่ถูกต้อง");
+  //     }
+  //   }
+
+  //   if (phoneNumber.length !== 10) {
+  //     return showAlert("กรุณากรอกเบอร์โทรให้ครบ 10 หลัก");
+  //   }
+
+  //   try {
+  //     setLoading(true);
+
+  //     let response:
+  //       | { status: string; user?: undefined }
+  //       | { status: string; user: DataUserType };
+
+  //     if (userType === "บุคคลธรรมดา") {
+  //       response = await mockVerifyIndividual({
+  //         personalIdCard: rawPersonalId,
+  //         birthDate,
+  //         phone: phoneNumber,
+  //       });
+  //     } else {
+  //       response = await mockVerifyJuristic({
+  //         companyRegisterNumber: rawCompanyReg,
+  //         contactIdCard: rawContactId,
+  //         phone: phoneNumber,
+  //       });
+  //     }
+  //     console.log("response", response);
+  //     // ✅ ไม่พบเลย
+  //     if (!response) {
+  //       return showAlert(
+  //         "ไม่พบข้อมูลสมาชิก กรุณาตรวจสอบข้อมูลหรือสมัครผ่านเว็บไซต์"
+  //       );
+  //     }
+
+  //     // ✅ ถ้าพบแต่ข้อมูลไม่ตรง
+  //     if (response.status === "incorrect") {
+  //       return showAlert("ข้อมูลของคุณไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง");
+  //     }
+
+  //     // ✅ ถ้าพบและข้อมูลตรง
+  //     const foundUser = response.user;
+
+  //     // ⛔ ถ้ามีสถานะว่าเคยสมัครแล้ว
+  //     if (foundUser.statusUser === "NewApp") {
+  //       return showAlert(
+  //         "คุณมีบัญชีอยู่แล้ว กรุณาเข้าสู่ระบบด้วยเบอร์โทรศัพท์ที่ลงทะเบียนไว้"
+  //       );
+  //     }
+  //     // await mockRequestOtp(phoneNumber);
+  //     await mockSendOtpNotification(phoneNumber);
+  //     const englishUserType =
+  //       userType === "บุคคลธรรมดา" ? "individual" : "juristic";
+  //     setDataUserPending((prev) => ({
+  //       ...prev,
+  //       ...foundUser,
+  //       userType: englishUserType, // เก็บเป็น english
+  //     }));
+  //     navigation.navigate("OtpVerification", {
+  //       from: "Register",
+  //       phoneNumber,
+  //     });
+  //   } catch (err) {
+  //     console.error("ขอ OTP ไม่สำเร็จ", err);
+  //     showAlert("ไม่สามารถขอรหัส OTP ได้ กรุณาลองใหม่อีกครั้ง");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // เมื่อได้รับวันที่จาก ThaiDatePicker ให้ update state date และ birthDate (แปลงเป็น พ.ศ.)
   const handleDateChange = (selectedDate: Date) => {

@@ -45,7 +45,7 @@ export type RootStackParamList = {
   OtpVerification: {
     from: "Login" | "Register" | "PhoneChange";
     phoneNumber: string;
-    foundUser?: DataUserType;
+    Data?: object;
   };
   PinSetup: undefined;
   PinConfirm: { firstPin: string };

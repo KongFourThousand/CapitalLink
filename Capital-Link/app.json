@@ -7,6 +7,7 @@
     "icon": "./assets/splash.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -20,6 +21,7 @@
         "foregroundImage": "./assets/splash.png",
         "backgroundColor": "#ffffff"
       },
+      "usesCleartextTraffic": true,
       "package": "com.botandlife.CapitalLink"
     },
     "web": {

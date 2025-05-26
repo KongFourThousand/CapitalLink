@@ -34,14 +34,9 @@ const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
   const { UserData, setUserData } = useData();
   const [selectedPrefix, setSelectedPrefix] = useState("");
-  const prefixOptions = [
-    { label: "นาย", value: "นาย" },
-    { label: "นาง", value: "นาง" },
-    { label: "นางสาว", value: "นางสาว" },
-    { label: "เด็กชาย", value: "เด็กชาย" },
-    { label: "เด็กหญิง", value: "เด็กหญิง" },
-    { label: "อื่นๆ", value: "อื่นๆ" },
-  ];
+  const [customPrefix, setCustomPrefix] = useState<string>(""); // เก็บค่าที่ผู้กรอกเอง
+
+  const isOther = selectedPrefix === "อื่นๆ";
 
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [newFirstName, setNewFirstName] = useState("");
@@ -146,11 +141,16 @@ const NameChangeRequestScreen: React.FC = () => {
       setIsLoading(false);
       await AsyncStorage.setItem("nameChangeRequested", "true");
       setIsPending(true);
+      const prefixToSave =
+        selectedPrefix === "อื่นๆ" && customPrefix.trim()
+          ? customPrefix.trim()
+          : selectedPrefix.trim();
+
       const updatedData = {
         ...UserData,
         ...(newFirstName.trim() && { name: newFirstName.trim() }),
         ...(newLastName.trim() && { lastname: newLastName.trim() }),
-        ...(selectedPrefix.trim() && { titlename: selectedPrefix.trim() }),
+        ...(prefixToSave.trim() && { titlename: prefixToSave.trim() }),
       };
       setUserData(updatedData);
 
@@ -223,13 +223,17 @@ const NameChangeRequestScreen: React.FC = () => {
       setStatusLoading(false);
     }
   };
-  const PrefixDropdown = () => {
+  const PrefixDropdownOld = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.label}>คำนำหน้า</Text>
+
         <Picker
           selectedValue={selectedPrefix}
-          onValueChange={(itemValue) => setSelectedPrefix(itemValue)}
+          onValueChange={(value) => {
+            setSelectedPrefix(value);
+            if (value !== "อื่นๆ") setCustomPrefix(""); // ล้างค่าถ้าเปลี่ยนจาก “อื่นๆ” ไปเป็นอย่างอื่น
+          }}
           style={styles.picker}
         >
           <Picker.Item label="เลือกคำนำหน้า" value="" />
@@ -238,7 +242,18 @@ const NameChangeRequestScreen: React.FC = () => {
           <Picker.Item label="นางสาว" value="นางสาว" />
           <Picker.Item label="เด็กชาย" value="เด็กชาย" />
           <Picker.Item label="เด็กหญิง" value="เด็กหญิง" />
+          <Picker.Item label="อื่นๆ" value="อื่นๆ" />
         </Picker>
+
+        {isOther && (
+          <TextInput
+            style={styles.textInput}
+            placeholder="กรอกคำนำหน้าเอง"
+            value={customPrefix}
+            onChangeText={setCustomPrefix}
+            returnKeyType="done"
+          />
+        )}
       </View>
     );
   };
@@ -281,49 +296,44 @@ const NameChangeRequestScreen: React.FC = () => {
         <Text style={styles.headerTitle}>ขอเปลี่ยนชื่อ-นามสกุล</Text>
 
         <ScrollView contentContainerStyle={styles.contentContainer}>
-          {/* ฟอร์มชื่อ - นามสกุลใหม่ */}
-          {/* <Text style={styles.sectionLabel}>กรอกข้อมูลชื่อหรือนามสกุลใหม่</Text> */}
           <View style={styles.formContainer}>
-            {/* กรอกชื่อใหม่ */}
-            <PrefixDropdown />
-            {/* <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>ชื่อใหม่</Text>
-              <TextInput
-                style={[
-                  styles.textInput,
-                  isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
-                ]}
-                value={newFirstName}
-                onChangeText={setNewFirstName}
-                placeholder="กรอกชื่อใหม่"
-                autoCapitalize="words"
-                editable={!isPending}
-                returnKeyType="next"
-                onSubmitEditing={() => lastNameInputRef.current?.focus()}
-              />
-            </View> */}
+            <View style={styles.container}>
+              <Text style={styles.label}>คำนำหน้า</Text>
+
+              <Picker
+                selectedValue={selectedPrefix}
+                onValueChange={(value) => {
+                  setSelectedPrefix(value);
+                  if (value !== "อื่นๆ") setCustomPrefix(""); // ล้างค่าถ้าเปลี่ยนจาก “อื่นๆ” ไปเป็นอย่างอื่น
+                }}
+                style={styles.picker}
+                dropdownIconColor={"#CFA459"}
+              >
+                <Picker.Item label="เลือกคำนำหน้า" value="" />
+                <Picker.Item label="นาย" value="นาย" />
+                <Picker.Item label="นาง" value="นาง" />
+                <Picker.Item label="นางสาว" value="นางสาว" />
+                <Picker.Item label="เด็กชาย" value="เด็กชาย" />
+                <Picker.Item label="เด็กหญิง" value="เด็กหญิง" />
+                <Picker.Item label="อื่นๆ" value="อื่นๆ" />
+              </Picker>
+
+              {isOther && (
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="กรอกคำนำหน้า"
+                  value={customPrefix}
+                  onChangeText={setCustomPrefix}
+                  returnKeyType="done"
+                />
+              )}
+            </View>
             <InputData
               title={"ชื่อใหม่"}
               placeholder={"กรอกชื่อใหม่"}
               value={newFirstName}
               setValue={setNewFirstName}
             />
-            {/* กรอกนามสกุลใหม่ */}
-            {/* <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>นามสกุลใหม่</Text>
-              <TextInput
-                ref={lastNameInputRef}
-                style={[
-                  styles.textInput,
-                  isPending && styles.textInputDisabled, // optional: เปลี่ยนสไตล์ให้ดูไม่ active
-                ]}
-                value={newLastName}
-                onChangeText={setNewLastName}
-                placeholder="กรอกนามสกุลใหม่"
-                editable={!isPending}
-                autoCapitalize="words"
-              />
-            </View> */}
             <InputData
               title={"นามสกุลใหม่"}
               placeholder={"กรอกนามสกุลใหม่"}
@@ -623,5 +633,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9F9F9",
     borderRadius: 8,
     color: "#000",
+    marginBottom: 12,
   },
 });

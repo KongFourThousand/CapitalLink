@@ -76,8 +76,8 @@ export const DataUsers: DataUserType[] = [
   },
   {
     titlename: "นางสาว",
-    name: "มะมะมะ",
-    lastname: "หมูเด้ง",
+    name: "สมชาย",
+    lastname: "ใจดี",
     companyName: "",
     phone: "0911022724",
     personalIdCard: "1569800000023",
@@ -177,8 +177,8 @@ export const mockDepositInfos: DepositInfo[] = [
     depositDate: "21/03/2024",
     maturityDate: "21/03/2025",
     history: [
-      { id: "21/03/2024", date: "21/03/2024", amount: 500_000 },
-      { id: "21/04/2024", date: "21/04/2024", amount: 500_000 },
+      { id: "21/03/2024", date: "21/03/2024", amount: 500000 },
+      { id: "21/04/2024", date: "21/04/2024", amount: 500000 },
     ],
   },
   {

@@ -6,8 +6,18 @@ import React, {
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { DataUserType, LoanInfo } from "../../Data/UserDataStorage";
-import { DataUser, mockLoanInfos } from "../../Data/UserDataStorage";
+import type {
+  DataUserType,
+  LoanInfo,
+  RegisterIndividualType,
+  RegisterJuristicType,
+} from "../../Data/UserDataStorage";
+import {
+  DataUser,
+  mockLoanInfos,
+  RegisterIndividual,
+  RegisterJuristic,
+} from "../../Data/UserDataStorage";
 import * as SecureStore from "expo-secure-store";
 import * as Notifications from "expo-notifications";
 import { mockNotifications, type Notification } from "../../Data/NotiData";
@@ -19,6 +29,10 @@ export function useData() {
 
 export const DataProvider = ({ children }) => {
   const [UserData, setUserData] = useState<DataUserType>(DataUser);
+  const [individualData, setIndividualData] =
+    useState<RegisterIndividualType>(RegisterIndividual);
+  const [juristicData, setJuristicData] =
+    useState<RegisterJuristicType>(RegisterJuristic);
   const [loanData, setLoanData] = useState<LoanInfo[]>(mockLoanInfos);
   const [notifications, setNotifications] =
     useState<Notification[]>(mockNotifications);
