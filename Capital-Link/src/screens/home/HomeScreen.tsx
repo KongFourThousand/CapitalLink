@@ -23,7 +23,7 @@ import { useData } from "../../Provide/Auth/UserDataProvide";
 const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
-  const { UserData } = useData();
+  const { UserData, getDepositInfo, getLoanInfo } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();
   const GreetingText = () => {
@@ -69,12 +69,14 @@ const HomeScreen: React.FC = () => {
   };
   const CapitalMenu = () => {
     // ฟังก์ชันเมื่อกดปุ่มเงินฝาก
-    const handleDepositPress = () => {
+    const handleDepositPress = async () => {
+      await getDepositInfo();
       navigation.navigate("Deposit");
     };
 
     // ฟังก์ชันเมื่อกดปุ่มสินเชื่อ
-    const handleLoanPress = () => {
+    const handleLoanPress = async () => {
+      await getLoanInfo();
       navigation.navigate("Loan");
     };
     return (

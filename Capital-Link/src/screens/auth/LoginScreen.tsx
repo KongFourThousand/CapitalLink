@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { use, useState } from "react";
 import {
   View,
   Text,
@@ -33,6 +33,9 @@ const { width } = Dimensions.get("window");
 const LoginScreen: React.FC = () => {
   const { setDataUserPending } = useData();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [userType, setUserType] = useState<"individual" | "juristic">(
+    "individual"
+  );
   const [loading, setLoading] = useState(false);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -45,7 +48,49 @@ const LoginScreen: React.FC = () => {
     const digitsOnly = input.replace(/\D/g, "").substring(0, 10);
     setPhoneNumber(digitsOnly);
   };
+  const CheckboxUserType = () => {
+    return (
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          marginBottom: 10,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => setUserType("individual")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginRight: 20,
+          }}
+        >
+          <Ionicons
+            name={
+              userType === "individual" ? "radio-button-on" : "radio-button-off"
+            }
+            size={20}
+            color="#CFA459"
+          />
+          <Text style={{ marginLeft: 6, fontSize: 16 }}>บุคคลธรรมดา</Text>
+        </TouchableOpacity>
 
+        <TouchableOpacity
+          onPress={() => setUserType("juristic")}
+          style={{ flexDirection: "row", alignItems: "center" }}
+        >
+          <Ionicons
+            name={
+              userType === "juristic" ? "radio-button-on" : "radio-button-off"
+            }
+            size={20}
+            color="#CFA459"
+          />
+          <Text style={{ marginLeft: 6, fontSize: 16 }}>นิติบุคคล</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
   // ขอ OTP
   const handleRequestOtp = async () => {
     if (phoneNumber.length < 10) {
@@ -55,28 +100,32 @@ const LoginScreen: React.FC = () => {
 
     try {
       setLoading(true);
-      const foundUser = DataUsers.find((u) => u.phone === phoneNumber);
-      if (!foundUser) {
-        Alert.alert(
-          "ไม่พบข้อมูลสมาชิก",
-          "กรุณาลงทะเบียนใหม่หรือกรอกเบอร์โทรอีกครั้ง"
-        );
-        return;
-      }
-      if (foundUser.statusUser !== "NewApp") {
-        Alert.alert(
-          "หมายเลขนี้ยังไม่ถูกลงทะเบียนผ่านแอปพลิเคชัน",
-          "กรุณาลงทะเบียนเพื่อเข้าใช้งานแอปพลิเคชัน"
-        );
-        return;
-      }
-      console.log("foundUser", foundUser);
-      setDataUserPending(foundUser);
+      // const foundUser = DataUsers.find((u) => u.phone === phoneNumber);
+      // if (!foundUser) {
+      //   Alert.alert(
+      //     "ไม่พบข้อมูลสมาชิก",
+      //     "กรุณาลงทะเบียนใหม่หรือกรอกเบอร์โทรอีกครั้ง"
+      //   );
+      //   return;
+      // }
+      // if (foundUser.statusUser !== "NewApp") {
+      //   Alert.alert(
+      //     "หมายเลขนี้ยังไม่ถูกลงทะเบียนผ่านแอปพลิเคชัน",
+      //     "กรุณาลงทะเบียนเพื่อเข้าใช้งานแอปพลิเคชัน"
+      //   );
+      //   return;
+      // }
+      // console.log("foundUser", foundUser);
+      // setDataUserPending(foundUser);
       await mockSendOtpNotification(phoneNumber);
       // await mockRequestOtp(phoneNumber);
       navigation.navigate("OtpVerification", {
         from: "Login",
         phoneNumber: phoneNumber,
+        Data: {
+          userType: userType, // หรือ "juristic" ตามที่ต้องการ
+          phone: phoneNumber,
+        }, // หรือ "juristic" ตามที่ต้องการ
       });
     } catch (error) {
       console.log("ขอ OTP ไม่สำเร็จ:", error);
@@ -109,7 +158,7 @@ const LoginScreen: React.FC = () => {
             style={styles.logo}
           />
         </View>
-
+        <CheckboxUserType />
         {/* Phone Input */}
         <Text style={styles.inputLabel}>เบอร์โทรศัพท์</Text>
         <View style={styles.inputContainer}>

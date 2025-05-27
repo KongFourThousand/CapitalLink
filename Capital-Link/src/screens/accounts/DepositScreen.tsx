@@ -27,6 +27,7 @@ import {
   accountTypeMap,
 } from "../../Data/UserDataStorage";
 import DepositCarousel from "../../components/Account/DepositCarousel";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
@@ -36,7 +37,8 @@ const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
 const DepositScreen: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [index, setIndex] = React.useState<number>(0);
-  const data = mockDepositInfos;
+  const { depositData } = useData();
+  const data = depositData;
   const current = data[selectedIndex];
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, "Home">>();

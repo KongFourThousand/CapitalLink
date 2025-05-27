@@ -24,7 +24,7 @@ type OtpRouteProp = RouteProp<RootStackParamList, "OtpVerification">;
 const { width } = Dimensions.get("window");
 
 const OtpVerificationScreen: React.FC = () => {
-  const { UserData, setUserData, setDataUserPending, DataUserPending } =
+  const { UserData, setUserData, showAlert, DataUserPending, setLoading } =
     useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -119,17 +119,41 @@ const OtpVerificationScreen: React.FC = () => {
           // };
           // await SecureStore.setItemAsync("authToken", "true");
           // setUserData(updatedData);
-
+          setLoading(true);
           const res = await api("register/individual", data, "json", "POST");
           console.log("Data", res);
           console.log("UserData", res.user);
           // บันทึกลง SecureStore
-          await SecureStore.setItemAsync("userData", JSON.stringify(res.user));
-          setUserData(res.user);
-          // console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", res);
-          // นำทางไปหน้ารออนุมัติ/ตั้งค่า PIN
-          // navigation.replace("Pending");
-          navigation.replace("PinSetup");
+
+          if (res.status === "match") {
+            await SecureStore.setItemAsync(
+              "userData",
+              JSON.stringify(res.user)
+            );
+            setUserData(res.user);
+            setLoading(false);
+            navigation.replace("PinSetup");
+          } else if (res.status === "notMatch") {
+            setLoading(false);
+            showAlert("ข้อมูลไม่ตรงกับฐานข้อมูล กรุณาลองใหม่อีกครั้ง");
+            navigation.goBack();
+            return;
+          } else if (res.status === "notFound") {
+            setLoading(false);
+            showAlert("ไม่พบข้อมูลผู้ใช้ กรุณาลงทะเบียนใหม่");
+            navigation.goBack();
+            return;
+          } else if (res.status === "registered") {
+            setLoading(false);
+            showAlert("เบอร์นี้ได้ลงทะเบียนไปแล้ว กรุณาเข้าสู่ระบบ");
+            navigation.replace("Login");
+            return;
+          } else {
+            setLoading(false);
+            showAlert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+            navigation.goBack();
+            return;
+          }
         } catch (error) {
           console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
         }
@@ -137,15 +161,30 @@ const OtpVerificationScreen: React.FC = () => {
 
       case "Login":
         // สำหรับกรณี Login ธรรมดา
+        console.log("Data", data);
+        try {
+          const res = await api("user-login", data, "json", "POST");
+          console.log("res:", res);
+          console.log("getLoanInfo res:", res.user);
+          if (res.status === "match") {
+            await SecureStore.setItemAsync(
+              "userData",
+              JSON.stringify(DataUserPending)
+            );
+            setUserData(res.user);
+            setLoading(false);
+            navigation.replace("PinSetup");
+            return res.status;
+          }
+          setLoading(false);
+          showAlert("ไม่สามารถดึงข้อมูลเงินฝากได้ กรุณาลองใหม่อีกครั้ง");
+          navigation.goBack();
+          return res.status;
+        } catch (error) {
+          console.error("Error getLoanInfo:", error);
+          setLoading(false);
+        }
 
-        console.log("UserData", DataUserPending);
-        await SecureStore.setItemAsync(
-          "userData",
-          JSON.stringify(DataUserPending)
-        );
-        setUserData(DataUserPending);
-        await SecureStore.setItemAsync("authToken", "true");
-        navigation.replace("PinSetup");
         break;
 
       default:

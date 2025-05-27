@@ -52,7 +52,7 @@ const { width } = Dimensions.get("window");
 const defaultDate = new Date(new Date().getFullYear(), 0, 1);
 type UserType = "บุคคลธรรมดา" | "นิติบุคคล";
 const RegisterScreen: React.FC = () => {
-  const { UserData, setUserData, setDataUserPending } = useData();
+  const { UserData, showAlert, alert, setAlert } = useData();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [fontsLoaded] = useFonts({
@@ -71,10 +71,6 @@ const RegisterScreen: React.FC = () => {
   const [date, setDate] = useState<Date>(defaultDate);
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<{ visible: boolean; message: string }>({
-    visible: false,
-    message: "",
-  });
 
   if (!fontsLoaded) {
     return (
@@ -93,9 +89,6 @@ const RegisterScreen: React.FC = () => {
   //   };
   //   CheckdocInCom();
   // }, []);
-  const showAlert = (message: string) => {
-    setAlert({ visible: true, message });
-  };
 
   const handlePhoneChange = (input: string) => {
     const digits = input.replace(/\D/g, "").substring(0, 10);
@@ -575,13 +568,6 @@ const RegisterScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </ScrollView>
-        <CustomAlertModal
-          visible={alert.visible}
-          message={alert.message}
-          onlyConfirm={true}
-          onConfirm={() => setAlert({ visible: false, message: "" })}
-          onCancel={() => setAlert({ visible: false, message: "" })}
-        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

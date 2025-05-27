@@ -15,6 +15,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomTabBar from "../../components/common/CustomTabBar";
+import { useData } from "../../Provide/Auth/UserDataProvide";
 
 // ชื่อ Route สมมติว่าคุณใส่ใน MainTabNavigator ว่า "AccountsTab"
 type AccountNavProp = NativeStackNavigationProp<RootStackParamList, "Account">;
@@ -23,17 +24,18 @@ const { width } = Dimensions.get("window");
 
 const AccountScreen: React.FC = () => {
   const navigation = useNavigation<AccountNavProp>();
+  const { getDepositInfo, getLoanInfo } = useData();
 
   // กดดูรายละเอียด "เงินฝาก"
-  const handlePressDeposit = () => {
+  const handlePressDeposit = async () => {
+    await getDepositInfo();
     navigation.navigate("Deposit");
-    console.log("Navigate to Deposit Details");
   };
 
   // กดดูรายละเอียด "สินเชื่อ"
-  const handlePressLoan = () => {
+  const handlePressLoan = async () => {
+    await getLoanInfo();
     navigation.navigate("Loan");
-    console.log("Navigate to Loan Details");
   };
 
   return (
