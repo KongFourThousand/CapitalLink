@@ -84,7 +84,7 @@ const RootNavigator: React.FC = () => {
       // อ่าน auth token และ flag PIN จาก SecureStore
       const token = await SecureStore.getItemAsync("userData");
       const pinDone = await SecureStore.getItemAsync("userPin");
-
+      console.log("token", token);
       if (!token) {
         // ยังไม่ล็อกอิน/สมัคร
         setInitialRoute("InitialEntry");

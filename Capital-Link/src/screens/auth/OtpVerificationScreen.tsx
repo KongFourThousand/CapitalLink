@@ -119,26 +119,17 @@ const OtpVerificationScreen: React.FC = () => {
           // };
           // await SecureStore.setItemAsync("authToken", "true");
           // setUserData(updatedData);
-          // const data = {
-          //   phone: phoneNumber,
-          // };
-          console.log("UserData", data);
+
           const res = await api("register/individual", data, "json", "POST");
-          const resWeb = await apiWeb("", "", "", "GET");
-          // const textData = await res; // ดึงข้อมูลออกมาเป็น Text
-          // const jsonData = await textData.json();
-          // const status = jsonData.msg;
           console.log("Data", res);
-          console.log("Web", resWeb);
+          console.log("UserData", res.user);
           // บันทึกลง SecureStore
-          // await SecureStore.setItemAsync(
-          //   "userData",
-          //   JSON.stringify(updatedData)
-          // );
-          // console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", updatedData);
+          await SecureStore.setItemAsync("userData", JSON.stringify(res.user));
+          setUserData(res.user);
+          // console.log("บันทึกข้อมูลผู้ใช้สำเร็จ", res);
           // นำทางไปหน้ารออนุมัติ/ตั้งค่า PIN
           // navigation.replace("Pending");
-          // navigation.replace("PinSetup");
+          navigation.replace("PinSetup");
         } catch (error) {
           console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
         }
