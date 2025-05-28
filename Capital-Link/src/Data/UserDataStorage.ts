@@ -25,6 +25,10 @@ export const RegisterJuristic: RegisterJuristicType = {
   contactIdCard: "",
   phone: "",
 };
+export interface changeRequestType {
+  changeName: string;
+  changeAddress: string;
+}
 export interface DataUserType {
   titlename: string;
   name: string;
@@ -40,6 +44,7 @@ export interface DataUserType {
   companyRegisterNumber: string;
   userType: string;
   statusUser: StatusUserType;
+  changeRequest: changeRequestType;
 }
 export const DataUser: DataUserType = {
   titlename: "",
@@ -56,6 +61,10 @@ export const DataUser: DataUserType = {
   companyRegisterNumber: "",
   userType: "",
   statusUser: "underfind",
+  changeRequest: {
+    changeName: null,
+    changeAddress: null,
+  },
 };
 export const DataUsers: DataUserType[] = [
   {
@@ -73,6 +82,10 @@ export const DataUsers: DataUserType[] = [
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
     userType: "individual",
     statusUser: "NewApp",
+    changeRequest: {
+      changeName: null,
+      changeAddress: null,
+    },
   },
   {
     titlename: "นางสาว",
@@ -89,6 +102,10 @@ export const DataUsers: DataUserType[] = [
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
     userType: "individual",
     statusUser: "underfind",
+    changeRequest: {
+      changeName: null,
+      changeAddress: null,
+    },
   },
   {
     titlename: "",
@@ -105,6 +122,10 @@ export const DataUsers: DataUserType[] = [
     companyRegisterNumber: "0105555000001",
     userType: "juristic",
     statusUser: "NewApp",
+    changeRequest: {
+      changeName: null,
+      changeAddress: null,
+    },
   },
   {
     titlename: "นางสาว",
@@ -121,6 +142,10 @@ export const DataUsers: DataUserType[] = [
     companyRegisterNumber: "", // ไม่ใช้ในกรณีบุคคลธรรมดา
     userType: "individual",
     statusUser: "NewApp",
+    changeRequest: {
+      changeName: null,
+      changeAddress: null,
+    },
   },
   {
     titlename: "",
@@ -137,6 +162,10 @@ export const DataUsers: DataUserType[] = [
     companyRegisterNumber: "0105555000002",
     userType: "juristic",
     statusUser: "underfind",
+    changeRequest: {
+      changeName: null,
+      changeAddress: null,
+    },
   },
   // ... เพิ่ม mock อื่นได้ตามต้องการ
 ];
@@ -468,6 +497,7 @@ export interface LoanInfo {
   penaltyFee: number; // ค่าปรับค้างชำระ (บาท)
   daysUntilDue: number; // จำนวนวันเหลือจนถึงกำหนด (วัน)
   history: LoanHistoryItem[];
+  evidenceStatus: "NotSubmitted" | "Pending" | "Approved" | "Rejected";
 }
 export const mockLoanInfos: LoanInfo[] = [
   {
@@ -483,6 +513,7 @@ export const mockLoanInfos: LoanInfo[] = [
     paymentStatus: "Current", // On-time payment
     penaltyFee: 0,
     daysUntilDue: 15,
+    evidenceStatus: "NotSubmitted",
     history: [
       {
         id: "28/02/2025",
@@ -523,6 +554,7 @@ export const mockLoanInfos: LoanInfo[] = [
     paymentStatus: "Overdue", // On-time payment
     penaltyFee: 1500,
     daysUntilDue: 15,
+    evidenceStatus: "NotSubmitted",
     history: [
       {
         id: "28/02/2025",

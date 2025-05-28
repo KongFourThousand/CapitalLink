@@ -24,6 +24,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
+import { api } from "../../../../API/route";
+import { pickImageRaw } from "../../../Data/picker";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -32,7 +34,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const NameChangeRequestScreen: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-  const { UserData, setUserData } = useData();
+  const { UserData, setUserData, setLoading } = useData();
   const [selectedPrefix, setSelectedPrefix] = useState("");
   const [customPrefix, setCustomPrefix] = useState<string>(""); // เก็บค่าที่ผู้กรอกเอง
 
@@ -43,8 +45,11 @@ const NameChangeRequestScreen: React.FC = () => {
   const [newLastName, setNewLastName] = useState("");
 
   // เอกสารแนบ
-  const [document, setDocument] = useState<string | null>(null);
-
+  const [document, setDocument] = useState<{
+    uri: string;
+    b64: string;
+    type: string;
+  } | null>(null);
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
   // pending state
@@ -57,14 +62,19 @@ const NameChangeRequestScreen: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-  const submitUrl = "https://api.example.com/profile/name-change";
-  const statusUrl = "https://api.example.com/profile/name-change/status";
 
   useFocusEffect(
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useCallback(() => {
-      AsyncStorage.getItem("nameChangeRequested").then((val) =>
-        setIsPending(val === "true")
-      );
+      // AsyncStorage.getItem("nameChangeRequested").then((val) =>
+      //   setIsPending(val === "true")
+      // );
+      const CheckStatus = () => {
+        if (UserData.changeRequest.changeName) {
+          setIsPending(true);
+        }
+      };
+      CheckStatus();
     }, [])
   );
   const NoteSection = React.memo(() => (
@@ -82,35 +92,35 @@ const NameChangeRequestScreen: React.FC = () => {
     </View>
   ));
   // ฟังก์ชันเลือกรูปเอกสาร
-  const handlePickDocument = async () => {
-    try {
-      // ขอสิทธิ์การเข้าถึง
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "การอนุญาต",
-          "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
-        );
-        return;
-      }
+  // const handlePickDocument = async () => {
+  //   try {
+  //     // ขอสิทธิ์การเข้าถึง
+  //     const { status } =
+  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //     if (status !== "granted") {
+  //       Alert.alert(
+  //         "การอนุญาต",
+  //         "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
+  //       );
+  //       return;
+  //     }
 
-      // เปิดคลังรูปภาพ
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
+  //     // เปิดคลังรูปภาพ
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsEditing: false,
+  //       aspect: [4, 3],
+  //       quality: 0.8,
+  //     });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setDocument(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการเลือกเอกสาร:", error);
-      Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
-    }
-  };
+  //     if (!result.canceled && result.assets && result.assets.length > 0) {
+  //       setDocument(result.assets[0].uri);
+  //     }
+  //   } catch (error) {
+  //     console.error("เกิดข้อผิดพลาดในการเลือกเอกสาร:", error);
+  //     Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
+  //   }
+  // };
 
   // ฟังก์ชันลบรูปเอกสาร
   const handleRemoveDocument = () => {
@@ -170,33 +180,46 @@ const NameChangeRequestScreen: React.FC = () => {
     }, 2000);
   };
   const handleSubmit = async () => {
-    if (!newFirstName && !newLastName) {
-      return Alert.alert("กรอกชื่อหรือสกุลใหม่ก่อน");
+    if (!newFirstName.trim() && !newLastName.trim() && !selectedPrefix) {
+      Alert.alert(
+        "ข้อมูลไม่ครบถ้วน",
+        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง หรือเลือกคำนำหน้า"
+      );
+      return;
     }
     if (!document) {
       return Alert.alert("แนบเอกสารก่อน");
     }
-    setIsLoading(true);
+    const prefixToSave =
+      selectedPrefix === "อื่นๆ" && customPrefix.trim()
+        ? customPrefix.trim()
+        : selectedPrefix.trim();
+    // setIsLoading(true);
+    const data = {
+      type: UserData.userType,
+      personalIdCard: UserData.personalIdCard,
+      birthDate: UserData.birthDate,
+      titleName: prefixToSave,
+      name: newFirstName,
+      lastName: newLastName,
+      base64Name: document,
+    };
+    // console.log("Data Change Name", data);
     try {
-      const res = await fetch(submitUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          newFirstName,
-          newLastName,
-          documentUri: document,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        Alert.alert("Error", json.message || "ส่งไม่สำเร็จ");
-      } else {
-        // สำเร็จ → เก็บ flag & สลับไป pending UI
-        await AsyncStorage.setItem("nameChangeRequested", "true");
+      setLoading(true);
+      const res = await api("change-request/Name", data, "json", "POST");
+      console.log("ChangeName res", res);
+      if (res.status === "ok") {
+        setLoading(false);
+        setUserData(res.user);
         setIsPending(true);
+      } else {
+        Alert.alert("Error", "ส่งไม่สำเร็จ");
+        setLoading(false);
       }
     } catch {
       Alert.alert("Error", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      setLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -204,17 +227,6 @@ const NameChangeRequestScreen: React.FC = () => {
   const checkStatus = async () => {
     setStatusLoading(true);
     try {
-      // const res = await fetch(statusUrl);
-      // const { status } = await res.json(); // pending/approved/rejected
-      // if (status === "approved") {
-      //   await AsyncStorage.removeItem("nameChangeRequested");
-      //   Alert.alert("อนุมัติแล้ว", "ไปกรอกใหม่ได้เลย");
-      //   setIsPending(false);
-      // } else if (status === "rejected") {
-      //   await AsyncStorage.removeItem("nameChangeRequested");
-      //   Alert.alert("ถูกปฏิเสธ", "กรุณาส่งคำขอใหม่");
-      //   setIsPending(false);
-      // }
       await AsyncStorage.removeItem("nameChangeRequested");
       navigation.goBack();
     } catch {
@@ -373,7 +385,7 @@ const NameChangeRequestScreen: React.FC = () => {
                 {document ? (
                   <View style={styles.documentPreview}>
                     <Image
-                      source={{ uri: document }}
+                      source={{ uri: document.uri }}
                       style={styles.documentImage}
                       resizeMode="cover"
                     />
@@ -388,7 +400,12 @@ const NameChangeRequestScreen: React.FC = () => {
                 ) : (
                   <TouchableOpacity
                     style={styles.uploadButton}
-                    onPress={handlePickDocument}
+                    onPress={async () => {
+                      const img = await pickImageRaw();
+                      if (img) {
+                        setDocument(img);
+                      }
+                    }}
                     activeOpacity={0.7}
                   >
                     <Ionicons
@@ -410,7 +427,7 @@ const NameChangeRequestScreen: React.FC = () => {
               >
                 <TouchableOpacity
                   style={styles.submitButton}
-                  onPress={handleSubmitRequest}
+                  onPress={handleSubmit}
                   activeOpacity={0.8}
                   disabled={isLoading}
                 >
@@ -540,6 +557,7 @@ const styles = StyleSheet.create({
   documentImage: {
     width: "100%",
     height: 200,
+    resizeMode: "contain",
   },
   removeDocumentButton: {
     position: "absolute",

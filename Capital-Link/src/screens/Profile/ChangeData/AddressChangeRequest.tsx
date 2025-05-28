@@ -25,6 +25,8 @@ import * as SecureStore from "expo-secure-store";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
 import { Checkbox } from "react-native-paper";
 import type { DataUserType } from "../../../Data/UserDataStorage";
+import { api } from "../../../../API/route";
+import { pickImageRaw } from "../../../Data/picker";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -33,7 +35,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const AddressChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-  const { UserData, setUserData } = useData();
+  const { UserData, setUserData, setLoading } = useData();
   const [addressType, setAddressType] = useState<
     "idCardAddress" | "mailingAddress"
   >("idCardAddress");
@@ -41,7 +43,11 @@ const AddressChangeRequest: React.FC = () => {
   const [newAddress, setNewAddress] = useState("");
 
   // เอกสารแนบ
-  const [document, setDocument] = useState<string | null>(null);
+  const [document, setDocument] = useState<{
+    uri: string;
+    b64: string;
+    type: string;
+  } | null>(null);
 
   // สถานะการโหลด
   const [isLoading, setIsLoading] = useState(false);
@@ -53,50 +59,64 @@ const AddressChangeRequest: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-  const submitUrl = "https://api.example.com/profile/name-change";
-  const statusUrl = "https://api.example.com/profile/name-change/status";
+
   // ฟังก์ชันเลือกรูปเอกสาร
-  const handlePickDocument = async () => {
-    try {
-      // ขอสิทธิ์การเข้าถึง
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "การอนุญาต",
-          "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
-        );
-        return;
-      }
 
-      // เปิดคลังรูปภาพ
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setDocument(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการเลือกเอกสาร:", error);
-      Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
-    }
-  };
   useFocusEffect(
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useCallback(() => {
-      AsyncStorage.getItem("AddressChangeRequested").then((val) =>
-        setIsPending(val === "true")
-      );
+      // AsyncStorage.getItem("nameChangeRequested").then((val) =>
+      //   setIsPending(val === "true")
+      // );
+      const CheckStatus = () => {
+        if (UserData.changeRequest.changeAddress) {
+          setIsPending(true);
+        }
+      };
+      CheckStatus();
     }, [])
   );
   // ฟังก์ชันลบรูปเอกสาร
   const handleRemoveDocument = () => {
     setDocument(null);
   };
+  const handleSubmit = async () => {
+    if (!newAddress.trim()) {
+      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกที่อยู่");
+      return;
+    }
+    if (!document) {
+      return Alert.alert("แนบเอกสารก่อน");
+    }
 
+    const data = {
+      type: UserData.userType,
+      personalIdCard: UserData.personalIdCard,
+      birthDate: UserData.birthDate,
+      idCardAddress: addressType === "idCardAddress" ? newAddress.trim() : "",
+      mailingAddress: addressType === "mailingAddress" ? newAddress.trim() : "",
+      base64Address: document,
+    };
+    // console.log("Data Change Name", data);
+    try {
+      setLoading(true);
+      const res = await api("change-request/Address", data, "json", "POST");
+      console.log("ChangeAddress res", res);
+      if (res.status === "ok") {
+        setLoading(false);
+        setUserData(res.user);
+        setIsPending(true);
+      } else {
+        Alert.alert("Error", "ส่งไม่สำเร็จ");
+        setLoading(false);
+      }
+    } catch {
+      Alert.alert("Error", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      setLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // ฟังก์ชันยื่นคำขอ
   const handleSubmitRequest = () => {
     // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
@@ -256,7 +276,7 @@ const AddressChangeRequest: React.FC = () => {
                 {document ? (
                   <View style={styles.documentPreview}>
                     <Image
-                      source={{ uri: document }}
+                      source={{ uri: document.uri }}
                       style={styles.documentImage}
                       resizeMode="cover"
                     />
@@ -271,7 +291,12 @@ const AddressChangeRequest: React.FC = () => {
                 ) : (
                   <TouchableOpacity
                     style={styles.uploadButton}
-                    onPress={handlePickDocument}
+                    onPress={async () => {
+                      const img = await pickImageRaw();
+                      if (img) {
+                        setDocument(img);
+                      }
+                    }}
                     activeOpacity={0.7}
                   >
                     <Ionicons
@@ -293,7 +318,7 @@ const AddressChangeRequest: React.FC = () => {
               >
                 <TouchableOpacity
                   style={styles.submitButton}
-                  onPress={handleSubmitRequest}
+                  onPress={handleSubmit}
                   activeOpacity={0.8}
                   disabled={isLoading}
                 >

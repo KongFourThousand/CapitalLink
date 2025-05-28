@@ -88,7 +88,7 @@ export async function apiWeb(fn, data, type, method) {
 }
 export async function api(fn, data, type, method) {
   const urlProd = "http://47.129.131.246:8765/app";
-  const urlTest = "http://192.168.1.182:3000/";
+  const urlTest = "http://192.168.1.44:8520/";
 
   try {
     if (prod) {

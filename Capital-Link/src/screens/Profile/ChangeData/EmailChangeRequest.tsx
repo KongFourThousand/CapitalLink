@@ -22,6 +22,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import { useData } from "../../../Provide/Auth/UserDataProvide";
+import { api } from "../../../../API/route";
 
 type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -30,7 +31,7 @@ type NameChangeRequestScreenNavProp = NativeStackNavigationProp<
 
 const EmailChangeRequest: React.FC = () => {
   const navigation = useNavigation<NameChangeRequestScreenNavProp>();
-  const { UserData, setUserData } = useData();
+  const { UserData, setUserData, setLoading } = useData();
   // สถานะสำหรับกรอกชื่อใหม่ / นามสกุลใหม่
   const [StoreEmail, setStoreEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -79,21 +80,32 @@ const EmailChangeRequest: React.FC = () => {
     }
 
     setIsLoading(true);
-    SaveNewEmail();
-    // สมมติว่าส่งข้อมูลไปยัง API
-    setTimeout(() => {
+    // SaveNewEmail();
+    const data = {
+      type: UserData.userType,
+      personalIdCard: UserData.personalIdCard,
+      birthDate: UserData.birthDate,
+      email: newEmail,
+    };
+    try {
+      const res = await api("change-request/Email", data, "json", "POST");
+      console.log("res:", res);
+      console.log("getChangeEmail res:", res.user);
+      if (res.status === "ok") {
+        setIsLoading(false);
+        setLoading(false);
+        setUserData(res.user);
+        await SecureStore.setItemAsync("userData", JSON.stringify(res.user));
+      } else {
+        Alert.alert("Error", "ส่งไม่สำเร็จ");
+        setLoading(false);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error getLoanInfo:", error);
+      setLoading(false);
       setIsLoading(false);
-      Alert.alert(
-        "ส่งคำขอสำเร็จ",
-        "คำขอเปลี่ยนอีเมลล์ของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
-        [
-          {
-            text: "ตกลง",
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
-    }, 2000);
+    }
   };
 
   return (

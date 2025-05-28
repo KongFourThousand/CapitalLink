@@ -32,7 +32,7 @@ const OtpVerificationScreen: React.FC = () => {
 
   const from = route.params?.from || "Login";
   const phoneNumber = route.params?.phoneNumber || "";
-  const data = route.params?.Data || "";
+  const data = route.params?.Data || {};
 
   const [fontsLoaded] = useFonts({
     TimesNewRoman: require("../../../assets/fonts/times new roman.ttf"),
@@ -86,41 +86,39 @@ const OtpVerificationScreen: React.FC = () => {
     // ถ้า OTP ถูกต้อง ให้แยกกรณีตามค่า from
     switch (from) {
       case "PhoneChange":
+        console.log("Phone", phoneNumber);
         try {
-          // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
-          const updatedData = {
-            ...UserData,
-            phone: phoneNumber,
-          };
-          setUserData(updatedData);
-
-          // บันทึกลง SecureStore
-          await SecureStore.setItemAsync(
-            "userData",
-            JSON.stringify(updatedData)
-          );
-          Alert.alert("เปลี่ยนเบอร์สำเร็จ", `เบอร์ของคุณคือ ${phoneNumber}`, [
-            {
-              text: "ตกลง",
-              onPress: () => navigation.navigate("Profile"),
-            },
-          ]);
+          const res = await api("change-request/Phone", data, "json", "POST");
+          console.log("res:", res);
+          console.log("getChangePhone res:", res.user);
+          if (res.status === "ok") {
+            setLoading(false);
+            setUserData(res.user);
+            navigation.goBack();
+            await SecureStore.setItemAsync(
+              "userData",
+              JSON.stringify(res.user)
+            );
+          } else {
+            Alert.alert("Error", "ส่งไม่สำเร็จ");
+            setLoading(false);
+            navigation.goBack();
+          }
         } catch (error) {
-          console.error("บันทึกข้อมูลผู้ใช้ไม่สำเร็จ", error);
+          console.error("Error getLoanInfo:", error);
+          setLoading(false);
         }
         break;
 
       case "Register":
         try {
-          // อัปเดต Context ว่าสถานะล็อกอินสำเร็จ
-          // const updatedData = {
-          //   ...DataUserPending,
-          //   // statusUser: "docSub", // ตั้งค่าเป็น docSub
-          // };
-          // await SecureStore.setItemAsync("authToken", "true");
-          // setUserData(updatedData);
+          const endpoint =
+            "personalIdCard" in data
+              ? "register/individual"
+              : "register/juristic";
           setLoading(true);
-          const res = await api("register/individual", data, "json", "POST");
+          const res = await api(endpoint, data, "json", "POST");
+          console.log("endpoint", endpoint);
           console.log("Data", res);
           console.log("UserData", res.user);
           // บันทึกลง SecureStore
@@ -132,7 +130,10 @@ const OtpVerificationScreen: React.FC = () => {
             );
             setUserData(res.user);
             setLoading(false);
-            navigation.replace("PinSetup");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "PinSetup" }],
+            });
           } else if (res.status === "notMatch") {
             setLoading(false);
             showAlert("ข้อมูลไม่ตรงกับฐานข้อมูล กรุณาลองใหม่อีกครั้ง");
@@ -165,11 +166,11 @@ const OtpVerificationScreen: React.FC = () => {
         try {
           const res = await api("user-login", data, "json", "POST");
           console.log("res:", res);
-          console.log("getLoanInfo res:", res.user);
+          console.log("getLogin res:", res.user);
           if (res.status === "match") {
             await SecureStore.setItemAsync(
               "userData",
-              JSON.stringify(DataUserPending)
+              JSON.stringify(res.user)
             );
             setUserData(res.user);
             setLoading(false);

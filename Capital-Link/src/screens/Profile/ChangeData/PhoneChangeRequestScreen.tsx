@@ -49,6 +49,12 @@ const PhoneChangeRequestScreen: React.FC = () => {
     navigation.navigate("OtpVerification", {
       from: "PhoneChange",
       phoneNumber: newPhone,
+      Data: {
+        type: UserData.userType,
+        personalIdCard: UserData.personalIdCard,
+        birthDate: UserData.birthDate,
+        phone: newPhone,
+      },
     });
   };
 

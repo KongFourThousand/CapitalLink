@@ -33,7 +33,7 @@ export function useData() {
 }
 
 export const DataProvider = ({ children }) => {
-  const [UserData, setUserData] = useState<DataUserType>(DataUser);
+  const [UserData, setUserData] = useState<DataUserType>();
   // const [individualData, setIndividualData] =
   //   useState<RegisterIndividualType>(RegisterIndividual);
   // const [juristicData, setJuristicData] =
@@ -127,7 +127,6 @@ export const DataProvider = ({ children }) => {
     }
     try {
       const res = await api("account/LoanInfo", data, "json", "POST");
-      console.log("res:", res);
       console.log("getLoanInfo res:", res.accounts);
       if (res.status === "ok") {
         setLoanData(res.accounts);
@@ -146,6 +145,7 @@ export const DataProvider = ({ children }) => {
     (async () => {
       try {
         const stored = await SecureStore.getItemAsync("userData");
+        console.log("UserData Loading", stored);
         if (stored) {
           setUserData(JSON.parse(stored));
         }
@@ -156,9 +156,6 @@ export const DataProvider = ({ children }) => {
       }
     })();
   }, []);
-  useEffect(() => {
-    AsyncStorage.setItem("userData", JSON.stringify(UserData));
-  }, [UserData]);
 
   return (
     <DataContext.Provider

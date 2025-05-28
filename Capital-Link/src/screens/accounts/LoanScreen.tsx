@@ -31,14 +31,20 @@ import {
 import LoanCarousel from "../../components/Account/LoanCarousel";
 import PaymentEvidenceModal from "../../components/Account/PaymentEvidenceModal";
 import { useData } from "../../Provide/Auth/UserDataProvide";
+import { api } from "../../../API/route";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 const CARD_WIDTH = width - 34;
 const SPACING = 16; // ระยะห่างระหว่างแต่ละ card
 const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
+type ImageObj = {
+  uri: string;
+  b64: string;
+  type: string;
+};
 const LoanScreen: React.FC = () => {
-  const { loanData, setLoanData } = useData();
+  const { loanData, setLoading, setLoanData } = useData();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [index, setIndex] = useState<number>(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -70,27 +76,32 @@ const LoanScreen: React.FC = () => {
       setShowPaymentModal(true);
     }
   };
-  const handleSubmitEvidence = (imageUri: string | null) => {
-    const updated = loanData.map((loan) =>
-      loan.id === selectedLoanIdForPayment
-        ? { ...loan, daysUntilDue: 30 }
-        : loan
-    );
-
-    setLoanData(updated);
-    setShowPaymentModal(false);
-    setSelectedLoanIdForPayment(null); // ✅ เคลียร์หลังใช้งาน
-  };
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      setPaymentImage(result.assets[0].uri);
+  const handleSubmitEvidence = async (imageUri: ImageObj | null) => {
+    const data = {
+      accountNumber: current.accountNumber,
+      base64: imageUri,
+    };
+    try {
+      setLoading(true);
+      const res = await api("proof-payment", data, "json", "POST");
+      console.log("res SubmitEvidence:", res);
+      if (!res) {
+        setLoading(false);
+      }
+      if (res.error) {
+        setLoading(false);
+      }
+      if (res.success === true) {
+        setLoanData(res.accounts);
+        setLoading(false);
+        setShowPaymentModal(false);
+        setSelectedLoanIdForPayment(null); // ✅ เคลียร์หลังใช้งาน
+      }
+    } catch (error) {
+      console.error("Error getLoanInfo:", error);
+      setLoading(false);
     }
+    // setLoanData(updated);
   };
   const DetailRow = ({ title, detail }: { title: string; detail: string }) => (
     <View style={styles.dateRow}>
@@ -208,48 +219,10 @@ const LoanScreen: React.FC = () => {
       </View>
     );
   };
-  const PaginationDot = () => {
-    return (
-      // {/* <View style={styles.pagination}>
-      //       {data.map((item, idx) => (
-      //         <View
-      //           key={item.id}
-      //           style={[styles.dot, selectedIndex === idx && styles.activeDot]}
-      //         />
-      //       ))}
-      //     </View> */}
-      //     {/* <View style={styles.pagination}>
-      //       <Text>
-      //         {selectedIndex + 1} / {data.length}
-      //       </Text>
-      //     </View> */}
-      <View style={styles.pagination}>
-        {data.map((_, idx) => {
-          const diff = Math.abs(idx - selectedIndex);
-          // กำหนด opacity ตามระยะ: 0 = เต็ม, 1 = กลาง, >=2 = จาง
-          const opacity = diff === 0 ? 1 : diff === 1 ? 0.6 : 0.3;
-          // กำหนดขนาดตามระยะ: 0 = ใหญ่สุด, 1 = กลาง, >=2 = เล็กสุด
-          const size = diff === 0 ? 10 : diff === 1 ? 8 : 6;
 
-          return (
-            <View
-              key={_.id}
-              style={{
-                width: size,
-                height: size,
-                borderRadius: size / 2,
-                backgroundColor: "#CFA459",
-                opacity,
-                marginHorizontal: 4,
-              }}
-            />
-          );
-        })}
-      </View>
-    );
-  };
   const StatusLoan = ({ item }: { item: LoanInfo }) => {
-    const isEvidenceSubmitted = item.daysUntilDue === 30;
+    const isEvidenceSubmitted =
+      item.evidenceStatus === "Pending" || item.daysUntilDue === 30;
     const getStatusColor = (statusKey: string) => {
       switch (statusKey) {
         case "Current":
@@ -311,18 +284,20 @@ const LoanScreen: React.FC = () => {
               activeOpacity={0.9}
               disabled={isEvidenceSubmitted} // ✅ ปิดการกด
             >
-              <Text style={styles.payButtonText}>ส่งหลักฐานการชำระ</Text>
+              <Text style={styles.payButtonText}>
+                {isEvidenceSubmitted ? "กำลังตรวจสอบ..." : "ส่งหลักฐานการชำระ"}
+              </Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
-        <PaymentEvidenceModal
+        {/* <PaymentEvidenceModal
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
           onSubmit={(imageUri) => {
             handleSubmitEvidence(imageUri);
-            setPaymentImage(null); // เคลียร์หลังใช้งาน
+            // setPaymentImage(null); // เคลียร์หลังใช้งาน
           }}
-        />
+        /> */}
       </View>
     );
   };
@@ -379,7 +354,14 @@ const LoanScreen: React.FC = () => {
         {/* ====== Card 3: ตารางกำหนดการ / ประวัติการผ่อนชำระ ====== */}
         <HistoryLoan history={current.history} />
       </ScrollView>
-
+      <PaymentEvidenceModal
+        visible={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSubmit={(imageUri) => {
+          handleSubmitEvidence(imageUri);
+          // setPaymentImage(null); // เคลียร์หลังใช้งาน
+        }}
+      />
       {/* แท็บบาร์ (ถ้ามีการใช้งาน) */}
       <CustomTabBar activeTab="account" />
     </SafeAreaView>

@@ -39,7 +39,10 @@ const PinConfirmScreen: React.FC = () => {
       try {
         await SecureStore.setItemAsync("userPin", pin);
         // ไปหน้า Home หรือหน้าอื่นตามต้องการ
-        navigation.replace("Home");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการบันทึก PIN:", error);
         //Alert.alert("ข้อผิดพลาด", "ไม่สามารถบันทึกรหัส PIN ได้ กรุณาลองใหม่");
