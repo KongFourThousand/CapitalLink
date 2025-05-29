@@ -78,6 +78,7 @@ const LoanScreen: React.FC = () => {
   };
   const handleSubmitEvidence = async (imageUri: ImageObj | null) => {
     const data = {
+      reqID: "1",
       accountNumber: current.accountNumber,
       base64: imageUri,
     };
@@ -339,20 +340,27 @@ const LoanScreen: React.FC = () => {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
       >
-        <LoanCarousel
-          data={data}
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          index={index}
-          setIndex={setIndex}
-          onMomentumScrollEnd={onMomentumScrollEnd}
-          LoanAccount={LoanAccount}
-        />
-        {/* ====== Card 2: สถานะการชำระ ====== */}
-        <StatusLoan item={current} />
-
-        {/* ====== Card 3: ตารางกำหนดการ / ประวัติการผ่อนชำระ ====== */}
-        <HistoryLoan history={current.history} />
+        {data.length === 0 ? (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <Text style={{ fontSize: 16, color: "#999" }}>
+              คุณไม่มีบัญชีสินเชื่อ
+            </Text>
+          </View>
+        ) : (
+          <>
+            <LoanCarousel
+              data={data}
+              selectedIndex={selectedIndex}
+              setSelectedIndex={setSelectedIndex}
+              index={index}
+              setIndex={setIndex}
+              onMomentumScrollEnd={onMomentumScrollEnd}
+              LoanAccount={LoanAccount}
+            />
+            <StatusLoan item={current} />
+            <HistoryLoan history={current.history} />
+          </>
+        )}
       </ScrollView>
       <PaymentEvidenceModal
         visible={showPaymentModal}

@@ -165,18 +165,28 @@ const DepositScreen: React.FC = () => {
       </View>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {/* กล่องข้อมูลบัญชีเงินฝาก */}
-        <DepositCarousel
-          data={data}
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          index={index}
-          setIndex={setIndex}
-          onMomentumScrollEnd={onMomentumScrollEnd}
-          DepositAccount={DepositAccount}
-        />
-        {/* กล่องข้อมูลวันที่ ส่วนที่สอง */}
-        <DetailAccount />
-        <HistoryDeposit history={current.history} />
+        {data.length === 0 ? (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <Text style={{ fontSize: 16, color: "#999" }}>
+              คุณไม่มีบัญชีสินเชื่อ
+            </Text>
+          </View>
+        ) : (
+          <>
+            <DepositCarousel
+              data={data}
+              selectedIndex={selectedIndex}
+              setSelectedIndex={setSelectedIndex}
+              index={index}
+              setIndex={setIndex}
+              onMomentumScrollEnd={onMomentumScrollEnd}
+              DepositAccount={DepositAccount}
+            />
+            {/* กล่องข้อมูลวันที่ ส่วนที่สอง */}
+            <DetailAccount />
+            <HistoryDeposit history={current.history} />
+          </>
+        )}
       </ScrollView>
       <CustomTabBar activeTab="account" />
     </SafeAreaView>

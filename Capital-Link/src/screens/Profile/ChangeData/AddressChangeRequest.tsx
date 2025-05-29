@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { v4 as uuidv4 } from "uuid";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -59,21 +60,19 @@ const AddressChangeRequest: React.FC = () => {
   const handleBack = () => {
     navigation.goBack();
   };
-
-  // ฟังก์ชันเลือกรูปเอกสาร
-
   useFocusEffect(
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useCallback(() => {
-      // AsyncStorage.getItem("nameChangeRequested").then((val) =>
-      //   setIsPending(val === "true")
-      // );
-      const CheckStatus = () => {
-        if (UserData.changeRequest.changeAddress) {
-          setIsPending(true);
-        }
-      };
-      CheckStatus();
+      if (!UserData) return;
+
+      const statusIDCard = UserData.changeRequest?.changeAddressMailing?.status;
+      const statusMailing = UserData.changeRequest?.changeAddressIDCard?.status;
+
+      if (statusIDCard === "Review" || statusMailing === "Review") {
+        setIsPending(true);
+      } else {
+        setIsPending(false);
+      }
     }, [])
   );
   // ฟังก์ชันลบรูปเอกสาร
@@ -90,6 +89,7 @@ const AddressChangeRequest: React.FC = () => {
     }
 
     const data = {
+      reqID: "1",
       type: UserData.userType,
       personalIdCard: UserData.personalIdCard,
       birthDate: UserData.birthDate,
@@ -97,14 +97,14 @@ const AddressChangeRequest: React.FC = () => {
       mailingAddress: addressType === "mailingAddress" ? newAddress.trim() : "",
       base64Address: document,
     };
-    // console.log("Data Change Name", data);
     try {
       setLoading(true);
-      const res = await api("change-request/Address", data, "json", "POST");
+      const res = await api("changeRequest/Address", data, "json", "POST");
       console.log("ChangeAddress res", res);
       if (res.status === "ok") {
         setLoading(false);
         setUserData(res.user);
+        await SecureStore.setItemAsync("userData", JSON.stringify(res.user));
         setIsPending(true);
       } else {
         Alert.alert("Error", "ส่งไม่สำเร็จ");
@@ -117,64 +117,10 @@ const AddressChangeRequest: React.FC = () => {
       setIsLoading(false);
     }
   };
-  // ฟังก์ชันยื่นคำขอ
-  const handleSubmitRequest = () => {
-    // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
-    if (!newAddress.trim()) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณากรอกที่อยู่");
-      return;
-    }
 
-    // ถ้าไม่ได้แนบเอกสาร
-    if (!document) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนที่อยู่");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // สมมติว่าส่งข้อมูลไปยัง API
-    setTimeout(async () => {
-      setIsLoading(false);
-      setNewAddress("");
-      setDocument(null);
-
-      await AsyncStorage.setItem("AddressChangeRequested", "true");
-      setIsPending(true);
-
-      let updatedData: DataUserType;
-
-      if (addressType === "idCardAddress") {
-        updatedData = {
-          ...UserData,
-          idCardAddress: newAddress.trim(), // ← บันทึกในฟิลด์นี้
-        };
-      } else {
-        updatedData = {
-          ...UserData,
-          mailingAddress: newAddress.trim(), // ← หรือฟิลด์นี้
-        };
-      }
-
-      setUserData(updatedData);
-      console.log("Updated UserData:", updatedData);
-      await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
-    }, 2000);
-  };
   const checkStatus = async () => {
     setStatusLoading(true);
     try {
-      // const res = await fetch(statusUrl);
-      // const { status } = await res.json(); // pending/approved/rejected
-      // if (status === "approved") {
-      //   await AsyncStorage.removeItem("nameChangeRequested");
-      //   Alert.alert("อนุมัติแล้ว", "ไปกรอกใหม่ได้เลย");
-      //   setIsPending(false);
-      // } else if (status === "rejected") {
-      //   await AsyncStorage.removeItem("nameChangeRequested");
-      //   Alert.alert("ถูกปฏิเสธ", "กรุณาส่งคำขอใหม่");
-      //   setIsPending(false);
-      // }
       await AsyncStorage.removeItem("AddressChangeRequested");
       navigation.goBack();
     } catch {
@@ -333,11 +279,11 @@ const AddressChangeRequest: React.FC = () => {
           )}
           {/* คำอธิบายเพิ่มเติม */}
           <View style={styles.noteContainer}>
-            {isPending && (
+            {/* {isPending && (
               <TouchableOpacity style={styles.btn} onPress={checkStatus}>
                 <FontAwesome5 name="redo" size={20} color="#CFA459" />
               </TouchableOpacity>
-            )}
+            )} */}
             <Text style={styles.noteTitle}>หมายเหตุ:</Text>
             <Text style={styles.noteText}>
               - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ

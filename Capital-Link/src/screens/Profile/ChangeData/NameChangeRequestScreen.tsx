@@ -15,6 +15,7 @@ import {
   Platform,
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { v4 as uuidv4 } from "uuid";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
@@ -66,11 +67,8 @@ const NameChangeRequestScreen: React.FC = () => {
   useFocusEffect(
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useCallback(() => {
-      // AsyncStorage.getItem("nameChangeRequested").then((val) =>
-      //   setIsPending(val === "true")
-      // );
       const CheckStatus = () => {
-        if (UserData.changeRequest.changeName) {
+        if (UserData.changeRequest.changeName?.status === "Review") {
           setIsPending(true);
         }
       };
@@ -91,111 +89,33 @@ const NameChangeRequestScreen: React.FC = () => {
       </Text>
     </View>
   ));
-  // ฟังก์ชันเลือกรูปเอกสาร
-  // const handlePickDocument = async () => {
-  //   try {
-  //     // ขอสิทธิ์การเข้าถึง
-  //     const { status } =
-  //       await ImagePicker.requestMediaLibraryPermissionsAsync();
-  //     if (status !== "granted") {
-  //       Alert.alert(
-  //         "การอนุญาต",
-  //         "จำเป็นต้องได้รับอนุญาตเพื่อเข้าถึงคลังรูปภาพ"
-  //       );
-  //       return;
-  //     }
-
-  //     // เปิดคลังรูปภาพ
-  //     const result = await ImagePicker.launchImageLibraryAsync({
-  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //       allowsEditing: false,
-  //       aspect: [4, 3],
-  //       quality: 0.8,
-  //     });
-
-  //     if (!result.canceled && result.assets && result.assets.length > 0) {
-  //       setDocument(result.assets[0].uri);
-  //     }
-  //   } catch (error) {
-  //     console.error("เกิดข้อผิดพลาดในการเลือกเอกสาร:", error);
-  //     Alert.alert("ข้อผิดพลาด", "ไม่สามารถเลือกเอกสารได้");
-  //   }
-  // };
-
   // ฟังก์ชันลบรูปเอกสาร
   const handleRemoveDocument = () => {
     setDocument(null);
   };
-
-  // ฟังก์ชันยื่นคำขอ
-  const handleSubmitRequest = () => {
-    // ถ้าทั้งชื่อใหม่และนามสกุลใหม่ว่าง
-    if (!newFirstName.trim() && !newLastName.trim() && !selectedPrefix) {
-      Alert.alert(
-        "ข้อมูลไม่ครบถ้วน",
-        "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง หรือเลือกคำนำหน้า"
-      );
-      return;
-    }
-
-    // ถ้าไม่ได้แนบเอกสาร
-    if (!document) {
-      Alert.alert("ข้อมูลไม่ครบถ้วน", "กรุณาแนบเอกสารการเปลี่ยนชื่อ-นามสกุล");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // สมมติว่าส่งข้อมูลไปยัง API
-    setTimeout(async () => {
-      setIsLoading(false);
-      await AsyncStorage.setItem("nameChangeRequested", "true");
-      setIsPending(true);
-      const prefixToSave =
-        selectedPrefix === "อื่นๆ" && customPrefix.trim()
-          ? customPrefix.trim()
-          : selectedPrefix.trim();
-
-      const updatedData = {
-        ...UserData,
-        ...(newFirstName.trim() && { name: newFirstName.trim() }),
-        ...(newLastName.trim() && { lastname: newLastName.trim() }),
-        ...(prefixToSave.trim() && { titlename: prefixToSave.trim() }),
-      };
-      setUserData(updatedData);
-
-      // บันทึกลง SecureStore
-      await SecureStore.setItemAsync("userData", JSON.stringify(updatedData));
-      console.log("Updated user data:", updatedData);
-      // Alert.alert(
-      //   "ส่งคำขอสำเร็จ",
-      //   "คำขอเปลี่ยนชื่อ-นามสกุลของคุณถูกส่งเรียบร้อยแล้ว เจ้าหน้าที่จะดำเนินการตรวจสอบและติดต่อกลับภายใน 3-5 วันทำการ",
-      //   [
-      //     {
-      //       text: "ตกลง",
-      //       onPress: () => navigation.navigate("Profile"),
-      //     },
-      //   ]
-      // );
-    }, 2000);
-  };
   const handleSubmit = async () => {
     if (!newFirstName.trim() && !newLastName.trim() && !selectedPrefix) {
-      Alert.alert(
+      console.log("Check name");
+      return Alert.alert(
         "ข้อมูลไม่ครบถ้วน",
         "กรุณากรอกชื่อใหม่หรือนามสกุลใหม่อย่างน้อย 1 อย่าง หรือเลือกคำนำหน้า"
       );
-      return;
     }
     if (!document) {
+      console.log("Check doc");
       return Alert.alert("แนบเอกสารก่อน");
     }
+    // const uniqueId = uuidv4();
+    // console.log("uniqueId", uniqueId);
+    // const reqID = `REQ-${uniqueId}`;
+    const reqID = "REQ-123456";
     const prefixToSave =
       selectedPrefix === "อื่นๆ" && customPrefix.trim()
         ? customPrefix.trim()
         : selectedPrefix.trim();
-    // setIsLoading(true);
+    console.log("✅ prefixToSave", prefixToSave);
     const data = {
+      reqID: reqID,
       type: UserData.userType,
       personalIdCard: UserData.personalIdCard,
       birthDate: UserData.birthDate,
@@ -204,14 +124,15 @@ const NameChangeRequestScreen: React.FC = () => {
       lastName: newLastName,
       base64Name: document,
     };
-    // console.log("Data Change Name", data);
+    // console.log("Data", data);
     try {
       setLoading(true);
-      const res = await api("change-request/Name", data, "json", "POST");
+      const res = await api("changeRequest/Name", data, "json", "POST");
       console.log("ChangeName res", res);
       if (res.status === "ok") {
         setLoading(false);
         setUserData(res.user);
+        await SecureStore.setItemAsync("userData", JSON.stringify(res.user));
         setIsPending(true);
       } else {
         Alert.alert("Error", "ส่งไม่สำเร็จ");
@@ -234,40 +155,6 @@ const NameChangeRequestScreen: React.FC = () => {
     } finally {
       setStatusLoading(false);
     }
-  };
-  const PrefixDropdownOld = () => {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.label}>คำนำหน้า</Text>
-
-        <Picker
-          selectedValue={selectedPrefix}
-          onValueChange={(value) => {
-            setSelectedPrefix(value);
-            if (value !== "อื่นๆ") setCustomPrefix(""); // ล้างค่าถ้าเปลี่ยนจาก “อื่นๆ” ไปเป็นอย่างอื่น
-          }}
-          style={styles.picker}
-        >
-          <Picker.Item label="เลือกคำนำหน้า" value="" />
-          <Picker.Item label="นาย" value="นาย" />
-          <Picker.Item label="นาง" value="นาง" />
-          <Picker.Item label="นางสาว" value="นางสาว" />
-          <Picker.Item label="เด็กชาย" value="เด็กชาย" />
-          <Picker.Item label="เด็กหญิง" value="เด็กหญิง" />
-          <Picker.Item label="อื่นๆ" value="อื่นๆ" />
-        </Picker>
-
-        {isOther && (
-          <TextInput
-            style={styles.textInput}
-            placeholder="กรอกคำนำหน้าเอง"
-            value={customPrefix}
-            onChangeText={setCustomPrefix}
-            returnKeyType="done"
-          />
-        )}
-      </View>
-    );
   };
   const InputData = ({ title, value, setValue, placeholder }) => {
     return (
@@ -361,11 +248,11 @@ const NameChangeRequestScreen: React.FC = () => {
               {"\n"}
               สามารถปล่อยอีกช่องว่างได้
             </Text>
-            {isPending && (
+            {/* {isPending && (
               <TouchableOpacity style={styles.btn} onPress={checkStatus}>
                 <FontAwesome5 name="redo" size={20} color="#CFA459" />
               </TouchableOpacity>
-            )}
+            )} */}
           </View>
 
           {isPending ? (
@@ -440,23 +327,7 @@ const NameChangeRequestScreen: React.FC = () => {
               </LinearGradient>
             </>
           )}
-
-          {/* คำอธิบายเพิ่มเติม */}
-          {/* <View style={styles.noteContainer}>
-            <Text style={styles.noteTitle}>หมายเหตุ:</Text>
-            <Text style={styles.noteText}>
-              - เจ้าหน้าที่จะตรวจสอบข้อมูลและติดต่อกลับภายใน 3-5 วันทำการ
-            </Text>
-            <Text style={styles.noteText}>
-              - โปรดตรวจสอบเอกสารให้ถูกต้องและชัดเจนก่อนยื่นคำขอ
-            </Text>
-            <Text style={styles.noteText}>
-              - หากมีข้อสงสัยกรุณาติดต่อ Call Center: 02-xxx-xxxx
-            </Text>
-          </View> */}
           <NoteSection />
-
-          {/* Spacer สำหรับ ScrollView */}
           <View style={{ height: 30 }} />
         </ScrollView>
       </KeyboardAvoidingView>

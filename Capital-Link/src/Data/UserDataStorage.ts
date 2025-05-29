@@ -26,8 +26,31 @@ export const RegisterJuristic: RegisterJuristicType = {
   phone: "",
 };
 export interface changeRequestType {
-  changeName: string;
-  changeAddress: string;
+  changeName: ChangeNameRequest;
+  changeAddress: ChangeAddressRequest;
+}
+export interface ChangeAddressRequest {
+  reqID: string;
+  requestDate: string;
+  infoType: "Address";
+  field: "idCardAddress" | "mailingAddress";
+  oldData: string;
+  newData: string;
+  attachDocument: string;
+  status: "Review" | "Approve" | "Reject";
+}
+export interface ChangeNameRequest {
+  reqID: string;
+  requestDate: string;
+  infoType: "Name";
+  oldTitleName: string;
+  oldName: string;
+  oldlastname: string;
+  newTitleName?: string;
+  newName?: string;
+  newlastname?: string;
+  attachDocument: string;
+  status: "Review" | "Approve" | "Reject";
 }
 export interface DataUserType {
   titlename: string;

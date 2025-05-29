@@ -80,6 +80,7 @@ const EmailChangeRequest: React.FC = () => {
     }
 
     setIsLoading(true);
+    setLoading(true);
     // SaveNewEmail();
     const data = {
       type: UserData.userType,
@@ -88,7 +89,7 @@ const EmailChangeRequest: React.FC = () => {
       email: newEmail,
     };
     try {
-      const res = await api("change-request/Email", data, "json", "POST");
+      const res = await api("changeRequest/Email", data, "json", "POST");
       console.log("res:", res);
       console.log("getChangeEmail res:", res.user);
       if (res.status === "ok") {

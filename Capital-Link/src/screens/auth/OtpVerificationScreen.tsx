@@ -88,7 +88,7 @@ const OtpVerificationScreen: React.FC = () => {
       case "PhoneChange":
         console.log("Phone", phoneNumber);
         try {
-          const res = await api("change-request/Phone", data, "json", "POST");
+          const res = await api("changeRequest/Phone", data, "json", "POST");
           console.log("res:", res);
           console.log("getChangePhone res:", res.user);
           if (res.status === "ok") {

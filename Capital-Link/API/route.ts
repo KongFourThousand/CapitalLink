@@ -3,7 +3,8 @@ const prod = false;
 
 export async function apiWeb(fn, data, type, method) {
   const urlProd = "http://47.129.131.246:8765/app";
-  const urlTest = "http://192.168.1.145:3000/test";
+  // const urlTest = "http://192.168.1.145:3000/test";
+  const urlTest = "http://192.168.1.70:3000/api/";
 
   try {
     if (prod) {
@@ -88,7 +89,7 @@ export async function apiWeb(fn, data, type, method) {
 }
 export async function api(fn, data, type, method) {
   const urlProd = "http://47.129.131.246:8765/app";
-  const urlTest = "http://192.168.1.44:8520/";
+  const urlTest = "http://192.168.1.70:3000/api/app";
 
   try {
     if (prod) {
@@ -119,6 +120,7 @@ export async function api(fn, data, type, method) {
       //     return response;
       //   }
     } else {
+      data.fn = fn;
       const body = JSON.stringify(data);
       let res: Response;
       if (method === "PUT") {
@@ -132,7 +134,17 @@ export async function api(fn, data, type, method) {
         });
       }
       if (method === "POST") {
-        res = await fetch(urlTest + fn, {
+        res = await fetch(urlTest, {
+          method: method,
+          headers: {
+            "content-type": "application/json",
+          },
+          // headers: headers,
+          body: body,
+        });
+      }
+      if (method === "GET") {
+        res = await fetch(urlTest, {
           method: method,
           headers: {
             "content-type": "application/json",

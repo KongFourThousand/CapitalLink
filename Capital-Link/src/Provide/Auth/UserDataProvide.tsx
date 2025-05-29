@@ -26,6 +26,7 @@ import { mockNotifications, type Notification } from "../../Data/NotiData";
 import CustomAlertModal from "../../components/common/CustomAlertModal";
 import { ActivityIndicator, View } from "react-native";
 import { api } from "../../../API/route";
+import type { BannerLink } from "../../Data/bannerLink";
 const DataContext = createContext(null);
 
 export function useData() {
@@ -45,6 +46,7 @@ export const DataProvider = ({ children }) => {
   const [DataUserPending, setDataUserPending] =
     useState<DataUserType>(DataUser);
   const [loading, setLoading] = useState<boolean>(true);
+  const [news, setNews] = useState<BannerLink[]>([]);
   const [alert, setAlert] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: "",
@@ -81,6 +83,7 @@ export const DataProvider = ({ children }) => {
         return;
     }
     try {
+      // const res = await api("account/DepositInfo", data, "json", "POST");
       const res = await api("account/DepositInfo", data, "json", "POST");
       console.log("res:", res);
       console.log("getDepositInfo res:", res.accounts);
@@ -126,6 +129,7 @@ export const DataProvider = ({ children }) => {
         return;
     }
     try {
+      // const res = await api("account/LoanInfo", data, "json", "POST");
       const res = await api("account/LoanInfo", data, "json", "POST");
       console.log("getLoanInfo res:", res.accounts);
       if (res.status === "ok") {
@@ -141,6 +145,29 @@ export const DataProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  const getNews = async () => {
+    console.log("getLoanInfo");
+    setLoading(true);
+    const data = {
+      status: "published",
+    };
+    try {
+      const res = await api("news/get", data, "json", "POST");
+      console.log("getNews res:", res);
+      if (res.status === "ok") {
+        // setLoanData(res.accounts);
+        setLoading(false);
+        // return res.status;
+      }
+      setLoading(false);
+      showAlert("ไม่สามารถดึงข่าวได้ กรุณาลองใหม่อีกครั้ง");
+      return res.status;
+    } catch (error) {
+      console.error("Error getNews:", error);
+      setLoading(false);
+    }
+  };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     (async () => {
       try {
@@ -149,6 +176,7 @@ export const DataProvider = ({ children }) => {
         if (stored) {
           setUserData(JSON.parse(stored));
         }
+        // getNews();
       } catch (error) {
         console.error("Failed to load userData from SecureStore", error);
       } finally {

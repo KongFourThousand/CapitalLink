@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -11,10 +12,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions } from "react-native";
-import { RootStackParamList } from "../../../navigation/RootNavigator";
+import type { RootStackParamList } from "../../../navigation/RootNavigator";
 import LogoutConfirmationModal from "../../../components/LogoutConfirmationModa";
 const { width } = Dimensions.get("window");
 
@@ -57,9 +58,12 @@ const ChangeDataUser: React.FC = () => {
   const confirmLogout = async () => {
     setModalVisible(false);
     await SecureStore.deleteItemAsync("authToken");
+    await SecureStore.deleteItemAsync("userData");
     await SecureStore.deleteItemAsync("userPin");
-    navigation.replace("InitialEntry");
-    // navigation.navigate("PinEntry");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "InitialEntry" }],
+    });
   };
 
   // เมื่อยกเลิกออกจากระบบ
